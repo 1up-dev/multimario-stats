@@ -1,6 +1,10 @@
 # 602Stats
 This is the program that runs the scoreboard and Twitch chat bot for [The 602 Race](https://docs.google.com/spreadsheets/d/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/).  
 See [this video archive](https://www.twitch.tv/videos/356727983) from December 2018 for an example of it in use.  
+
+## What is the 602 Race?  
+>The 602 Race is a race to 100% completion of four 3D Super Mario games, for a total of 602 stars.  
+>The four games in order are:  Super Mario 64: 120 Stars, Super Mario Galaxy: 120 Stars, Super Mario Sunshine: 120 Shines, and Super Mario Galaxy 2: 242 Stars.
   
 ## Stats stream bot commands:
 **Note: Moderators of the Twitch channel the bot is in are automatically allowed to update. They do not have to be whitelisted manually.**
