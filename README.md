@@ -38,3 +38,10 @@ This is the program that runs the scoreboard and Twitch chat bot for [The 602 Ra
 
 #### !revive [twitchname]
 - Undo a quit, dq, or noshow.
+
+
+WARNING: Running the program will join all the Twitch chats specified in racers.txt and make the bot active. Make sure racers.txt has the correct names in it before starting.
+
+The program pulls the username and password (authentication token) for the bot from settings.txt. Get the authentication token from http://twitchapps.com/tmi/
+
+The Twitch developer app Client-ID is for API requests, get it from https://dev.twitch.tv/dashboard/apps admins.txt, racers.txt, and updaters.txt must contain only Twitch usernames separated by newlines.
