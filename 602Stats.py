@@ -1,5 +1,6 @@
 import socket
 import math
+import sys
 import pygame
 import datetime
 import pickle
@@ -9,8 +10,10 @@ import requests
 import urllib
 import os
 import time
+import threading
 
 #-----------------object definitions-------------------
+#todo recalculate completion times if the start time of the race is changed.
 class playerObject:
     def __init__(self, name):
         self.name = name.lower()
@@ -24,33 +27,36 @@ class playerObject:
         try:
             self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
         except pygame.error:
-            self.profile = pygame.transform.scale(pygame.image.load("./602files/error.png"), (60,60))
-        #time.sleep(1)
-        #self.chat = ChatRoom("#"+name, NICK, PASSWORD)
+            self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
+        time.sleep(1)
+        self.chat = ChatRoom("#"+name, NICK, PASSWORD)
 
     def finish(self):
         cycleTime = datetime.datetime.now()
 
         tmp1 = datetime.timedelta(seconds=math.floor((cycleTime - startTime).total_seconds()))
-        delta = str(tmp1).split(" days,")
+        delta = str(tmp1).split(" day")
 
-        extraHours = 0
+        initialHours = 0
+        extraHours=""
         if len(delta)==1:
-            delta = delta[0]
+            extraHours = delta[0]
             pass
         elif len(delta)==2:
             days = delta[0]
             days = int(days)
-            extraHours = days * 24
-            delta = delta[1]
+            initialHours = days * 24
+            if delta[1][0]=="s":
+                extraHours = delta[1][3:]
+            elif delta[1][0]==",":
+                extraHours = delta[1][2:]
 
-        finalTime = delta.split(":")
-        preHours = int(finalTime[0])
-        finalHours = preHours + extraHours
+        finalTime = extraHours.split(":")
+        finalHours = int(finalTime[0]) + initialHours
         finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
 
         finishers.append(self.name)
-        mainChat.message(self.nameCaseSensitive + " has finished!")
+        self.chat.message(self.nameCaseSensitive + " has finished!")
         self.completionTime = finishTime
         self.status = "done"
 
@@ -83,7 +89,8 @@ class playerObject:
             tempStars -= 360
         if tempStars is not 1:
             buffer = "s"
-        mainChat.message(self.nameCaseSensitive + " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + ".")
+
+        return self.nameCaseSensitive + " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
 
 class ChatRoom:
     def __init__(self, channel, nick, password):
@@ -149,6 +156,7 @@ def assignPlaces(playerLookup):
 
 #todo info on scorecard after dq/forfeit (how long they played, how many stars they had)
 #todo scorecard/profile borders
+#todo make sure sorting is done well and is not being done twice on accident (assignPlaces & draw)
 def draw(screen, playerLookup):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
 
@@ -361,6 +369,7 @@ def fetchIRC(thisChat):
         thisChat.inputBuffer += readbuffer
 
 #---------loading & processing external data-------------
+#todo catch FileNotFoundError and catch settings that cannot be found from settings.txt
 with open('racers.txt') as f:
     racersCaseSensitive = f.read().split("\n")
     racers = []
@@ -384,16 +393,16 @@ with open('admins.txt') as f:
             admins.remove(a)
 with open ('settings.txt') as f:
     file = f.read()
-    NICK = file.split("Twitch Username for Bot: ")[1].split()[0]
+    NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
     PASSWORD = file.split("Twitch Chat Authentication Token: ")[1].split()[0]
-    CHANNEL = file.split("Main Twitch Chat for Bot: ")[1].split()[0]
+    CHANNEL = file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
 
 for racer in racers:
     if racer not in updaters:
         updaters.append(racer)
         pushUpdaters()
 
-with open("./602files/startingTime.obj", 'rb') as objIn:
+with open("./resources/startingTime.obj", 'rb') as objIn:
     startTime = pickle.load(objIn)
 
 fetchProfiles(racers)
@@ -404,7 +413,7 @@ slots = [
     (10,345),(407,345),(804,345),(1201,345),
     (10,530),(407,530),(804,530),(1201,530),
     (10,715),(407,715),(804,715),(1201,715), (1600,900)
-]
+] #387 x 175 scorecards
 playerLookup = {}
 finishers = []
 for racer in racersCaseSensitive:
@@ -417,18 +426,18 @@ screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("602 Stats Program")
 screen.fill((16,16,16))
 
-SM64= pygame.image.load('./602files/star.png')
-SMS = pygame.image.load('./602files/shine.png')
-SMG = pygame.image.load('./602files/luma.png')
-SMG2 = pygame.image.load('./602files/yoshi.png')
+SM64= pygame.image.load('./resources/star.png')
+SMS = pygame.image.load('./resources/shine.png')
+SMG = pygame.image.load('./resources/luma.png')
+SMG2 = pygame.image.load('./resources/yoshi.png')
 
-background = pygame.image.load('./602files/bgtest.png')
+background = pygame.image.load('./resources/bgtest.png')
 
-sm64BG = pygame.image.load('./602files/sm64bg.png')
-smgBG = pygame.image.load('./602files/smgbg.png')
-smsBG = pygame.image.load('./602files/smsbg.png')
-smg2BG = pygame.image.load('./602files/smg2bg.png')
-finishBG = pygame.image.load('./602files/602bg.png')
+sm64BG = pygame.image.load('./resources/sm64bg.png')
+smgBG = pygame.image.load('./resources/smgbg.png')
+smsBG = pygame.image.load('./resources/smsbg.png')
+smg2BG = pygame.image.load('./resources/smg2bg.png')
+finishBG = pygame.image.load('./resources/602bg.png')
 
 def getFont(size):
     return pygame.font.SysFont("Lobster 1.4", size)
@@ -437,38 +446,38 @@ screen = draw(screen, playerLookup)
 pygame.display.flip()
 redraw = False
 
+#------------create and start chat threads------------
 #todo join srl chat with a thread and set start time
-#--------------------main bot loop--------------------
+for racer in racers:
+    room = playerLookup[racer].chat
+    t = threading.Thread(target=fetchIRC, args=(room,))
+    t.start()
+
 mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
+t = threading.Thread(target=fetchIRC, args=(mainChat,))
+t.start()
+#--------------------main bot loop--------------------
+#todo add user blacklist
 done = False
 while not done:
     for i in range(0, len(racers)+1):
-        '''
+
         if i == len(racers):
             currentChat = mainChat
-            currentChannel = "602race"
+            currentChannel = CHANNEL[1:]
         else:
             currentChat = playerLookup[racers[i]].chat
             currentChannel = racers[i]
-        '''
-        #todo remove these two lines to check the other chats
-        currentChat = mainChat
-        currentChannel = "602race"
 
         try:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("pygame.QUIT triggered")
                     done=True
             #--------------------reading from twitch chat--------------------
-            lines=""
-            try: #todo move this into chatroom object in order to stop it from halting the loop
-                readbuffer = currentChat.currentSocket.recv(1024).decode("UTF-8", errors = "ignore")
-                lines = readbuffer.split("\n")
-            except socket.error as e:
-                print("[!] Socket Error:", e)
-                pass
+            lines = currentChat.inputBuffer.split("\n")
+            currentChat.inputBuffer = ""
 
-            print(lines)
             for line in lines:
                 out = ""
                 user = ""
@@ -495,10 +504,14 @@ while not done:
 
                 if user == "PING":
                     currentChat.pong()
+                elif user[1:]=="tmi.twitch.tv" or user[-10:]=="tmi.twitch":
+                    pass
                 elif len(out) > 0:
                     user = user.lower()[1:]
                     out = out.lower()
                     command = out.split(" ")
+
+                    print("user:"+user+" command:"+str(command))
 
                     #todo allow add command to work if racer is finished, so anyone can undo a finish
                     #todo maybe instead: allow racers to unfinish themselves
@@ -506,14 +519,14 @@ while not done:
                     #----------------------racer commands----------------------
                     if user in racers:
                         if playerLookup[user].status == "live":
-                            if command[0] == "!add" and len(command) == 2: #and user == player.name
+                            if command[0] == "!add" and len(command) == 2:
                                 number = int(command[1])
                                 if 0 <= playerLookup[user].collects + number <= 602:
                                     playerLookup[user].collects += number
                                     if playerLookup[user].collects == 602:
                                         playerLookup[user].finish()
                                     else:
-                                        playerLookup[user].hasCollected()
+                                        currentChat.message(playerLookup[user].hasCollected())
                                     redraw = True
                             elif command[0] == "!quit":
                                 playerLookup[user].fail("quit")
@@ -537,33 +550,44 @@ while not done:
 
                     #--------------------updater commands----------------------
                     if (user in updaters) or ismod:
-                        if command[0] == "!add" and len(command) == 3:
-                            if command[1] in playerLookup.keys():
-                                player = command[1]
-                                if playerLookup[player].status == "live":
-                                    number = int(command[2])
-                                    if 0 <= playerLookup[player].collects + number <= 602:
-                                        playerLookup[player].collects += number
-                                        if playerLookup[player].collects == 602:
-                                            playerLookup[player].finish()
-                                        else:
-                                            playerLookup[player].hasCollected()
-                                        redraw = True
-                        elif command[0] == "!add" and len(command) == 2 and user not in racers:
-                            currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
-                            #placeholder to allow me to collapse this line of code
+                        if command[0] == "!add":
+                            if len(command) == 3:
+                                if command[1] in playerLookup.keys():
+                                    player = command[1]
+                                    if playerLookup[player].status == "live":
+                                        number = int(command[2])
+                                        if 0 <= playerLookup[player].collects + number <= 602:
+                                            playerLookup[player].collects += number
+                                            if playerLookup[player].collects == 602:
+                                                playerLookup[player].finish()
+                                            else:
+                                                currentChat.message(playerLookup[player].hasCollected())
+                                            redraw = True
+                            elif len(command) == 2:
+                                if user not in racers:
+                                    currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
 
                     #----------------------admin commands----------------------
                     if user in admins:
                         if command[0] == "!start":
-                            #todo allow admin to set start time to a specific date & time (2018-12-29 09:00)
-
-                            startTime = datetime.datetime.now()
-                            with open("./602files/startingTime.obj", 'wb') as output:
-                                pickle.dump(startTime, output, pickle.HIGHEST_PROTOCOL)
-                            now = datetime.datetime.now().isoformat().split("T")
-                            now = now[0] + " @ " + now[1].split(".")[0]
-                            currentChat.message("The race has started, on " + now)
+                            newTime = -1
+                            if len(command)==1:
+                                newTime = datetime.datetime.now()
+                            elif len(command)==2:
+                                newTime = command[1]
+                                try:
+                                    newTime = datetime.datetime.fromisoformat(newTime)
+                                except:
+                                    currentChat.message("Invalid date format. Must be of this format: 2018-12-29@09:00")
+                            else:
+                                currentChat.message("Invalid date format. Must be of this format: 2018-12-29@09:00")
+                            if type(newTime) == datetime.datetime:
+                                with open("./resources/startingTime.obj", 'wb') as output:
+                                    pickle.dump(newTime, output, pickle.HIGHEST_PROTOCOL)
+                                startTime = newTime
+                                now = newTime.isoformat().split("T")
+                                now = now[0] + " @ " + now[1].split(".")[0]
+                                currentChat.message("The race start time has been set to " + now)
                         elif command[0] == "!mod" and len(command) == 2:
                             if command[1] not in updaters:
                                 updaters.append(command[1])
@@ -620,7 +644,7 @@ while not done:
                 redraw = False
 
         except Exception as e:
-            print("[!] Exception:", e)
+            print("[!] Exception on line", sys.exc_info()[-1].tb_lineno, ":", e)
             pass
 
 pygame.quit()
