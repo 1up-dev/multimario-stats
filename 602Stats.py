@@ -13,7 +13,6 @@ import time
 import threading
 
 #-----------------object definitions-------------------
-#todo recalculate completion times if the start time of the race is changed.
 class playerObject:
     def __init__(self, name):
         self.name = name.lower()
@@ -154,9 +153,6 @@ def assignPlaces(playerLookup):
             playerLookup[player].place = place
         place += count
 
-#todo info on scorecard after dq/forfeit (how long they played, how many stars they had)
-#todo scorecard/profile borders
-#todo make sure sorting is done well and is not being done twice on accident (assignPlaces & draw)
 def draw(screen, playerLookup):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
 
@@ -352,7 +348,6 @@ def fetchProfiles(users):
                 if len(responseData)==0:
                     print("[API] Twitch user "+user+" does not exist. Using default image.")
                     #playerLookup[user].validTwitchAccount = False
-                    #todo if twitch account does not exist, don't try to join its chat
                 else:
                     data = responseData[0]
                     profileLocation = data['profile_image_url']
@@ -369,7 +364,6 @@ def fetchIRC(thisChat):
         thisChat.inputBuffer += readbuffer
 
 #---------loading & processing external data-------------
-#todo catch FileNotFoundError and catch settings that cannot be found from settings.txt
 with open('racers.txt') as f:
     racersCaseSensitive = f.read().split("\n")
     racers = []
@@ -447,7 +441,6 @@ pygame.display.flip()
 redraw = False
 
 #------------create and start chat threads------------
-#todo join srl chat with a thread and set start time
 for racer in racers:
     room = playerLookup[racer].chat
     t = threading.Thread(target=fetchIRC, args=(room,))
@@ -457,7 +450,6 @@ mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
 t = threading.Thread(target=fetchIRC, args=(mainChat,))
 t.start()
 #--------------------main bot loop--------------------
-#todo add user blacklist
 done = False
 while not done:
     for i in range(0, len(racers)+1):
@@ -512,9 +504,6 @@ while not done:
                     command = out.split(" ")
 
                     print("user:"+user+" command:"+str(command))
-
-                    #todo allow add command to work if racer is finished, so anyone can undo a finish
-                    #todo maybe instead: allow racers to unfinish themselves
 
                     #----------------------racer commands----------------------
                     if user in racers:
