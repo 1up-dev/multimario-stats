@@ -1,6 +1,7 @@
 # 602Stats
 This is the program that runs the scoreboard and Twitch chat bot for [The 602 Race](https://docs.google.com/spreadsheets/d/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/).  
 See [this video archive](https://www.twitch.tv/videos/356727983) from December 2018 for an example of it in use.  
+![Example](https://i.imgur.com/vZSinTe.jpg)
 
 ## What is the 602 Race?  
 >The 602 Race is a race to 100% completion of four 3D Super Mario games, for a total of 602 stars.  
