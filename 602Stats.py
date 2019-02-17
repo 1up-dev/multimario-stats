@@ -551,7 +551,7 @@ while not done:
                                             playerLookup[player].collects += number
                                             if playerLookup[player].collects == 602:
                                                 playerLookup[player].finish()
-                                                currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
+                                                currentChat.message(playerLookup[player].nameCaseSensitive + " has finished!")
                                             else:
                                                 currentChat.message(playerLookup[player].hasCollected())
                                             redraw = True
