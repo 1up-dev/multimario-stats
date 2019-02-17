@@ -494,16 +494,19 @@ while not done:
                     if index >= 4:
                         out += " " + word
 
-                if user == "PING":
-                    currentChat.pong()
-                elif user[1:]=="tmi.twitch.tv" or user[-10:]=="tmi.twitch":
-                    pass
-                elif len(out) > 0:
-                    user = user.lower()[1:]
-                    out = out.lower()
-                    command = out.split(" ")
+                command = out.lower().split(" ")
 
-                    print("user:"+user+" command:"+str(command))
+                if command[0] == '':
+                    pass
+                elif user == "PING":
+                    currentChat.pong()
+                elif user.__contains__("."):
+                    pass
+                elif command[0][0] != "!":
+                    pass
+                else:
+                    user = user.lower()[1:]
+                    print("User:"+user+" Command:"+str(command))
 
                     #----------------------racer commands----------------------
                     if user in racers:
@@ -514,6 +517,7 @@ while not done:
                                     playerLookup[user].collects += number
                                     if playerLookup[user].collects == 602:
                                         playerLookup[user].finish()
+                                        currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
                                     else:
                                         currentChat.message(playerLookup[user].hasCollected())
                                     redraw = True
@@ -549,6 +553,7 @@ while not done:
                                             playerLookup[player].collects += number
                                             if playerLookup[player].collects == 602:
                                                 playerLookup[player].finish()
+                                                currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
                                             else:
                                                 currentChat.message(playerLookup[player].hasCollected())
                                             redraw = True
