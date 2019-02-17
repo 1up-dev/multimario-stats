@@ -21,6 +21,7 @@ class playerObject:
         self.collects = random.choice(range(0,602))
         self.status = "live"
         self.completionTime = "HH:MM:SS"
+        self.duration = -1
         self.failTime = "HH:MM:SS"
         self.place = 1
         try:
@@ -34,6 +35,7 @@ class playerObject:
         cycleTime = datetime.datetime.now()
 
         tmp1 = datetime.timedelta(seconds=math.floor((cycleTime - startTime).total_seconds()))
+        self.duration = (cycleTime - startTime).total_seconds()
         delta = str(tmp1).split(" day")
 
         initialHours = 0
@@ -129,30 +131,6 @@ class ChatRoom:
             print("Socket error.")
 
 #----------------function definitions------------------
-def assignPlaces(playerLookup):
-    scores = {}
-    place = 1
-
-    for finisher in finishers:
-        playerLookup[finisher].place = place
-        place += 1
-
-    for key in playerLookup:
-        if playerLookup[key].status != "done":
-            totalScore =  playerLookup[key].collects
-            if totalScore in scores.keys():
-                scores[totalScore].append(playerLookup[key].name)
-            else:
-                scores[totalScore] = [playerLookup[key].name]
-    array = sorted(scores.keys(), reverse = True)
-
-    for score in array:
-        count = 0
-        for player in scores[score]:
-            count+=1
-            playerLookup[player].place = place
-        place += count
-
 def draw(screen, playerLookup):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
 
@@ -161,29 +139,51 @@ def draw(screen, playerLookup):
     for key in playerLookup:
         if len(sortedRacers) == 0:
             sortedRacers.append(key)
+        elif playerLookup[key].collects == 602:
+            added = False
+            for index, racer in enumerate(sortedRacers):
+                if added:
+                    pass
+                elif playerLookup[racer].collects < 602:
+                    sortedRacers.insert(index, key)
+                    added = True
+                elif playerLookup[key].duration < playerLookup[racer].duration:
+                    sortedRacers.insert(index, key)
+                    added = True
         else:
             added = False
             for index, racer in enumerate(sortedRacers):
                 if added:
                     pass
-                elif playerLookup[key].place < playerLookup[racer].place:
+                elif playerLookup[key].collects >= playerLookup[racer].collects:
                     sortedRacers.insert(index, key)
                     added = True
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
                     added = True
 
+    #---------place number assignments--------
+    for index, racer in enumerate(sortedRacers):
+        current = playerLookup[racer]
+        previous = playerLookup[sortedRacers[index-1]]
+        if current.collects != 602:
+            if current.collects == previous.collects:
+                current.place = previous.place
+            else:
+                playerLookup[racer].place = index+1
+        else:
+            playerLookup[racer].place = index+1
+
     #------------slot assignments-----------
     racerIndex=0
-    for s in range(0,len(racers)):
+    for s in range(0,len(sortedRacers)):
         if s==-1: #leaving empty slots for spacing
             pass
+        elif racerIndex < len(sortedRacers):
+            playerLookup[sortedRacers[racerIndex]].corner = slots[s]
+            racerIndex+=1
         else:
-            if racerIndex >= len(sortedRacers):
-                pass
-            else:
-                playerLookup[sortedRacers[racerIndex]].corner = slots[s]
-                racerIndex+=1
+            playerLookup[sortedRacers[racerIndex]].corner = [1600, 900]
 
     #-----------scorecard drawing------------
     for key in playerLookup:
@@ -412,7 +412,6 @@ playerLookup = {}
 finishers = []
 for racer in racersCaseSensitive:
     playerLookup[racer.lower()] = playerObject(racer)
-assignPlaces(playerLookup)
 
 #--------------------pygame settings--------------------
 pygame.init()
@@ -464,7 +463,6 @@ while not done:
         try:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    print("pygame.QUIT triggered")
                     done=True
             #--------------------reading from twitch chat--------------------
             lines = currentChat.inputBuffer.split("\n")
@@ -632,7 +630,6 @@ while not done:
                                 currentChat.message(command[1] + " has been revived.")
 
             if redraw:
-                assignPlaces(playerLookup)
                 screen = draw(screen, playerLookup)
                 pygame.display.flip()
                 redraw = False
