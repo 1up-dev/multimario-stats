@@ -161,8 +161,18 @@ def draw(screen, playerLookup):
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
                     added = True
+
+    #---------place number assignments--------
     for index, racer in enumerate(sortedRacers):
-        playerLookup[racer].place = index+1
+        current = playerLookup[racer]
+        previous = playerLookup[sortedRacers[index-1]]
+        if current.collects != 602:
+            if current.collects == previous.collects:
+                current.place = previous.place
+            else:
+                playerLookup[racer].place = index+1
+        else:
+            playerLookup[racer].place = index+1
 
     #------------slot assignments-----------
     racerIndex=0
