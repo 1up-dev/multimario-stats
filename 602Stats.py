@@ -29,7 +29,7 @@ class playerObject:
         except pygame.error:
             self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
         time.sleep(1)
-        self.chat = ChatRoom("#"+name, NICK, PASSWORD)
+        self.chat = ChatRoom("#"+self.name, NICK, PASSWORD)
 
     def finish(self):
         cycleTime = datetime.datetime.now()
@@ -118,7 +118,7 @@ class ChatRoom:
         timeNow = datetime.datetime.now().isoformat()
         timeNow = timeNow.split("T")
         timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-        self.currentSocket.send(bytes("PRIVMSG "+self.channel+" :"+"602 Stats Bot joined "+self.channel+" on "+timeNow+"\n", "UTF-8"))
+        self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
         print("[IRC] "+ timeNow + ": Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
