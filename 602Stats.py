@@ -569,7 +569,7 @@ while not done:
                                 newTime = command[1]
                                 try:
                                     newTime = datetime.datetime.fromisoformat(newTime)
-                                except:
+                                except ValueError:
                                     currentChat.message("Invalid date format. Must be of this format: 2018-12-29@09:00")
                             else:
                                 currentChat.message("Invalid date format. Must be of this format: 2018-12-29@09:00")
