@@ -39,6 +39,9 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 #### !dq [twitchname]
 #### !revive [twitchname]
 - Undo a quit, dq, or noshow.
+#### !settime [twitchname] [duration]
+- Set a racer's run duration on the "done" or "quit" card.
+- Must be in this format: 32:59:59
   
 ## Before you attempt to run the program
 - WARNING: Running the program will join all the Twitch chats specified in racers.txt and make the bot active. Make sure racers.txt has the correct names in it before starting.  

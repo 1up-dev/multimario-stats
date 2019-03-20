@@ -34,13 +34,15 @@ class playerObject:
         time.sleep(1)
         self.chat = ChatRoom("#"+self.name, NICK, PASSWORD)
 
+    def manualDuration(self):               #add startTime + duration to calculate new finish time
+        self.finishTimeAbsolute = startTime + datetime.timedelta(seconds=self.duration)
+
     def calculateCompletionTime(self):
         if type(self.finishTimeAbsolute) != datetime.datetime:
             return
-        finishTime = self.finishTimeAbsolute
+        self.duration = (self.finishTimeAbsolute - startTime).total_seconds()
 
-        tmp1 = datetime.timedelta(seconds=math.floor((finishTime - startTime).total_seconds()))
-        self.duration = (finishTime - startTime).total_seconds()
+        tmp1 = datetime.timedelta(seconds=math.floor(self.duration))
         delta = str(tmp1).split(" day")
 
         initialHours = 0
@@ -633,6 +635,19 @@ while not done:
                                     playerLookup[player].unfinish()
                                 redraw = True
                                 currentChat.message(command[1] + " has been revived.")
+                        elif command[0] == "!settime":
+                            if len(command) == 3 and command[1] in playerLookup.keys():
+                                player = command[1]
+                                if playerLookup[player].status == "done":
+                                    newTime = command[2]
+                                    stringTime = command[2]
+                                    newTime = newTime.split(":")
+                                    if len(newTime) == 3:
+                                        duration = int(newTime[2]) + 60*int(newTime[1]) + 360*int(newTime[0])
+                                        playerLookup[player].duration = duration
+                                        playerLookup[player].completionTime = stringTime
+                                        playerLookup[player].manualDuration()
+                                        redraw = True
 
             if redraw:
                 screen = draw(screen, playerLookup)
