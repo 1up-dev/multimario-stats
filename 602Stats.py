@@ -20,10 +20,10 @@ class playerObject:
         self.corner = (0,0)
         self.collects = random.choice(range(0,602))
         self.status = "live"
-        self.completionTime = "HH:MM:SS"
-        self.duration = -1
-        self.failTime = "HH:MM:SS"
         self.place = 1
+        self.duration = -1
+        self.completionTime = "HH:MM:SS"
+        self.finishTimeAbsolute = None
         try:
             self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
         except pygame.error:
@@ -31,11 +31,15 @@ class playerObject:
         time.sleep(1)
         self.chat = ChatRoom("#"+self.name, NICK, PASSWORD)
 
-    def finish(self):
-        cycleTime = datetime.datetime.now()
+    def manualDuration(self):               #add startTime + duration to calculate new finish time
+        self.finishTimeAbsolute = startTime + datetime.timedelta(seconds=self.duration)
 
-        tmp1 = datetime.timedelta(seconds=math.floor((cycleTime - startTime).total_seconds()))
-        self.duration = (cycleTime - startTime).total_seconds()
+    def calculateCompletionTime(self):
+        if type(self.finishTimeAbsolute) != datetime.datetime:
+            return
+        self.duration = (self.finishTimeAbsolute - startTime).total_seconds()
+
+        tmp1 = datetime.timedelta(seconds=math.floor(self.duration))
         delta = str(tmp1).split(" day")
 
         initialHours = 0
@@ -55,21 +59,22 @@ class playerObject:
         finalTime = extraHours.split(":")
         finalHours = int(finalTime[0]) + initialHours
         finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
-
-        finishers.append(self.name)
-        self.chat.message(self.nameCaseSensitive + " has finished!")
         self.completionTime = finishTime
+
+    def finish(self):
+        self.finishTimeAbsolute = datetime.datetime.now()
+        self.calculateCompletionTime()
+        self.chat.message(self.nameCaseSensitive + " has finished!")
         self.status = "done"
 
     def unfinish(self):
-        finishers.remove(self.name)
         self.collects = 601
+        self.status = "live"
 
     def fail(self, status):
-        cycleTime = datetime.datetime.now()
-        failTime = str(datetime.timedelta(seconds=(math.floor((cycleTime - startTime).total_seconds()))))
-        self.failTime = failTime
         self.status = status
+        self.finishTimeAbsolute = datetime.datetime.now()
+        self.calculateCompletionTime()
 
     def hasCollected(self):
         tempStars = self.collects
@@ -285,8 +290,8 @@ def draw(screen, playerLookup):
             quitTag = getFont(70).render("Quit", 1, (255, 0, 0))
             screen.blit(quitTag, (130+currentPlayer.corner[0], 55+currentPlayer.corner[1]))
 
-            label = getFont(24).render("Completion: "+str(score)+"/602", 1, (220,220,220))
-            screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            label = getFont(24).render("Completion: "+str(score)+"/602 in "+currentPlayer.completionTime, 1, (220,220,220))
+            screen.blit(label, (50+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "disqualified":    #shows disqualified tag
             forfeitTag = getFont(50).render("Disqualified", 1, (255, 0, 0))
@@ -409,7 +414,6 @@ slots = [
     (10,715),(407,715),(804,715),(1201,715), (1600,900)
 ] #387 x 175 scorecards
 playerLookup = {}
-finishers = []
 for racer in racersCaseSensitive:
     playerLookup[racer.lower()] = playerObject(racer)
 
@@ -522,7 +526,10 @@ while not done:
                             elif command[0] == "!quit":
                                 playerLookup[user].fail("quit")
                                 redraw = True
-                                currentChat.message(playerLookup[user].nameCaseSensitive + "has quit.")
+                                currentChat.message(playerLookup[user].nameCaseSensitive + " has quit.")
+                        elif playerLookup[user].status == "done":
+                            if command[0] == "!unfinish":
+                                playerLookup[user].unfinish()
                         if user not in admins:
                             if command[0] == "!mod" and len(command) == 2:
                                 if command[1] not in updaters:
@@ -580,6 +587,9 @@ while not done:
                                 now = newTime.isoformat().split("T")
                                 now = now[0] + " @ " + now[1].split(".")[0]
                                 currentChat.message("The race start time has been set to " + now)
+                                for racer in racers:
+                                    playerLookup[racer].calculateCompletionTime()
+                                redraw = True
                         elif command[0] == "!mod" and len(command) == 2:
                             if command[1] not in updaters:
                                 updaters.append(command[1])
@@ -598,16 +608,12 @@ while not done:
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
                                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                                    if playerLookup[player].status == "done":
-                                        finishers.remove(player)
                                     playerLookup[player].fail("quit")
                                     redraw = True
                                     currentChat.message(command[1] + " has been forcequit.")
                         elif command[0] == "!noshow":
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
-                                if playerLookup[player].status == "done":
-                                    finishers.remove(player)
                                 playerLookup[player].fail("noshow")
                                 redraw = True
                                 currentChat.message(command[1] + " set to No-show.")
@@ -615,8 +621,6 @@ while not done:
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
                                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                                    if playerLookup[player].status == "done":
-                                        finishers.remove(player)
                                     playerLookup[player].fail("disqualified")
                                     redraw = True
                                     currentChat.message(command[1] + " has been disqualified.")
@@ -628,6 +632,19 @@ while not done:
                                     playerLookup[player].unfinish()
                                 redraw = True
                                 currentChat.message(command[1] + " has been revived.")
+                        elif command[0] == "!settime":
+                            if len(command) == 3 and command[1] in playerLookup.keys():
+                                player = command[1]
+                                if playerLookup[player].status == "done" or playerLookup[player].status == "quit":
+                                    newTime = command[2]
+                                    stringTime = command[2]
+                                    newTime = newTime.split(":")
+                                    if len(newTime) == 3:
+                                        duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
+                                        playerLookup[player].duration = duration
+                                        playerLookup[player].completionTime = stringTime
+                                        playerLookup[player].manualDuration()
+                                        redraw = True
 
             if redraw:
                 screen = draw(screen, playerLookup)
