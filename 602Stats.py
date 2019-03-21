@@ -337,6 +337,14 @@ def pushUpdaters():
             else:
                 updaterFile.write(updater+"\n")
 
+def pushBlacklist():
+    with open("blacklist.txt", "w") as blacklistFile:
+        for b in blacklist:
+            if b.index == len(blacklist)-1:
+                blacklistFile.write(b)
+            else:
+                blacklistFile.write(b+"\n")
+
 def fetchProfiles(users):
     with open ('settings.txt') as f:
         settingsFile = f.read()
@@ -390,6 +398,12 @@ with open('admins.txt') as f:
         a.rstrip()
         if a=="" or a==" ":
             admins.remove(a)
+with open('blacklist.txt') as f:
+    blacklist = f.read().lower().split("\n")
+    for b in blacklist:
+        b.rstrip()
+        if b=="" or b==" ":
+            blacklist.remove(b)
 with open ('settings.txt') as f:
     file = f.read()
     NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
@@ -397,7 +411,7 @@ with open ('settings.txt') as f:
     CHANNEL = file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
 
 for racer in racers:
-    if racer not in updaters:
+    if (racer not in updaters) and (racer not in blacklist):
         updaters.append(racer)
         pushUpdaters()
 
@@ -532,7 +546,9 @@ while not done:
                                 playerLookup[user].unfinish()
                         if user not in admins:
                             if command[0] == "!mod" and len(command) == 2:
-                                if command[1] not in updaters:
+                                if command[1] in blacklist:
+                                    currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
+                                elif command[1] not in updaters:
                                     updaters.append(command[1])
                                     pushUpdaters()
                                     currentChat.message(command[1] + " is now an updater.")
@@ -591,7 +607,9 @@ while not done:
                                     playerLookup[racer].calculateCompletionTime()
                                 redraw = True
                         elif command[0] == "!mod" and len(command) == 2:
-                            if command[1] not in updaters:
+                            if command[1] in blacklist:
+                                    currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
+                            elif command[1] not in updaters:
                                 updaters.append(command[1])
                                 pushUpdaters()
                                 currentChat.message(command[1] + " is now an updater.")
@@ -645,6 +663,24 @@ while not done:
                                         playerLookup[player].completionTime = stringTime
                                         playerLookup[player].manualDuration()
                                         redraw = True
+                        elif command[0] == "!blacklist" and len(command) == 2:
+                            if command[1] not in blacklist:
+                                blacklist.append(command[1])
+                                pushBlacklist()
+                                if command[1] in updaters:
+                                    updaters.remove(command[1])
+                                    pushUpdaters()
+                                currentChat.message(command[1] + " has been blacklisted.")
+                            else:
+                                currentChat.message(command[1] + " is already blacklisted.")
+
+                        elif command[0] == "!unblacklist" and len(command) == 2:
+                            if command[1] in blacklist:
+                                blacklist.remove(command[1])
+                                pushBlacklist()
+                                currentChat.message(command[1] + " is no longer blacklisted.")
+                            else:
+                                currentChat.message(command[1] + " is already not blacklisted.")
 
             if redraw:
                 screen = draw(screen, playerLookup)
