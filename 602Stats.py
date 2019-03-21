@@ -21,12 +21,9 @@ class playerObject:
         self.collects = random.choice(range(0,602))
         self.status = "live"
         self.place = 1
-
         self.duration = -1
         self.completionTime = "HH:MM:SS"
-        self.failTime = "HH:MM:SS"
         self.finishTimeAbsolute = None
-
         try:
             self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
         except pygame.error:
@@ -75,10 +72,9 @@ class playerObject:
         self.status = "live"
 
     def fail(self, status):
-        cycleTime = datetime.datetime.now()
-        failTime = str(datetime.timedelta(seconds=(math.floor((cycleTime - startTime).total_seconds()))))
-        self.failTime = failTime
         self.status = status
+        self.finishTimeAbsolute = datetime.datetime.now()
+        self.calculateCompletionTime()
 
     def hasCollected(self):
         tempStars = self.collects
@@ -294,8 +290,8 @@ def draw(screen, playerLookup):
             quitTag = getFont(70).render("Quit", 1, (255, 0, 0))
             screen.blit(quitTag, (130+currentPlayer.corner[0], 55+currentPlayer.corner[1]))
 
-            label = getFont(24).render("Completion: "+str(score)+"/602", 1, (220,220,220))
-            screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            label = getFont(24).render("Completion: "+str(score)+"/602 in "+currentPlayer.completionTime, 1, (220,220,220))
+            screen.blit(label, (50+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "disqualified":    #shows disqualified tag
             forfeitTag = getFont(50).render("Disqualified", 1, (255, 0, 0))
@@ -530,8 +526,9 @@ while not done:
                             elif command[0] == "!quit":
                                 playerLookup[user].fail("quit")
                                 redraw = True
-                                currentChat.message(playerLookup[user].nameCaseSensitive + "has quit.")
-                            elif command[0] == "!unfinish":
+                                currentChat.message(playerLookup[user].nameCaseSensitive + " has quit.")
+                        elif playerLookup[user].status == "done":
+                            if command[0] == "!unfinish":
                                 playerLookup[user].unfinish()
                         if user not in admins:
                             if command[0] == "!mod" and len(command) == 2:
@@ -638,12 +635,12 @@ while not done:
                         elif command[0] == "!settime":
                             if len(command) == 3 and command[1] in playerLookup.keys():
                                 player = command[1]
-                                if playerLookup[player].status == "done":
+                                if playerLookup[player].status == "done" or playerLookup[player].status == "quit":
                                     newTime = command[2]
                                     stringTime = command[2]
                                     newTime = newTime.split(":")
                                     if len(newTime) == 3:
-                                        duration = int(newTime[2]) + 60*int(newTime[1]) + 360*int(newTime[0])
+                                        duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
                                         playerLookup[player].duration = duration
                                         playerLookup[player].completionTime = stringTime
                                         playerLookup[player].manualDuration()
