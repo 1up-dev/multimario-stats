@@ -32,16 +32,16 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 - Sets the start time of the race to the specified time.
 - Must be in this format: 2018-12-29@09:00
   
-#### !mod [twitchname]
-#### !unmod [twitchname]
-#### !forcequit [twitchname]
-#### !noshow [twitchname]
-#### !dq [twitchname]
+#### !mod/!unmod [twitchname]
+#### !forcequit/!noshow/!dq [twitchname]
 #### !revive [twitchname]
 - Undo a quit, dq, or noshow.
 #### !settime [twitchname] [duration]
 - Set a racer's run duration on the "done" or "quit" card.
 - Must be in this format: 32:59:59
+#### !blacklist/!unblacklist [twitchname]
+- Add/remove a user to the updater blacklist, preventing them from updating star counts.
+#### !admin [twitchname]
   
 ## Before you attempt to run the program
 - WARNING: Running the program will join all the Twitch chats specified in racers.txt and make the bot active. Make sure racers.txt has the correct names in it before starting.  

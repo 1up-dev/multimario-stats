@@ -124,14 +124,14 @@ class ChatRoom:
         timeNow = timeNow.split("T")
         timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
         self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
-        print("[IRC] "+ timeNow + ": Joined Twitch channel "+self.channel+".")
+        print("[Twitch] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
             self.currentSocket.send(bytes("PONG tmi.twitch.tv\r\n", "UTF-8"))
             timeNow = datetime.datetime.now().isoformat()
             timeNow = timeNow.split("T")
             timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-            print("[IRC] "+ timeNow +": Pong attempted.")
+            print("[Twitch] "+ timeNow +": Pong attempted.")
         except socket.error:
             print("Socket error.")
 
@@ -337,6 +337,14 @@ def pushUpdaters():
             else:
                 updaterFile.write(updater+"\n")
 
+def pushAdmins():
+    with open("admins.txt", "w") as adminFile:
+        for admin in admins:
+            if admin.index == len(admins)-1:
+                adminFile.write(admin)
+            else:
+                adminFile.write(admin+"\n")
+
 def pushBlacklist():
     with open("blacklist.txt", "w") as blacklistFile:
         for b in blacklist:
@@ -376,6 +384,77 @@ def fetchIRC(thisChat):
         readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
         thisChat.inputBuffer += readbuffer
 
+def srlThread(NICK, PASS, channel, twitchChat):
+    HOST = "irc.speedrunslive.com"
+    PORT = 6667
+    joinedRoom = False
+    roomCode = ""
+    stopLoop = False
+    srlGame = "Dragon Warrior (NES) Hacks" #replace with "Super Mario 602"
+    currentSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    currentSocket.connect((HOST,PORT))
+    currentSocket.send(bytes("USER "+NICK+" "+NICK+" "+NICK+" :test"+"\n", "UTF-8"))
+    currentSocket.send(bytes("NICK "+NICK+"\n", "UTF-8"))
+    time.sleep(2)
+
+    while not stopLoop:
+        readbuffer = currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+        #print(readbuffer, end="")
+
+        if readbuffer.find('PING :') != -1:
+            pong = readbuffer.split("PING :")[1]
+            pong = pong.split("\r")[0]
+            print("[SRL] PONG :"+pong)
+            currentSocket.send(bytes("PONG :"+pong+"\n", "UTF-8"))
+
+        if readbuffer.find("If you do not change within 20 seconds") != -1:
+            currentSocket.send(bytes("nickserv identify "+PASS+"\n", "UTF-8"))
+            time.sleep(1)
+            currentSocket.send(bytes("JOIN "+channel+"\n", "UTF-8"))
+
+        if readbuffer.find("Password accepted") != -1:
+            print("[SRL] Joined SpeedRunsLive IRC.")
+
+        if readbuffer.find("You have not registered") != -1:
+            stopLoop = True
+
+        if (not joinedRoom) and (readbuffer.find(srlGame) != -1):
+            roomCode = readbuffer.split(srlGame)[1].split("#srl")[1][0:6]
+            roomCode = "#srl"+roomCode
+            currentSocket.send(bytes("JOIN "+roomCode+"\n", "UTF-8"))
+            print("[SRL] Joined " + srlGame + " - "+ roomCode)
+            joinedRoom = True
+
+        if joinedRoom and (readbuffer.find(":RaceBot!RaceBot") != -1):
+            global startTime
+            global redraw
+            tmp = readbuffer.split(":RaceBot!RaceBot")[1]
+            if tmp.find("PRIVMSG "+roomCode) != -1:
+                tmp = tmp.split("PRIVMSG "+roomCode)[1]
+
+                racebotMessage = tmp.split("\n")[0][2:].replace("4", "")
+                twitchChat.message("[SRL] RaceBot: "+racebotMessage)
+
+                #TODO check for an eaten message, this doesn't work right now
+                tmp3 = tmp.split("\n")[1]
+                if tmp3.find(":RaceBot!RaceBot") != -1:
+                    tmp3 = tmp3.split(":RaceBot!RaceBot")
+                    if tmp3.find("PRIVMSG " + roomCode) != -1:
+                        tmp3 = tmp3.split("PRIVMSG " +roomCode)[1].split("\n")[0][2:].replace("4", "")
+                        twitchChat.message("[SRL] RaceBot: "+tmp3)
+
+                if tmp.find("GO!") != -1:
+                    startTime = datetime.datetime.now()
+                    redraw = True
+                    with open("./resources/startingTime.obj", 'wb') as output:
+                        pickle.dump(startTime, output, pickle.HIGHEST_PROTOCOL)
+                    for racer in racers:
+                        playerLookup[racer].calculateCompletionTime()
+                    now = datetime.datetime.now().isoformat().split("T")
+                    now = now[0] + " @ " + now[1].split(".")[0]
+                    twitchChat.message("[SRL] Race start time set to "+now)
+                    stopLoop = True
+
 #---------loading & processing external data-------------
 with open('racers.txt') as f:
     racersCaseSensitive = f.read().split("\n")
@@ -409,6 +488,8 @@ with open ('settings.txt') as f:
     NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
     PASSWORD = file.split("Twitch Chat Authentication Token: ")[1].split()[0]
     CHANNEL = file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
+    SRLusername = file.split("SpeedRunsLive Username: ")[1].split()[0]
+    SRLpassword = file.split("SpeedRunsLive Password: ")[1].split()[0]
 
 for racer in racers:
     if (racer not in updaters) and (racer not in blacklist):
@@ -466,6 +547,8 @@ for racer in racers:
 mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
 t = threading.Thread(target=fetchIRC, args=(mainChat,))
 t.start()
+SRL = threading.Thread(target=srlThread, args=(SRLusername,SRLpassword,"#speedrunslive", mainChat,))
+SRL.start()
 #--------------------main bot loop--------------------
 done = False
 while not done:
@@ -522,7 +605,7 @@ while not done:
                     pass
                 else:
                     user = user.lower()[1:]
-                    print("User:"+user+" Command:"+str(command))
+                    print("[Command] "+user+":"+str(command))
 
                     #----------------------racer commands----------------------
                     if user in racers:
@@ -601,14 +684,14 @@ while not done:
                                     pickle.dump(newTime, output, pickle.HIGHEST_PROTOCOL)
                                 startTime = newTime
                                 now = newTime.isoformat().split("T")
-                                now = now[0] + " @ " + now[1].split(".")[0]
+                                now = now[0] + "@" + now[1].split(".")[0]
                                 currentChat.message("The race start time has been set to " + now)
                                 for racer in racers:
                                     playerLookup[racer].calculateCompletionTime()
                                 redraw = True
                         elif command[0] == "!mod" and len(command) == 2:
                             if command[1] in blacklist:
-                                    currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
+                                currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
                             elif command[1] not in updaters:
                                 updaters.append(command[1])
                                 pushUpdaters()
@@ -673,7 +756,6 @@ while not done:
                                 currentChat.message(command[1] + " has been blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already blacklisted.")
-
                         elif command[0] == "!unblacklist" and len(command) == 2:
                             if command[1] in blacklist:
                                 blacklist.remove(command[1])
@@ -681,6 +763,13 @@ while not done:
                                 currentChat.message(command[1] + " is no longer blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already not blacklisted.")
+                        elif command[0] == "!admin" and len(command) == 2:
+                            if command[1] not in admins:
+                                admins.append(command[1])
+                                pushAdmins()
+                                currentChat.message(command[1] + " is now an admin.")
+                            else:
+                                currentChat.message(command[1] + " is already an admin.")
 
             if redraw:
                 screen = draw(screen, playerLookup)
