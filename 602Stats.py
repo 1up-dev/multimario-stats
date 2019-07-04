@@ -124,14 +124,14 @@ class ChatRoom:
         timeNow = timeNow.split("T")
         timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
         self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
-        print("[IRC] "+ timeNow + ": Joined Twitch channel "+self.channel+".")
+        print("[Twitch] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
             self.currentSocket.send(bytes("PONG tmi.twitch.tv\r\n", "UTF-8"))
             timeNow = datetime.datetime.now().isoformat()
             timeNow = timeNow.split("T")
             timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-            print("[IRC] "+ timeNow +": Pong attempted.")
+            print("[Twitch] "+ timeNow +": Pong attempted.")
         except socket.error:
             print("Socket error.")
 
@@ -262,19 +262,19 @@ def draw(screen, playerLookup):
                 smg2color = (60,60,60)
 
             #------------individual game scores & icons--------------
-            screen.blit(SM64, (6+corner[0], 75+corner[1]) )
+            screen.blit(star, (6+corner[0], 75+corner[1]) )
             label = getFont(18).render(str(sm64count), 1, sm64color)
             screen.blit(label, (45+corner[0], 79+corner[1]))
 
-            screen.blit(SMG, (6+corner[0], 103+corner[1]) )
+            screen.blit(luma, (6+corner[0], 103+corner[1]) )
             label = getFont(18).render(str(smgcount), 1, smgcolor)
             screen.blit(label, (45+corner[0], 109+corner[1]))
 
-            screen.blit(SMS, (188+corner[0], 70+corner[1]) )
+            screen.blit(shine, (188+corner[0], 70+corner[1]) )
             label = getFont(18).render(str(smscount), 1, smscolor)
             screen.blit(label, (230+corner[0], 79+corner[1]))
 
-            screen.blit(SMG2, (6+corner[0], 137+corner[1]) )
+            screen.blit(yoshi, (6+corner[0], 137+corner[1]) )
             label = getFont(18).render(str(smg2count), 1, smg2color)
             screen.blit(label, (45+corner[0], 139+corner[1]))
 
@@ -337,6 +337,14 @@ def pushUpdaters():
             else:
                 updaterFile.write(updater+"\n")
 
+def pushAdmins():
+    with open("admins.txt", "w") as adminFile:
+        for admin in admins:
+            if admin.index == len(admins)-1:
+                adminFile.write(admin)
+            else:
+                adminFile.write(admin+"\n")
+
 def pushBlacklist():
     with open("blacklist.txt", "w") as blacklistFile:
         for b in blacklist:
@@ -345,17 +353,26 @@ def pushBlacklist():
             else:
                 blacklistFile.write(b+"\n")
 
-def fetchProfiles(users):
-    with open ('settings.txt') as f:
-        settingsFile = f.read()
-        CLIENT_ID = settingsFile.split("Twitch developer app Client-ID: ")[1].split()[0]
+def status(user):
+    returnString = user + ": "
+    if user in racers:
+        returnString += "Racer ("+playerLookup[user].status +"), "
+    if user in admins:
+        returnString += "Admin, "
+    if user in updaters:
+        returnString += "Updater, "
+    if user in blacklist:
+        returnString += "Blacklist, "
+    if returnString == (user + ": "):
+        returnString += "None, "
+    return returnString[0:-2]
+
+def fetchProfiles(users, CLIENT_ID):
     for user in users:
         if not os.path.isfile("./profiles/"+user+".png"):
             url = "https://api.twitch.tv/helix/users?login="+user
             headers = {"Client-ID":CLIENT_ID}
             response = requests.get(url, headers=headers)
-            #data={}
-
             if response.status_code in range(200,300):
                 responseData = json.loads(response.content.decode("UTF-8"))['data']
                 if len(responseData)==0:
@@ -371,44 +388,141 @@ def fetchProfiles(users):
                 return None
     return
 
+def fetchRacers(APIkey):
+    success=False
+    tries = 0
+    sheetRacers = []
+    while not success:
+        url = "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="+APIkey
+        response = requests.get(url, headers={})
+        tries+=1
+        if response.status_code in range(200,300):
+            nResponse = json.loads(response.content.decode("UTF-8"))["values"]
+            for e in nResponse:
+                if e == []:
+                    pass
+                elif e[0] == "Theoretical WR":
+                    pass
+                else:
+                    sheetRacers.append(e[0])
+            success=True
+        else:
+            nResponse = json.loads(response.content.decode("UTF-8"))["error"]
+            print('[!] (Try '+str(tries)+') Google Sheets API request failed. ' + str(nResponse["code"]) +': '+nResponse["message"])
+            if tries==5:
+                print("[!] Can't request from Google Sheets API. Giving up.")
+                success=True
+    return sheetRacers
+
 def fetchIRC(thisChat):
     while True:
         readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
         thisChat.inputBuffer += readbuffer
 
+def srlThread(NICK, PASS, channel, twitchChat):
+    HOST = "irc.speedrunslive.com"
+    PORT = 6667
+    joinedRoom = False
+    roomCode = ""
+    stopLoop = False
+    srlGame = "Dragon Warrior (NES) Hacks" #replace with "Super Mario 602"
+    currentSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    currentSocket.connect((HOST,PORT))
+    currentSocket.send(bytes("USER "+NICK+" "+NICK+" "+NICK+" :test"+"\n", "UTF-8"))
+    currentSocket.send(bytes("NICK "+NICK+"\n", "UTF-8"))
+    time.sleep(2)
+
+    while not stopLoop:
+        readbuffer = currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+        #print(readbuffer, end="")
+
+        if readbuffer.find('PING :') != -1:
+            pong = readbuffer.split("PING :")[1]
+            pong = pong.split("\r")[0]
+            print("[SRL] PONG :"+pong)
+            currentSocket.send(bytes("PONG :"+pong+"\n", "UTF-8"))
+
+        if readbuffer.find("If you do not change within 20 seconds") != -1:
+            currentSocket.send(bytes("nickserv identify "+PASS+"\n", "UTF-8"))
+            time.sleep(1)
+            currentSocket.send(bytes("JOIN "+channel+"\n", "UTF-8"))
+
+        if readbuffer.find("Password accepted") != -1:
+            print("[SRL] Joined SpeedRunsLive IRC.")
+
+        if readbuffer.find("You have not registered") != -1:
+            stopLoop = True
+
+        if (not joinedRoom) and (readbuffer.find(srlGame) != -1):
+            roomCode = readbuffer.split(srlGame)[1].split("#srl")[1][0:6]
+            roomCode = "#srl"+roomCode
+            currentSocket.send(bytes("JOIN "+roomCode+"\n", "UTF-8"))
+            print("[SRL] Joined " + srlGame + " - "+ roomCode)
+            joinedRoom = True
+
+        if joinedRoom and (readbuffer.find(":RaceBot!RaceBot") != -1):
+            global startTime
+            global redraw
+            tmp = readbuffer.split(":RaceBot!RaceBot")[1]
+            if tmp.find("PRIVMSG "+roomCode) != -1:
+                tmp = tmp.split("PRIVMSG "+roomCode)[1]
+
+                racebotMessage = tmp.split("\n")[0][2:].replace("4", "")
+                twitchChat.message("[SRL] RaceBot: "+racebotMessage)
+
+                #TODO check for an eaten message, this doesn't work right now
+                tmp3 = tmp.split("\n")[1]
+                if tmp3.find(":RaceBot!RaceBot") != -1:
+                    tmp3 = tmp3.split(":RaceBot!RaceBot")
+                    if tmp3.find("PRIVMSG " + roomCode) != -1:
+                        tmp3 = tmp3.split("PRIVMSG " +roomCode)[1].split("\n")[0][2:].replace("4", "")
+                        twitchChat.message("[SRL] RaceBot: "+tmp3)
+
+                if tmp.find("GO!") != -1:
+                    startTime = datetime.datetime.now()
+                    redraw = True
+                    with open("./resources/startingTime.obj", 'wb') as output:
+                        pickle.dump(startTime, output, pickle.HIGHEST_PROTOCOL)
+                    for racer in racers:
+                        playerLookup[racer].calculateCompletionTime()
+                    now = datetime.datetime.now().isoformat().split("T")
+                    now = now[0] + " @ " + now[1].split(".")[0]
+                    twitchChat.message("[SRL] Race start time set to "+now)
+                    stopLoop = True
+
 #---------loading & processing external data-------------
 with open('racers.txt') as f:
     racersCaseSensitive = f.read().split("\n")
+    racersCaseSensitive = list(filter(None, racersCaseSensitive))
     racers = []
-    for r in racersCaseSensitive:
-        r.rstrip()
-        if r=="" or r==" ":
-            racersCaseSensitive.remove(r)
     for r in racersCaseSensitive:
         racers.append(r.lower())
 with open('updaters.txt') as f:
     updaters = f.read().lower().split("\n")
-    for u in updaters:
-        u.rstrip()
-        if u=="" or u==" ":
-            updaters.remove(u)
+    updaters = list(filter(None, updaters))
 with open('admins.txt') as f:
     admins = f.read().lower().split("\n")
-    for a in admins:
-        a.rstrip()
-        if a=="" or a==" ":
-            admins.remove(a)
+    admins = list(filter(None, admins))
 with open('blacklist.txt') as f:
     blacklist = f.read().lower().split("\n")
-    for b in blacklist:
-        b.rstrip()
-        if b=="" or b==" ":
-            blacklist.remove(b)
-with open ('settings.txt') as f:
+    blacklist = list(filter(None, blacklist))
+with open('settings.txt') as f:
     file = f.read()
     NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
     PASSWORD = file.split("Twitch Chat Authentication Token: ")[1].split()[0]
-    CHANNEL = file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
+    CHANNEL = "#" + file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
+    SRLusername = file.split("SpeedRunsLive Username: ")[1].split()[0]
+    SRLpassword = file.split("SpeedRunsLive Password: ")[1].split()[0]
+    Twitch_clientId = file.split("Twitch developer app Client-ID: ")[1].split()[0]
+    GoogleAPIKey = file.split("Google API Key: ")[1].split()[0]
+
+fetchedRacersCaseSensitive = fetchRacers(GoogleAPIKey)
+fetchedRacers = []
+for racer in fetchedRacersCaseSensitive:
+    fetchedRacers.append(racer.lower())
+#todo: remove fetched from both names to use official sheet racers
+#      then get rid of reference to racers.txt file
+print(fetchedRacersCaseSensitive)
 
 for racer in racers:
     if (racer not in updaters) and (racer not in blacklist):
@@ -418,7 +532,7 @@ for racer in racers:
 with open("./resources/startingTime.obj", 'rb') as objIn:
     startTime = pickle.load(objIn)
 
-fetchProfiles(racers)
+fetchProfiles(racers, Twitch_clientId)
 
 #----------player object & slot assignments-------------
 slots = [
@@ -435,20 +549,17 @@ for racer in racersCaseSensitive:
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("602 Stats Program")
-screen.fill((16,16,16))
 
-SM64= pygame.image.load('./resources/star.png')
-SMS = pygame.image.load('./resources/shine.png')
-SMG = pygame.image.load('./resources/luma.png')
-SMG2 = pygame.image.load('./resources/yoshi.png')
-
-background = pygame.image.load('./resources/bgtest.png')
-
-sm64BG = pygame.image.load('./resources/sm64bg.png')
-smgBG = pygame.image.load('./resources/smgbg.png')
-smsBG = pygame.image.load('./resources/smsbg.png')
-smg2BG = pygame.image.load('./resources/smg2bg.png')
-finishBG = pygame.image.load('./resources/602bg.png')
+star  = pygame.image.load('./resources/star.png')
+shine = pygame.image.load('./resources/shine.png')
+luma  = pygame.image.load('./resources/luma.png')
+yoshi = pygame.image.load('./resources/yoshi.png')
+background = pygame.image.load('./resources/background.png')
+sm64BG = pygame.image.load('./resources/sm64.png')
+smgBG = pygame.image.load('./resources/smg.png')
+smsBG = pygame.image.load('./resources/sms.png')
+smg2BG = pygame.image.load('./resources/smg2.png')
+finishBG = pygame.image.load('./resources/finish.png')
 
 def getFont(size):
     return pygame.font.SysFont("Lobster 1.4", size)
@@ -466,6 +577,8 @@ for racer in racers:
 mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
 t = threading.Thread(target=fetchIRC, args=(mainChat,))
 t.start()
+SRL = threading.Thread(target=srlThread, args=(SRLusername,SRLpassword,"#speedrunslive", mainChat,))
+SRL.start()
 #--------------------main bot loop--------------------
 done = False
 while not done:
@@ -522,10 +635,21 @@ while not done:
                     pass
                 else:
                     user = user.lower()[1:]
-                    print("User:"+user+" Command:"+str(command))
+                    print("[Command] "+user+":"+str(command))
+
+                    #----------------------global commands---------------------
+                    if command[0] == "!ping":
+                        currentChat.message("Hi. Bot is alive.")
+                    if command[0] == "!status":
+                        if len(command) == 1:
+                            statusMsg = status(user)
+                        else:
+                            statusMsg = status(command[1])
+                        if statusMsg is not None:
+                            currentChat.message(statusMsg)
 
                     #----------------------racer commands----------------------
-                    if user in racers:
+                    if user in racers: #todo more intuitive unfinish command?
                         if playerLookup[user].status == "live":
                             if command[0] == "!add" and len(command) == 2:
                                 number = int(command[1])
@@ -601,14 +725,14 @@ while not done:
                                     pickle.dump(newTime, output, pickle.HIGHEST_PROTOCOL)
                                 startTime = newTime
                                 now = newTime.isoformat().split("T")
-                                now = now[0] + " @ " + now[1].split(".")[0]
+                                now = now[0] + "@" + now[1].split(".")[0]
                                 currentChat.message("The race start time has been set to " + now)
                                 for racer in racers:
                                     playerLookup[racer].calculateCompletionTime()
                                 redraw = True
                         elif command[0] == "!mod" and len(command) == 2:
                             if command[1] in blacklist:
-                                    currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
+                                currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
                             elif command[1] not in updaters:
                                 updaters.append(command[1])
                                 pushUpdaters()
@@ -673,7 +797,6 @@ while not done:
                                 currentChat.message(command[1] + " has been blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already blacklisted.")
-
                         elif command[0] == "!unblacklist" and len(command) == 2:
                             if command[1] in blacklist:
                                 blacklist.remove(command[1])
@@ -681,6 +804,13 @@ while not done:
                                 currentChat.message(command[1] + " is no longer blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already not blacklisted.")
+                        elif command[0] == "!admin" and len(command) == 2:
+                            if command[1] not in admins:
+                                admins.append(command[1])
+                                pushAdmins()
+                                currentChat.message(command[1] + " is now an admin.")
+                            else:
+                                currentChat.message(command[1] + " is already an admin.")
 
             if redraw:
                 screen = draw(screen, playerLookup)
