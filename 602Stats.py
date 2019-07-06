@@ -123,7 +123,7 @@ class ChatRoom:
         timeNow = datetime.datetime.now().isoformat()
         timeNow = timeNow.split("T")
         timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-        self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
+        #self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
         print("[Twitch] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
@@ -184,11 +184,12 @@ def draw(screen, playerLookup):
     for s in range(0,len(sortedRacers)):
         if s==-1: #leaving empty slots for spacing
             pass
-        elif racerIndex < len(sortedRacers):
+        elif racerIndex < 16:
             playerLookup[sortedRacers[racerIndex]].corner = slots[s]
             racerIndex+=1
         else:
             playerLookup[sortedRacers[racerIndex]].corner = [1600, 900]
+            racerIndex+=1
 
     #-----------scorecard drawing------------
     for key in playerLookup:
@@ -416,8 +417,12 @@ def fetchRacers(APIkey):
 
 def fetchIRC(thisChat):
     while True:
-        readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
-        thisChat.inputBuffer += readbuffer
+        try:
+            readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+            thisChat.inputBuffer += readbuffer
+        except Exception as e:
+            print("[!] Exception on line", sys.exc_info()[-1].tb_lineno, ":", e)
+            return #returns from method and ends thread if there is an error
 
 def srlThread(NICK, PASS, channel, twitchChat):
     HOST = "irc.speedrunslive.com"
@@ -425,7 +430,7 @@ def srlThread(NICK, PASS, channel, twitchChat):
     joinedRoom = False
     roomCode = ""
     stopLoop = False
-    srlGame = "Dragon Warrior (NES) Hacks" #replace with "Super Mario 602"
+    srlGame = "Super Monkey Ball 2" #replace with "Multiple Game Race"
     currentSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     currentSocket.connect((HOST,PORT))
     currentSocket.send(bytes("USER "+NICK+" "+NICK+" "+NICK+" :test"+"\n", "UTF-8"))
@@ -439,7 +444,7 @@ def srlThread(NICK, PASS, channel, twitchChat):
         if readbuffer.find('PING :') != -1:
             pong = readbuffer.split("PING :")[1]
             pong = pong.split("\r")[0]
-            print("[SRL] PONG :"+pong)
+            #print("[SRL] PONG :"+pong)
             currentSocket.send(bytes("PONG :"+pong+"\n", "UTF-8"))
 
         if readbuffer.find("If you do not change within 20 seconds") != -1:
@@ -491,12 +496,14 @@ def srlThread(NICK, PASS, channel, twitchChat):
                     stopLoop = True
 
 #---------loading & processing external data-------------
+'''
 with open('racers.txt') as f:
     racersCaseSensitive = f.read().split("\n")
     racersCaseSensitive = list(filter(None, racersCaseSensitive))
     racers = []
     for r in racersCaseSensitive:
         racers.append(r.lower())
+'''
 with open('updaters.txt') as f:
     updaters = f.read().lower().split("\n")
     updaters = list(filter(None, updaters))
@@ -516,13 +523,13 @@ with open('settings.txt') as f:
     Twitch_clientId = file.split("Twitch developer app Client-ID: ")[1].split()[0]
     GoogleAPIKey = file.split("Google API Key: ")[1].split()[0]
 
-fetchedRacersCaseSensitive = fetchRacers(GoogleAPIKey)
-fetchedRacers = []
-for racer in fetchedRacersCaseSensitive:
-    fetchedRacers.append(racer.lower())
+racersCaseSensitive = fetchRacers(GoogleAPIKey)
+racers = []
+for racer in racersCaseSensitive:
+    racers.append(racer.lower())
 #todo: remove fetched from both names to use official sheet racers
 #      then get rid of reference to racers.txt file
-print(fetchedRacersCaseSensitive)
+print(racersCaseSensitive)
 
 for racer in racers:
     if (racer not in updaters) and (racer not in blacklist):
@@ -605,13 +612,17 @@ while not done:
                 line = line.rstrip().split()
 
                 ismod = False
-                if len(line) > 0:
+                if user == currentChannel:
+                    ismod = True
+                elif len(line) > 0:
                     if line[0][0] == "@":
                         tags = line[0]
                         del line[0]
-                        modstatus = tags.split("mod=")[1][0]
-                        if (modstatus == "1") or (user == currentChannel):
-                            ismod = True
+                        modstatus = tags.split("mod=")
+                        if len(modstatus) > 1:
+                            modstatus = modstatus[1][0]
+                            if modstatus == "1":
+                                ismod = True
 
                 for index, word in enumerate(line):
                     if index == 0:
@@ -668,6 +679,8 @@ while not done:
                         elif playerLookup[user].status == "done":
                             if command[0] == "!unfinish":
                                 playerLookup[user].unfinish()
+                                redraw = True
+                                currentChat.message(user+" has been unfinished.")
                         if user not in admins:
                             if command[0] == "!mod" and len(command) == 2:
                                 if command[1] in blacklist:
@@ -704,7 +717,8 @@ while not done:
                                             redraw = True
                             elif len(command) == 2:
                                 if user not in racers:
-                                    currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
+                                    pass
+                                    #currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
 
                     #----------------------admin commands----------------------
                     if user in admins:
@@ -787,6 +801,7 @@ while not done:
                                         playerLookup[player].completionTime = stringTime
                                         playerLookup[player].manualDuration()
                                         redraw = True
+                                        currentChat.message(command[1]+"'s time has been updated.")
                         elif command[0] == "!blacklist" and len(command) == 2:
                             if command[1] not in blacklist:
                                 blacklist.append(command[1])

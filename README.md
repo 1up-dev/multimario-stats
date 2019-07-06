@@ -26,6 +26,8 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 - Positive and negative numbers are accepted.
 #### !quit
 - Quit the race. An admin can undo this if necessary.
+#### !unfinish
+- Re-enter the race after accidentally finishing too early.
 #### !mod/!unmod [twitchname]
 - Adds or removes [twitchname] as a star count updater.
   
