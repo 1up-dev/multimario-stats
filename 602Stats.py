@@ -430,7 +430,7 @@ def srlThread(NICK, PASS, channel, twitchChat):
     joinedRoom = False
     roomCode = ""
     stopLoop = False
-    srlGame = "Super Monkey Ball 2" #replace with "Multiple Game Race"
+    srlGame = "Multiple Game Race" #replace with "Multiple Game Race"
     currentSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     currentSocket.connect((HOST,PORT))
     currentSocket.send(bytes("USER "+NICK+" "+NICK+" "+NICK+" :test"+"\n", "UTF-8"))
