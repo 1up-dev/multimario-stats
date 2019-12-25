@@ -419,10 +419,12 @@ def fetchIRC(thisChat):
     while True:
         try:
             readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+            if readbuffer == "": #reconnect on server disconnect
+                thisChat.reconnect()
             thisChat.inputBuffer += readbuffer
         except Exception as e:
-            print("[!] Exception on line", sys.exc_info()[-1].tb_lineno, ":", e)
-            return #returns from method and ends thread if there is an error
+            print("[!] Error in irc recv thread:", thisChat.channel, e)
+            thisChat.reconnect() #reconnect if there is an error
 
 def srlThread(NICK, PASS, channel, twitchChat):
     HOST = "irc.speedrunslive.com"
