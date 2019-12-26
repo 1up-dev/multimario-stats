@@ -18,7 +18,9 @@ class playerObject:
         self.name = name.lower()
         self.nameCaseSensitive = name
         self.corner = (0,0)
-        self.collects = random.choice(range(0,602))
+        self.collects = 0
+        if debug:
+            self.collects = random.choice(range(0,602))
         self.status = "live"
         self.place = 1
         self.duration = -1
@@ -169,15 +171,18 @@ def draw(screen, playerLookup):
 
     #---------place number assignments--------
     for index, racer in enumerate(sortedRacers):
-        current = playerLookup[racer]
-        previous = playerLookup[sortedRacers[index-1]]
-        if current.collects != 602:
-            if current.collects == previous.collects:
-                current.place = previous.place
+        if index == 0:
+            playerLookup[racer].place = 1
+        else:
+            current = playerLookup[racer]
+            previous = playerLookup[sortedRacers[index-1]]
+            if current.collects != 602:
+                if current.collects == previous.collects:
+                    current.place = previous.place
+                else:
+                    playerLookup[racer].place = index+1
             else:
                 playerLookup[racer].place = index+1
-        else:
-            playerLookup[racer].place = index+1
 
     #------------slot assignments-----------
     racerIndex=0
@@ -498,23 +503,7 @@ def srlThread(NICK, PASS, channel, twitchChat):
                     stopLoop = True
 
 #---------loading & processing external data-------------
-'''
-with open('racers.txt') as f:
-    racersCaseSensitive = f.read().split("\n")
-    racersCaseSensitive = list(filter(None, racersCaseSensitive))
-    racers = []
-    for r in racersCaseSensitive:
-        racers.append(r.lower())
-'''
-with open('updaters.txt') as f:
-    updaters = f.read().lower().split("\n")
-    updaters = list(filter(None, updaters))
-with open('admins.txt') as f:
-    admins = f.read().lower().split("\n")
-    admins = list(filter(None, admins))
-with open('blacklist.txt') as f:
-    blacklist = f.read().lower().split("\n")
-    blacklist = list(filter(None, blacklist))
+debug = True
 with open('settings.txt') as f:
     file = f.read()
     NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
@@ -524,15 +513,26 @@ with open('settings.txt') as f:
     SRLpassword = file.split("SpeedRunsLive Password: ")[1].split()[0]
     Twitch_clientId = file.split("Twitch developer app Client-ID: ")[1].split()[0]
     GoogleAPIKey = file.split("Google API Key: ")[1].split()[0]
+with open('racers.txt') as f:
+    if debug:
+        racersCaseSensitive = f.read().split("\n")
+        racersCaseSensitive = list(filter(None, racersCaseSensitive))
+    else:
+        racersCaseSensitive = fetchRacers(GoogleAPIKey)
+with open('updaters.txt') as f:
+    updaters = f.read().lower().split("\n")
+    updaters = list(filter(None, updaters))
+with open('admins.txt') as f:
+    admins = f.read().lower().split("\n")
+    admins = list(filter(None, admins))
+with open('blacklist.txt') as f:
+    blacklist = f.read().lower().split("\n")
+    blacklist = list(filter(None, blacklist))
 
-racersCaseSensitive = fetchRacers(GoogleAPIKey)
 racers = []
 for racer in racersCaseSensitive:
     racers.append(racer.lower())
-#todo: remove fetched from both names to use official sheet racers
-#      then get rid of reference to racers.txt file
-print(racersCaseSensitive)
-
+print("Racers:"+str(racersCaseSensitive))
 for racer in racers:
     if (racer not in updaters) and (racer not in blacklist):
         updaters.append(racer)
@@ -554,7 +554,7 @@ playerLookup = {}
 for racer in racersCaseSensitive:
     playerLookup[racer.lower()] = playerObject(racer)
 
-#--------------------pygame settings--------------------
+#---------------------pygame setup----------------------
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("602 Stats Program")
