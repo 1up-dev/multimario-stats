@@ -571,7 +571,7 @@ smg2BG = pygame.image.load('./resources/smg2.png')
 finishBG = pygame.image.load('./resources/finish.png')
 
 def getFont(size):
-    return pygame.font.SysFont("Lobster 1.4", size)
+    return pygame.font.Font(".\\resources\\Lobster 1.4.otf", size)
 
 screen = draw(screen, playerLookup)
 pygame.display.flip()
