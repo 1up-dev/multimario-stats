@@ -684,7 +684,7 @@ while not done:
                                 redraw = True
                                 currentChat.message(user+" has been unfinished.")
                         if user not in admins:
-                            if command[0] == "!mod" and len(command) == 2:
+                            if command[0] == "!whitelist" and len(command) == 2:
                                 if command[1] in blacklist:
                                     currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
                                 elif command[1] not in updaters:
@@ -693,7 +693,7 @@ while not done:
                                     currentChat.message(command[1] + " is now an updater.")
                                 else:
                                     currentChat.message(command[1] + " is already an updater.")
-                            elif command[0] == "!unmod" and len(command) == 2:
+                            elif command[0] == "!unwhitelist" and len(command) == 2:
                                 if command[1] in updaters:
                                     updaters.remove(command[1])
                                     pushUpdaters()
@@ -746,7 +746,7 @@ while not done:
                                 for racer in racers:
                                     playerLookup[racer].calculateCompletionTime()
                                 redraw = True
-                        elif command[0] == "!mod" and len(command) == 2:
+                        elif command[0] == "!whitelist" and len(command) == 2:
                             if command[1] in blacklist:
                                 currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
                             elif command[1] not in updaters:
@@ -755,7 +755,7 @@ while not done:
                                 currentChat.message(command[1] + " is now an updater.")
                             else:
                                 currentChat.message(command[1] + " is already an updater.")
-                        elif command[0] == "!unmod" and len(command) == 2:
+                        elif command[0] == "!unwhitelist" and len(command) == 2:
                             if command[1] in updaters:
                                 updaters.remove(command[1])
                                 pushUpdaters()

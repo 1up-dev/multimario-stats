@@ -28,7 +28,7 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 - Quit the race. An admin can undo this if necessary.
 #### !unfinish
 - Re-enter the race after accidentally finishing too early.
-#### !mod/!unmod [twitchname]
+#### !whitelist/!unwhitelist [twitchname]
 - Adds or removes [twitchname] as a star count updater.
   
 ### **Commands for Admins:**
@@ -37,7 +37,7 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 #### !start [date & time]
 - Sets the start time of the race to the specified time.
 - Must be in this format: 2018-12-29@09:00
-#### !mod/!unmod [twitchname]
+#### !whitelist/!unwhitelist [twitchname]
 #### !forcequit/!noshow/!dq [twitchname]
 #### !revive [twitchname]
 - Undo a quit, dq, noshow, or finish.
