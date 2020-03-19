@@ -648,12 +648,12 @@ while not done:
                     pass
                 else:
                     user = user.lower()[1:]
-                    print("[Command] "+user+":"+str(command))
+                    print("[Command:"+"#"+currentChannel+"] "+user+":"+str(command))
 
                     #----------------------global commands---------------------
                     if command[0] == "!ping":
                         currentChat.message("Hi. Bot is alive.")
-                    if command[0] == "!status":
+                    if command[0] == "!roles":
                         if len(command) == 1:
                             statusMsg = status(user)
                         else:
@@ -702,7 +702,7 @@ while not done:
                                     currentChat.message(command[1] + " is already not an updater.")
 
                     #--------------------updater commands----------------------
-                    if (user in updaters) or ismod:
+                    if ((user in updaters) or (ismod==True)) and (user not in blacklist):
                         if command[0] == "!add":
                             if len(command) == 3:
                                 if command[1] in playerLookup.keys():
