@@ -589,8 +589,8 @@ for racer in racers:
 mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
 t = threading.Thread(target=fetchIRC, args=(mainChat,))
 t.start()
-SRL = threading.Thread(target=srlThread, args=(SRLusername,SRLpassword,"#speedrunslive", mainChat,))
-SRL.start()
+#SRL = threading.Thread(target=srlThread, args=(SRLusername,SRLpassword,"#speedrunslive", mainChat,))
+#SRL.start()
 #--------------------main bot loop--------------------
 done = False
 while not done:
@@ -656,6 +656,8 @@ while not done:
                     #----------------------global commands---------------------
                     if command[0] == "!ping":
                         currentChat.message("Hi. Bot is alive.")
+                    if command[0] == "!602commands":
+                        currentChat.message("Command list: https://pastebin.com/d7mPZd13")
                     if command[0] == "!roles":
                         if len(command) == 1:
                             statusMsg = status(user)
@@ -677,6 +679,16 @@ while not done:
                                     else:
                                         currentChat.message(playerLookup[user].hasCollected())
                                     redraw = True
+                            elif command[0] == "!set" and len(command) == 2:
+                                number = int(command[1])
+                                if 0 <= number <= 602:
+                                    playerLookup[user].collects = number
+                                    if playerLookup[user].collects == 602:
+                                        playerLookup[user].finish()
+                                        currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
+                                    else:
+                                        currentChat.message(playerLookup[user].hasCollected())
+                                redraw = True
                             elif command[0] == "!quit":
                                 playerLookup[user].fail("quit")
                                 redraw = True
@@ -722,8 +734,22 @@ while not done:
                                             redraw = True
                             elif len(command) == 2:
                                 if user not in racers:
-                                    pass
                                     #currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
+                                    pass
+                        elif command[0] == "!set":
+                            if len(command) == 3:
+                                if command[1] in playerLookup.keys():
+                                    player = command[1]
+                                    if playerLookup[player].status == "live":
+                                        number = int(command[2])
+                                        if 0 <= number <= 602:
+                                            playerLookup[player].collects = number
+                                            if playerLookup[player].collects == 602:
+                                                playerLookup[player].finish()
+                                                currentChat.message(playerLookup[player].nameCaseSensitive + " has finished!")
+                                            else:
+                                                currentChat.message(playerLookup[player].hasCollected())
+                                            redraw = True
 
                     #----------------------admin commands----------------------
                     if user in admins:
