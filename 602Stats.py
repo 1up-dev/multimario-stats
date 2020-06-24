@@ -157,6 +157,9 @@ def draw(screen, playerLookup):
                 elif playerLookup[key].duration < playerLookup[racer].duration:
                     sortedRacers.insert(index, key)
                     added = True
+                elif index == len(sortedRacers)-1:
+                    sortedRacers.append(key)
+                    added = True
         else:
             added = False
             for index, racer in enumerate(sortedRacers):
