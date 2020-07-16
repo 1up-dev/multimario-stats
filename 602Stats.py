@@ -95,7 +95,7 @@ class playerObject:
         elif tempStars <= 602:
             game="Super Mario Galaxy 2"
             tempStars -= 360
-        if tempStars is not 1:
+        if tempStars != 1:
             buffer = "s"
 
         return self.nameCaseSensitive + " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
@@ -188,22 +188,29 @@ def draw(screen, playerLookup):
                 playerLookup[racer].place = index+1
 
     #------------slot assignments-----------
-    racerIndex=0
-    for s in range(0,len(sortedRacers)):
-        if s==-1: #leaving empty slots for spacing
-            pass
-        elif racerIndex < 16:
-            playerLookup[sortedRacers[racerIndex]].corner = slots[s]
-            racerIndex+=1
+    for index, p in enumerate(sortedRacers):
+        if index+2 < 25:
+            playerLookup[p].corner = slots[index+2]
         else:
-            playerLookup[sortedRacers[racerIndex]].corner = [1600, 900]
-            racerIndex+=1
+            playerLookup[p].corner = slots[25]
+
+    # racerIndex=0
+    # for s in range(0,25):
+    #     if s <= 2: #leaving empty slots for spacing
+    #         pass
+    #     elif racerIndex < 25:
+    #         playerLookup[sortedRacers[racerIndex]].corner = slots[s]
+    #         racerIndex+=1
+    #     else:
+    #         playerLookup[sortedRacers[racerIndex]].corner = [1600, 900]
+    #         racerIndex+=1
 
     #-----------scorecard drawing------------
     for key in playerLookup:
         currentPlayer = playerLookup[key]
         corner = currentPlayer.corner
-        pygame.draw.rect(screen, (25, 25, 25), [corner[0]-3, corner[1]-3, 393, 181])
+        #pygame.draw.rect(screen, (25, 25, 25), [corner[0]-3, corner[1]-3, 393, 181])
+        pygame.draw.rect(screen, (25, 25, 25), [corner[0], corner[1], 314, 174])
 
         score = currentPlayer.collects
         if currentPlayer.status == "live":
@@ -218,26 +225,30 @@ def draw(screen, playerLookup):
             smscount = 0
             smg2count = 0
             if score < 120:
-                screen.blit(sm64BG, (corner[0], corner[1]))
+                test = pygame.transform.scale(sm64BG,(306,166))
+                screen.blit(test, (corner[0]+4, corner[1]+4))
                 sm64count = score
             elif score < 240:
-                screen.blit(smgBG, (corner[0], corner[1]))
+                test = pygame.transform.scale(smgBG,(306,166))
+                screen.blit(test, (corner[0]+4, corner[1]+4))
                 sm64count = 120
                 smgcount = score-120
             elif score < 360:
-                screen.blit(smsBG, (corner[0], corner[1]))
+                test = pygame.transform.scale(smsBG,(306,166))
+                screen.blit(test, (corner[0]+4, corner[1]+4))
                 sm64count = 120
                 smgcount = 120
                 smscount = score-240
             elif score < 602:
-                screen.blit(smg2BG, (corner[0], corner[1]))
+                test = pygame.transform.scale(smg2BG,(306,166))
+                screen.blit(test, (corner[0]+4, corner[1]+4))
                 sm64count = 120
                 smgcount = 120
                 smscount = 120
                 smg2count = score-360
 
-            smallBar = 136
-            largeBar = 322
+            smallBar = 110 #136
+            largeBar = 260 #322
             barHeight = 20
             sm64length = math.floor((sm64count/120)*smallBar)
             smglength = math.floor((smgcount/120)*largeBar)
@@ -246,14 +257,14 @@ def draw(screen, playerLookup):
 
             pygame.draw.rect(screen, (40,40,40), [40+corner[0], 80+corner[1], smallBar+4, barHeight])
             pygame.draw.rect(screen, (40,40,40), [40+corner[0], 110+corner[1], largeBar+4, barHeight])
-            pygame.draw.rect(screen, (40,40,40), [225+corner[0], 80+corner[1], smallBar+4, barHeight])
+            pygame.draw.rect(screen, (40,40,40), [190+corner[0], 80+corner[1], smallBar+4, barHeight])
             pygame.draw.rect(screen, (40,40,40), [40+corner[0], 140+corner[1], largeBar+4, barHeight])
             if score > 0:
                 pygame.draw.rect(screen, (150,150,150,254), [40+corner[0]+2, 80+corner[1]+2, sm64length, barHeight-4])
             if score > 120:
                 pygame.draw.rect(screen, (150,150,150,254), [40+corner[0]+2, 110+corner[1]+2, smglength, barHeight-4])
             if score > 240:
-                pygame.draw.rect(screen, (150,150,150,254), [225+corner[0]+2, 80+corner[1]+2, smslength, barHeight-4])
+                pygame.draw.rect(screen, (150,150,150,254), [190+corner[0]+2, 80+corner[1]+2, smslength, barHeight-4])
             if score > 360:
                 pygame.draw.rect(screen, (150,150,150,254), [40+corner[0]+2, 140+corner[1]+2, smg2length, barHeight-4])
 
@@ -279,60 +290,64 @@ def draw(screen, playerLookup):
             label = getFont(18).render(str(smgcount), 1, smgcolor)
             screen.blit(label, (45+corner[0], 109+corner[1]))
 
-            screen.blit(shine, (188+corner[0], 70+corner[1]) )
+            screen.blit(shine, (157+corner[0], 70+corner[1]) )
             label = getFont(18).render(str(smscount), 1, smscolor)
-            screen.blit(label, (230+corner[0], 79+corner[1]))
+            screen.blit(label, (195+corner[0], 79+corner[1]))
 
             screen.blit(yoshi, (6+corner[0], 137+corner[1]) )
             label = getFont(18).render(str(smg2count), 1, smg2color)
             screen.blit(label, (45+corner[0], 139+corner[1]))
 
         elif currentPlayer.status == "done":    #shows done tag
-            screen.blit(finishBG, (playerLookup[key].corner[0], playerLookup[key].corner[1]))
+
+            test = pygame.transform.scale(finishBG,(306,166))
+            screen.blit(test, (corner[0]+4, corner[1]+4))
+
+            # screen.blit(finishBG, (playerLookup[key].corner[0], playerLookup[key].corner[1]))
             doneTag = getFont(70).render("Done!", 1, (220,220,220))
-            screen.blit(doneTag, (120+currentPlayer.corner[0], 65+currentPlayer.corner[1]))
+            screen.blit(doneTag, (90+currentPlayer.corner[0], 65+currentPlayer.corner[1]))
 
             label = getFont(24).render(str("Final Time: {0}".format(currentPlayer.completionTime)), 1, (220,220,220))
-            screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            screen.blit(label, (70+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "quit":    #shows quit tag
+
             quitTag = getFont(70).render("Quit", 1, (255, 0, 0))
-            screen.blit(quitTag, (130+currentPlayer.corner[0], 55+currentPlayer.corner[1]))
+            screen.blit(quitTag, (100+currentPlayer.corner[0], 55+currentPlayer.corner[1]))
 
             label = getFont(24).render("Completion: "+str(score)+"/602 in "+currentPlayer.completionTime, 1, (220,220,220))
-            screen.blit(label, (50+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            screen.blit(label, (5+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "disqualified":    #shows disqualified tag
             forfeitTag = getFont(50).render("Disqualified", 1, (255, 0, 0))
-            screen.blit(forfeitTag, (80+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
+            screen.blit(forfeitTag, (40+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
 
             label = getFont(24).render("Completion: "+str(score)+"/602", 1, (220,220,220))
-            screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            screen.blit(label, (65+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "noshow":    #shows no-show tag
             forfeitTag = getFont(50).render("No-Show", 1, (255, 0, 0))
-            screen.blit(forfeitTag, (110+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
+            screen.blit(forfeitTag, (75+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
 
             label = getFont(24).render("Completion: "+str(score)+"/602", 1, (220,220,220))
-            screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
+            screen.blit(label, (65+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
 
         #-------scorecard header-------
         screen.blit(currentPlayer.profile, (10+currentPlayer.corner[0], 10+currentPlayer.corner[1])) #profile picture
 
+        color = (220,220,220)
         if currentPlayer.place <=3:
-            nameRender = getFont(28).render(str(currentPlayer.nameCaseSensitive), 1, (239,195,0))
-            placeRender = getFont(45).render(str(currentPlayer.place), 1, (239,195,0))
-        else:
-            nameRender = getFont(28).render(str(currentPlayer.nameCaseSensitive), 1, (220,220,220))
-            placeRender = getFont(45).render(str(currentPlayer.place), 1, (200,200,200))
+            color = (239,195,0)
+        nameRender = getFont(24).render(str(currentPlayer.nameCaseSensitive), 1, color)
+        placeRender = getFont(45).render(str(currentPlayer.place), 1, color)
 
-        screen.blit(nameRender, (80+currentPlayer.corner[0], 20+currentPlayer.corner[1])) #name
+        screen.blit(nameRender, (75+currentPlayer.corner[0], 22+currentPlayer.corner[1])) #name
 
         if currentPlayer.place > 9:
-            screen.blit(placeRender, (335+currentPlayer.corner[0], 8+currentPlayer.corner[1]))
+            screen.blit(placeRender, (260+currentPlayer.corner[0], 8+currentPlayer.corner[1]))
         else:
-            screen.blit(placeRender, (350+currentPlayer.corner[0], 8+currentPlayer.corner[1]))
+            screen.blit(placeRender, (280+currentPlayer.corner[0], 8+currentPlayer.corner[1]))
 
 
     pygame.display.flip()
@@ -377,10 +392,11 @@ def status(user):
     return returnString[0:-2]
 
 def fetchProfiles(users, CLIENT_ID):
+    AUTH = "Bearer placeholder_text"
     for user in users:
         if not os.path.isfile("./profiles/"+user+".png"):
             url = "https://api.twitch.tv/helix/users?login="+user
-            headers = {"Client-ID":CLIENT_ID}
+            headers = {"Client-ID":CLIENT_ID, "Authorization":AUTH}
             response = requests.get(url, headers=headers)
             if response.status_code in range(200,300):
                 responseData = json.loads(response.content.decode("UTF-8"))['data']
@@ -547,12 +563,22 @@ with open("./resources/startingTime.obj", 'rb') as objIn:
 fetchProfiles(racers, Twitch_clientId)
 
 #----------player object & slot assignments-------------
+#387 x 175 scorecards
+# slots = [
+#     (10,160),(407,160),(804,160),(1201,160),
+#     (10,345),(407,345),(804,345),(1201,345),
+#     (10,530),(407,530),(804,530),(1201,530),
+#     (10,715),(407,715),(804,715),(1201,715), (1600,900)
+# ]
+#314 x 174 scorecards
 slots = [
-    (10,160),(407,160),(804,160),(1201,160),
-    (10,345),(407,345),(804,345),(1201,345),
-    (10,530),(407,530),(804,530),(1201,530),
-    (10,715),(407,715),(804,715),(1201,715), (1600,900)
-] #387 x 175 scorecards
+    (5,5),  (324,5),  (643,5),  (962,5),  (1281,5),
+    (5,184),(324,184),(643,184),(962,184),(1281,184),
+    (5,363),(324,363),(643,363),(962,363),(1281,363),
+    (5,542),(324,542),(643,542),(962,542),(1281,542),
+    (5,721),(324,721),(643,721),(962,721),(1281,721),
+    (1600,900)
+]
 playerLookup = {}
 for racer in racersCaseSensitive:
     playerLookup[racer.lower()] = playerObject(racer)
