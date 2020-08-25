@@ -6,136 +6,18 @@ import datetime
 import pickle
 import random
 import json
+import traceback
 import requests
 import urllib
 import os
 import time
 import threading
-
-#-----------------object definitions-------------------
-class playerObject:
-    def __init__(self, name):
-        self.name = name.lower()
-        self.nameCaseSensitive = name
-        self.corner = (0,0)
-        self.collects = 0
-        if debug:
-            self.collects = random.choice(range(0,602))
-        self.status = "live"
-        self.place = 1
-        self.duration = -1
-        self.completionTime = "HH:MM:SS"
-        self.finishTimeAbsolute = None
-        try:
-            self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
-        except pygame.error:
-            self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
-        time.sleep(1)
-        self.chat = ChatRoom("#"+self.name, NICK, PASSWORD)
-
-    def manualDuration(self):               #add startTime + duration to calculate new finish time
-        self.finishTimeAbsolute = startTime + datetime.timedelta(seconds=self.duration)
-
-    def calculateCompletionTime(self):
-        if type(self.finishTimeAbsolute) != datetime.datetime:
-            return
-        self.duration = (self.finishTimeAbsolute - startTime).total_seconds()
-
-        tmp1 = datetime.timedelta(seconds=math.floor(self.duration))
-        delta = str(tmp1).split(" day")
-
-        initialHours = 0
-        extraHours=""
-        if len(delta)==1:
-            extraHours = delta[0]
-            pass
-        elif len(delta)==2:
-            days = delta[0]
-            days = int(days)
-            initialHours = days * 24
-            if delta[1][0]=="s":
-                extraHours = delta[1][3:]
-            elif delta[1][0]==",":
-                extraHours = delta[1][2:]
-
-        finalTime = extraHours.split(":")
-        finalHours = int(finalTime[0]) + initialHours
-        finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
-        self.completionTime = finishTime
-
-    def finish(self):
-        self.finishTimeAbsolute = datetime.datetime.now()
-        self.calculateCompletionTime()
-        self.chat.message(self.nameCaseSensitive + " has finished!")
-        self.status = "done"
-
-    def unfinish(self):
-        self.collects = 601
-        self.status = "live"
-
-    def fail(self, status):
-        self.status = status
-        self.finishTimeAbsolute = datetime.datetime.now()
-        self.calculateCompletionTime()
-
-    def hasCollected(self):
-        tempStars = self.collects
-        game=""
-        buffer=""
-        noun="Star"
-        if tempStars <= 120:
-            game="Super Mario 64"
-        elif tempStars <= 240:
-            game="Super Mario Galaxy"
-            tempStars -= 120
-        elif tempStars <= 360:
-            game="Super Mario Sunshine"
-            tempStars -= 240
-            noun="Shine"
-        elif tempStars <= 602:
-            game="Super Mario Galaxy 2"
-            tempStars -= 360
-        if tempStars != 1:
-            buffer = "s"
-
-        return self.nameCaseSensitive + " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
-
-class ChatRoom:
-    def __init__(self, channel, nick, password):
-        self.HOST = "irc.chat.twitch.tv"
-        self.PORT = 6667
-        self.NICK = nick
-        self.PASSWORD = password
-        self.channel = channel
-        self.currentSocket = socket.socket()
-        self.inputBuffer = ""
-        self.reconnect()
-    def message(self, msg):
-        try:
-            self.currentSocket.send(bytes("PRIVMSG "+self.channel+" :"+msg+"\n", "UTF-8"))
-        except socket.error:
-            print("Socket error.")
-    def reconnect(self):
-        self.currentSocket = socket.socket()
-        self.currentSocket.connect((self.HOST,self.PORT))
-        self.currentSocket.send(bytes("PASS "+self.PASSWORD+"\n", "UTF-8"))
-        self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
-        self.currentSocket.send(bytes("JOIN "+self.channel+"\n", "UTF-8"))
-        self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
-        timeNow = datetime.datetime.now().isoformat()
-        timeNow = timeNow.split("T")
-        timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-        #self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
-        print("[Twitch] "+ "Joined Twitch channel "+self.channel+".")
-    def pong(self):
-        try:
-            self.currentSocket.send(bytes("PONG tmi.twitch.tv\r\n", "UTF-8"))
-            timeNow = datetime.datetime.now().isoformat()
-            timeNow = timeNow.split("T")
-            timeNow = timeNow[0] + "@" + timeNow[1].split(".")[0]
-            print("[Twitch] "+ timeNow +": Pong attempted.")
-        except socket.error:
-            print("Socket error.")
+import chatroom
+import srl
+import twitch
+import player
+import google_sheets
+import users
 
 #----------------function definitions------------------
 def draw(screen, playerLookup):
@@ -353,91 +235,19 @@ def draw(screen, playerLookup):
     pygame.display.flip()
     return screen
 
-def pushUpdaters():
-    with open("updaters.txt", "w") as updaterFile:
-        for updater in updaters:
-            if updater.index == len(updaters)-1:
-                updaterFile.write(updater)
-            else:
-                updaterFile.write(updater+"\n")
-
-def pushAdmins():
-    with open("admins.txt", "w") as adminFile:
-        for admin in admins:
-            if admin.index == len(admins)-1:
-                adminFile.write(admin)
-            else:
-                adminFile.write(admin+"\n")
-
-def pushBlacklist():
-    with open("blacklist.txt", "w") as blacklistFile:
-        for b in blacklist:
-            if b.index == len(blacklist)-1:
-                blacklistFile.write(b)
-            else:
-                blacklistFile.write(b+"\n")
-
 def status(user):
     returnString = user + ": "
-    if user in racers:
+    if user in users.racersL:
         returnString += "Racer ("+playerLookup[user].status +"), "
-    if user in admins:
+    if user in users.admins:
         returnString += "Admin, "
-    if user in updaters:
+    if user in users.updaters:
         returnString += "Updater, "
-    if user in blacklist:
+    if user in users.blacklist:
         returnString += "Blacklist, "
     if returnString == (user + ": "):
         returnString += "None, "
     return returnString[0:-2]
-
-def fetchProfiles(users, CLIENT_ID):
-    AUTH = "Bearer placeholder_text"
-    for user in users:
-        if not os.path.isfile("./profiles/"+user+".png"):
-            url = "https://api.twitch.tv/helix/users?login="+user
-            headers = {"Client-ID":CLIENT_ID, "Authorization":AUTH}
-            response = requests.get(url, headers=headers)
-            if response.status_code in range(200,300):
-                responseData = json.loads(response.content.decode("UTF-8"))['data']
-                if len(responseData)==0:
-                    print("[API] Twitch user "+user+" does not exist. Using default image.")
-                    #playerLookup[user].validTwitchAccount = False
-                else:
-                    data = responseData[0]
-                    profileLocation = data['profile_image_url']
-                    urllib.request.urlretrieve(profileLocation, "."+"/profiles/"+user+".png")
-                    print("[API] Fetched profile of Twitch user "+user+".")
-            else:
-                print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-                return None
-    return
-
-def fetchRacers(APIkey):
-    success=False
-    tries = 0
-    sheetRacers = []
-    while not success:
-        url = "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="+APIkey
-        response = requests.get(url, headers={})
-        tries+=1
-        if response.status_code in range(200,300):
-            nResponse = json.loads(response.content.decode("UTF-8"))["values"]
-            for e in nResponse:
-                if e == []:
-                    pass
-                elif e[0] == "Theoretical WR":
-                    pass
-                else:
-                    sheetRacers.append(e[0])
-            success=True
-        else:
-            nResponse = json.loads(response.content.decode("UTF-8"))["error"]
-            print('[!] (Try '+str(tries)+') Google Sheets API request failed. ' + str(nResponse["code"]) +': '+nResponse["message"])
-            if tries==5:
-                print("[!] Can't request from Google Sheets API. Giving up.")
-                success=True
-    return sheetRacers
 
 def fetchIRC(thisChat):
     while True:
@@ -450,117 +260,21 @@ def fetchIRC(thisChat):
             print("[!] Error in irc recv thread:", thisChat.channel, e)
             thisChat.reconnect() #reconnect if there is an error
 
-def srlThread(NICK, PASS, channel, twitchChat):
-    HOST = "irc.speedrunslive.com"
-    PORT = 6667
-    joinedRoom = False
-    roomCode = ""
-    stopLoop = False
-    srlGame = "Multiple Game Race" #replace with "Multiple Game Race"
-    currentSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    currentSocket.connect((HOST,PORT))
-    currentSocket.send(bytes("USER "+NICK+" "+NICK+" "+NICK+" :test"+"\n", "UTF-8"))
-    currentSocket.send(bytes("NICK "+NICK+"\n", "UTF-8"))
-    time.sleep(2)
-
-    while not stopLoop:
-        readbuffer = currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
-        #print(readbuffer, end="")
-
-        if readbuffer.find('PING :') != -1:
-            pong = readbuffer.split("PING :")[1]
-            pong = pong.split("\r")[0]
-            #print("[SRL] PONG :"+pong)
-            currentSocket.send(bytes("PONG :"+pong+"\n", "UTF-8"))
-
-        if readbuffer.find("If you do not change within 20 seconds") != -1:
-            currentSocket.send(bytes("nickserv identify "+PASS+"\n", "UTF-8"))
-            time.sleep(1)
-            currentSocket.send(bytes("JOIN "+channel+"\n", "UTF-8"))
-
-        if readbuffer.find("Password accepted") != -1:
-            print("[SRL] Joined SpeedRunsLive IRC.")
-
-        if readbuffer.find("You have not registered") != -1:
-            stopLoop = True
-
-        if (not joinedRoom) and (readbuffer.find(srlGame) != -1):
-            roomCode = readbuffer.split(srlGame)[1].split("#srl")[1][0:6]
-            roomCode = "#srl"+roomCode
-            currentSocket.send(bytes("JOIN "+roomCode+"\n", "UTF-8"))
-            print("[SRL] Joined " + srlGame + " - "+ roomCode)
-            joinedRoom = True
-
-        if joinedRoom and (readbuffer.find(":RaceBot!RaceBot") != -1):
-            global startTime
-            global redraw
-            tmp = readbuffer.split(":RaceBot!RaceBot")[1]
-            if tmp.find("PRIVMSG "+roomCode) != -1:
-                tmp = tmp.split("PRIVMSG "+roomCode)[1]
-
-                racebotMessage = tmp.split("\n")[0][2:].replace("4", "")
-                twitchChat.message("[SRL] RaceBot: "+racebotMessage)
-
-                #TODO check for an eaten message, this doesn't work right now
-                tmp3 = tmp.split("\n")[1]
-                if tmp3.find(":RaceBot!RaceBot") != -1:
-                    tmp3 = tmp3.split(":RaceBot!RaceBot")
-                    if tmp3.find("PRIVMSG " + roomCode) != -1:
-                        tmp3 = tmp3.split("PRIVMSG " +roomCode)[1].split("\n")[0][2:].replace("4", "")
-                        twitchChat.message("[SRL] RaceBot: "+tmp3)
-
-                if tmp.find("GO!") != -1:
-                    startTime = datetime.datetime.now()
-                    redraw = True
-                    with open("./resources/startingTime.obj", 'wb') as output:
-                        pickle.dump(startTime, output, pickle.HIGHEST_PROTOCOL)
-                    for racer in racers:
-                        playerLookup[racer].calculateCompletionTime()
-                    now = datetime.datetime.now().isoformat().split("T")
-                    now = now[0] + " @ " + now[1].split(".")[0]
-                    twitchChat.message("[SRL] Race start time set to "+now)
-                    stopLoop = True
-
 #---------loading & processing external data-------------
-debug = True
-with open('settings.txt') as f:
-    file = f.read()
-    NICK = file.split("Twitch Username for Bot: ")[1].split()[0].lower()
-    PASSWORD = file.split("Twitch Chat Authentication Token: ")[1].split()[0]
-    CHANNEL = "#" + file.split("Main Twitch Chat for Bot: ")[1].split()[0].lower()
-    SRLusername = file.split("SpeedRunsLive Username: ")[1].split()[0]
-    SRLpassword = file.split("SpeedRunsLive Password: ")[1].split()[0]
-    Twitch_clientId = file.split("Twitch developer app Client-ID: ")[1].split()[0]
-    GoogleAPIKey = file.split("Google API Key: ")[1].split()[0]
-with open('racers.txt') as f:
+with open('settings.json', 'r') as f:
+    j = json.load(f)
+    debug = json.loads(j['debug'].lower())
+    NICK = j['bot-twitch-username']
+    PASSWORD = j['bot-twitch-auth']
     if debug:
-        racersCaseSensitive = f.read().split("\n")
-        racersCaseSensitive = list(filter(None, racersCaseSensitive))
+        CHANNEL = "#" + j['test-chat']
     else:
-        racersCaseSensitive = fetchRacers(GoogleAPIKey)
-with open('updaters.txt') as f:
-    updaters = f.read().lower().split("\n")
-    updaters = list(filter(None, updaters))
-with open('admins.txt') as f:
-    admins = f.read().lower().split("\n")
-    admins = list(filter(None, admins))
-with open('blacklist.txt') as f:
-    blacklist = f.read().lower().split("\n")
-    blacklist = list(filter(None, blacklist))
+        CHANNEL = "#" + j['main-chat']
+    debug = json.loads(j['debug'].lower())
+    startTime = datetime.datetime.fromisoformat(j['start-time'])
+    use_backups = json.loads(j['use-player-backups'].lower())
 
-racers = []
-for racer in racersCaseSensitive:
-    racers.append(racer.lower())
-print("Racers:"+str(racersCaseSensitive))
-for racer in racers:
-    if (racer not in updaters) and (racer not in blacklist):
-        updaters.append(racer)
-        pushUpdaters()
-
-with open("./resources/startingTime.obj", 'rb') as objIn:
-    startTime = pickle.load(objIn)
-
-fetchProfiles(racers, Twitch_clientId)
+twitch.fetchProfiles(users.racersL)
 
 #----------player object & slot assignments-------------
 #387 x 175 scorecards
@@ -579,15 +293,23 @@ slots = [
     (5,721),(324,721),(643,721),(962,721),(1281,721),
     (1600,900)
 ]
+
 playerLookup = {}
-for racer in racersCaseSensitive:
-    playerLookup[racer.lower()] = playerObject(racer)
+if use_backups:
+    for racer in users.racersL:
+        pass
+        # with open("./backup/"+racer+".obj", 'rb') as f:
+        #     playerLookup[racer] = pickle.load(f)
+else:
+    print("Joining Twitch channels...", end="", flush=True)
+    for racer in users.racersCS:
+        playerLookup[racer.lower()] = player.Player(racer, NICK, PASSWORD, debug)
+    print(" Done.")
 
 #---------------------pygame setup----------------------
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
-pygame.display.set_caption("602 Stats Program")
-
+pygame.display.set_caption("Multi-Mario Stats Program")
 star  = pygame.image.load('./resources/star.png')
 shine = pygame.image.load('./resources/shine.png')
 luma  = pygame.image.load('./resources/luma.png')
@@ -600,34 +322,32 @@ smg2BG = pygame.image.load('./resources/smg2.png')
 finishBG = pygame.image.load('./resources/finish.png')
 
 def getFont(size):
-    return pygame.font.Font(".\\resources\\Lobster 1.4.otf", size)
+    return pygame.font.Font("./resources/Lobster 1.4.otf", size)
 
 screen = draw(screen, playerLookup)
 pygame.display.flip()
 redraw = False
 
-#------------create and start chat threads------------
-for racer in racers:
-    room = playerLookup[racer].chat
+#------------create and start irc threads------------
+for player in playerLookup.keys():
+    room = playerLookup[player].chat
     t = threading.Thread(target=fetchIRC, args=(room,))
     t.start()
 
-mainChat = ChatRoom(CHANNEL, NICK, PASSWORD)
+mainChat = chatroom.ChatRoom(CHANNEL, NICK, PASSWORD)
 t = threading.Thread(target=fetchIRC, args=(mainChat,))
 t.start()
-#SRL = threading.Thread(target=srlThread, args=(SRLusername,SRLpassword,"#speedrunslive", mainChat,))
+#SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat,))
 #SRL.start()
 #--------------------main bot loop--------------------
 done = False
 while not done:
-    for i in range(0, len(racers)+1):
+    for i in range(0, len(users.racersL)+1):
 
-        if i == len(racers):
+        if i == len(users.racersL):
             currentChat = mainChat
-            currentChannel = CHANNEL[1:]
         else:
-            currentChat = playerLookup[racers[i]].chat
-            currentChannel = racers[i]
+            currentChat = playerLookup[users.racersL[i]].chat
 
         try:
             for event in pygame.event.get():
@@ -643,17 +363,19 @@ while not done:
                 line = line.rstrip().split()
 
                 ismod = False
-                if user == currentChannel:
-                    ismod = True
-                elif len(line) > 0:
+                userId = -1
+                if len(line) > 0:
                     if line[0][0] == "@":
-                        tags = line[0]
-                        del line[0]
-                        modstatus = tags.split("mod=")
-                        if len(modstatus) > 1:
-                            modstatus = modstatus[1][0]
-                            if modstatus == "1":
+                        tags = line.pop(0)
+
+                        tmp8 = tags.split("mod=")
+                        if len(tmp8) > 1:
+                            if tmp8[1][0] == "1":
                                 ismod = True
+                        
+                        tmp9 = tags.split("user-id=")
+                        if len(tmp9) > 1:
+                            userId = tmp9[1].split(";")[0]
 
                 for index, word in enumerate(line):
                     if index == 0:
@@ -677,7 +399,7 @@ while not done:
                     pass
                 else:
                     user = user.lower()[1:]
-                    print("[Command:"+"#"+currentChannel+"] "+user+":"+str(command))
+                    print("[In chat "+currentChat.channel+"] "+user+":"+str(command))
 
                     #----------------------global commands---------------------
                     if command[0] == "!ping":
@@ -692,93 +414,71 @@ while not done:
                         if statusMsg is not None:
                             currentChat.message(statusMsg)
 
+                    #----------------------shared commands---------------------
+                    if (user in users.admins) or (user in users.racersL):
+                        if command[0] == "!whitelist" and len(command) == 2:
+                            if command[1] in users.blacklist:
+                                currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
+                            elif command[1] not in users.updaters:
+                                users.add(command[1],users.Role.UPDATER)
+                                currentChat.message(command[1] + " is now an updater.")
+                            else:
+                                currentChat.message(command[1] + " is already an updater.")
+                        elif command[0] == "!unwhitelist" and len(command) == 2:
+                            if command[1] in users.updaters:
+                                users.remove(command[1],users.Role.UPDATER)
+                                currentChat.message(command[1] + " is no longer an updater.")
+                            else:
+                                currentChat.message(command[1] + " is already not an updater.")
+
                     #----------------------racer commands----------------------
-                    if user in racers: #todo more intuitive unfinish command?
-                        if playerLookup[user].status == "live":
-                            if command[0] == "!add" and len(command) == 2:
+                    if user in users.racersL:
+                        if (command[0] == "!add" or command[0] == "!set") and len(command) == 2:
+                            try:
                                 number = int(command[1])
-                                if 0 <= playerLookup[user].collects + number <= 602:
-                                    playerLookup[user].collects += number
-                                    if playerLookup[user].collects == 602:
-                                        playerLookup[user].finish()
-                                        currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
-                                    else:
-                                        currentChat.message(playerLookup[user].hasCollected())
+                                if user in playerLookup.keys():
+                                    response = ""
+                                    if command[0] == "!add":
+                                        response = playerLookup[user].update(playerLookup[user].collects + number)
+                                    elif command[0] == "!set":
+                                        response = playerLookup[user].update(number)
+                                    if response != "":
+                                        currentChat.message(response)
                                     redraw = True
-                            elif command[0] == "!set" and len(command) == 2:
-                                number = int(command[1])
-                                if 0 <= number <= 602:
-                                    playerLookup[user].collects = number
-                                    if playerLookup[user].collects == 602:
-                                        playerLookup[user].finish()
-                                        currentChat.message(playerLookup[user].nameCaseSensitive + " has finished!")
-                                    else:
-                                        currentChat.message(playerLookup[user].hasCollected())
-                                redraw = True
-                            elif command[0] == "!quit":
-                                playerLookup[user].fail("quit")
-                                redraw = True
-                                currentChat.message(playerLookup[user].nameCaseSensitive + " has quit.")
-                        elif playerLookup[user].status == "done":
-                            if command[0] == "!unfinish":
-                                playerLookup[user].unfinish()
-                                redraw = True
-                                currentChat.message(user+" has been unfinished.")
-                        if user not in admins:
-                            if command[0] == "!whitelist" and len(command) == 2:
-                                if command[1] in blacklist:
-                                    currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
-                                elif command[1] not in updaters:
-                                    updaters.append(command[1])
-                                    pushUpdaters()
-                                    currentChat.message(command[1] + " is now an updater.")
-                                else:
-                                    currentChat.message(command[1] + " is already an updater.")
-                            elif command[0] == "!unwhitelist" and len(command) == 2:
-                                if command[1] in updaters:
-                                    updaters.remove(command[1])
-                                    pushUpdaters()
-                                    currentChat.message(command[1] + " is no longer an updater.")
-                                else:
-                                    currentChat.message(command[1] + " is already not an updater.")
+                            except ValueError:
+                                pass
+                        
+                        if command[0] == "!quit" and playerLookup[user].status == "live":
+                            playerLookup[user].fail("quit", startTime)
+                            redraw = True
+                            currentChat.message(playerLookup[user].nameCaseSensitive + " has quit.")
+                        if command[0] == "!rejoin" and playerLookup[user].status != "live":
+                            if playerLookup[user].status == "done":
+                                playerLookup[user].collects = 601
+                            playerLookup[user].status = "live"
+                            redraw = True
+                            currentChat.message(playerLookup[user].nameCaseSensitive +" has rejoined the race.")          
 
                     #--------------------updater commands----------------------
-                    if ((user in updaters) or (ismod==True)) and (user not in blacklist):
-                        if command[0] == "!add":
-                            if len(command) == 3:
-                                if command[1] in playerLookup.keys():
-                                    player = command[1]
-                                    if playerLookup[player].status == "live":
-                                        number = int(command[2])
-                                        if 0 <= playerLookup[player].collects + number <= 602:
-                                            playerLookup[player].collects += number
-                                            if playerLookup[player].collects == 602:
-                                                playerLookup[player].finish()
-                                                currentChat.message(playerLookup[player].nameCaseSensitive + " has finished!")
-                                            else:
-                                                currentChat.message(playerLookup[player].hasCollected())
-                                            redraw = True
-                            elif len(command) == 2:
-                                if user not in racers:
-                                    #currentChat.message(user+", you're not a racer! Please specify whose star count you would like to update. (!add odme_ 2)")
-                                    pass
-                        elif command[0] == "!set":
-                            if len(command) == 3:
-                                if command[1] in playerLookup.keys():
-                                    player = command[1]
-                                    if playerLookup[player].status == "live":
-                                        number = int(command[2])
-                                        if 0 <= number <= 602:
-                                            playerLookup[player].collects = number
-                                            if playerLookup[player].collects == 602:
-                                                playerLookup[player].finish()
-                                                currentChat.message(playerLookup[player].nameCaseSensitive + " has finished!")
-                                            else:
-                                                currentChat.message(playerLookup[player].hasCollected())
-                                            redraw = True
+                    if ((user in users.updaters) or (ismod==True)) and (user not in users.blacklist):
+                        if (command[0] == "!add" or command[0] == "!set") and len(command) == 3:
+                            player = command[1]
+                            try:
+                                number = int(command[2])
+                                if player in playerLookup.keys():
+                                    response = ""
+                                    if command[0] == "!add":
+                                        response = playerLookup[player].update(playerLookup[player].collects + number)
+                                    elif command[0] == "!set":
+                                        response = playerLookup[player].update(number)
+                                    if response != "":
+                                        currentChat.message(response)
+                                    redraw = True
+                            except ValueError:
+                                pass
 
                     #----------------------admin commands----------------------
-                    if user in admins:
+                    if user in users.admins:
                         if command[0] == "!start":
                             newTime = -1
                             if len(command)==1:
@@ -792,49 +492,35 @@ while not done:
                             else:
                                 currentChat.message("Invalid date format. Must be of this format: 2018-12-29@09:00")
                             if type(newTime) == datetime.datetime:
-                                with open("./resources/startingTime.obj", 'wb') as output:
-                                    pickle.dump(newTime, output, pickle.HIGHEST_PROTOCOL)
                                 startTime = newTime
-                                now = newTime.isoformat().split("T")
-                                now = now[0] + "@" + now[1].split(".")[0]
-                                currentChat.message("The race start time has been set to " + now)
-                                for racer in racers:
-                                    playerLookup[racer].calculateCompletionTime()
+                                with open('settings.json', 'r+') as f:
+                                    j = json.load(f)
+                                    j['start-time'] = startTime.isoformat().split(".")[0]
+                                    f.seek(0)
+                                    json.dump(j, f, indent=4)
+                                    f.truncate()
+                                currentChat.message("The race start time has been set to " + startTime.isoformat().split(".")[0])
+                                for player in playerLookup.keys():
+                                    playerLookup[player].calculateCompletionTime(startTime)
                                 redraw = True
-                        elif command[0] == "!whitelist" and len(command) == 2:
-                            if command[1] in blacklist:
-                                currentChat.message("Sorry, " + command[1] + " is on the blacklist.")
-                            elif command[1] not in updaters:
-                                updaters.append(command[1])
-                                pushUpdaters()
-                                currentChat.message(command[1] + " is now an updater.")
-                            else:
-                                currentChat.message(command[1] + " is already an updater.")
-                        elif command[0] == "!unwhitelist" and len(command) == 2:
-                            if command[1] in updaters:
-                                updaters.remove(command[1])
-                                pushUpdaters()
-                                currentChat.message(command[1] + " is no longer an updater.")
-                            else:
-                                currentChat.message(command[1] + " is already not an updater.")
                         elif command[0] == "!forcequit":
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
                                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                                    playerLookup[player].fail("quit")
+                                    playerLookup[player].fail("quit", startTime)
                                     redraw = True
                                     currentChat.message(command[1] + " has been forcequit.")
                         elif command[0] == "!noshow":
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
-                                playerLookup[player].fail("noshow")
+                                playerLookup[player].fail("noshow", startTime)
                                 redraw = True
                                 currentChat.message(command[1] + " set to No-show.")
                         elif command[0] == "!dq":
                             if len(command) == 2 and command[1] in playerLookup.keys():
                                 player = command[1]
                                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                                    playerLookup[player].fail("disqualified")
+                                    playerLookup[player].fail("disqualified", startTime)
                                     redraw = True
                                     currentChat.message(command[1] + " has been disqualified.")
                         elif command[0] == "!revive":
@@ -842,7 +528,7 @@ while not done:
                                 player = command[1]
                                 playerLookup[player].status = "live"
                                 if playerLookup[player].collects == 602:
-                                    playerLookup[player].unfinish()
+                                    playerLookup[player].collects = 601
                                 redraw = True
                                 currentChat.message(command[1] + " has been revived.")
                         elif command[0] == "!settime":
@@ -856,30 +542,26 @@ while not done:
                                         duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
                                         playerLookup[player].duration = duration
                                         playerLookup[player].completionTime = stringTime
-                                        playerLookup[player].manualDuration()
+                                        playerLookup[player].manualDuration(startTime)
                                         redraw = True
                                         currentChat.message(command[1]+"'s time has been updated.")
                         elif command[0] == "!blacklist" and len(command) == 2:
-                            if command[1] not in blacklist:
-                                blacklist.append(command[1])
-                                pushBlacklist()
-                                if command[1] in updaters:
-                                    updaters.remove(command[1])
-                                    pushUpdaters()
+                            if command[1] not in users.blacklist:
+                                users.add(command[1],users.Role.BLACKLIST)
+                                if command[1] in users.updaters:
+                                    users.remove(command[1],users.Role.UPDATER)
                                 currentChat.message(command[1] + " has been blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already blacklisted.")
                         elif command[0] == "!unblacklist" and len(command) == 2:
-                            if command[1] in blacklist:
-                                blacklist.remove(command[1])
-                                pushBlacklist()
+                            if command[1] in users.blacklist:
+                                users.remove(command[1],users.Role.BLACKLIST)
                                 currentChat.message(command[1] + " is no longer blacklisted.")
                             else:
                                 currentChat.message(command[1] + " is already not blacklisted.")
                         elif command[0] == "!admin" and len(command) == 2:
-                            if command[1] not in admins:
-                                admins.append(command[1])
-                                pushAdmins()
+                            if command[1] not in users.admins:
+                                users.add(command[1],users.Role.ADMIN)
                                 currentChat.message(command[1] + " is now an admin.")
                             else:
                                 currentChat.message(command[1] + " is already an admin.")
@@ -890,7 +572,6 @@ while not done:
                 redraw = False
 
         except Exception as e:
-            print("[!] Exception on line", sys.exc_info()[-1].tb_lineno, ":", e)
-            pass
+            print(traceback.format_exc())
 
 pygame.quit()

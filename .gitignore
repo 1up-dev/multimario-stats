@@ -1,4 +1,10 @@
 settings.txt
+settings.json
 .idea/
 .vscode/
 profiles/
+backup/
+__pycache__/
+multimario-stats.code-workspace
+test.py
+test.json
