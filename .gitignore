@@ -1,10 +1,9 @@
-settings.txt
-settings.json
 .idea/
 .vscode/
-profiles/
-backup/
-__pycache__/
 multimario-stats.code-workspace
+__pycache__/
+profiles/
+backup.json
+settings.json
 test.py
 test.json

@@ -73,4 +73,18 @@ def remove(user, role: Role):
             print("Removed user "+user+".")
     push_all()
 
+def status(user, playerLookup):
+    returnString = user + ": "
+    if user in racersL:
+        returnString += "Racer ("+playerLookup[user].status +"), "
+    if user in admins:
+        returnString += "Admin, "
+    if user in updaters:
+        returnString += "Updater, "
+    if user in blacklist:
+        returnString += "Blacklist, "
+    if returnString == (user + ": "):
+        returnString += "None, "
+    return returnString[0:-2]
+
 load_all()

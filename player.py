@@ -5,20 +5,33 @@ import datetime
 import math
 import chatroom
 import json
+import mode_602
+import mode_1120
 
 class Player:
-    def __init__(self, name, NICK, PASSWORD, debug):
+    def __init__(self, name, NICK, PASSWORD, debug, mode, state_data):
         self.name = name.lower()
         self.nameCaseSensitive = name
         self.corner = (0,0)
-        self.collects = 0
-        if debug:
-            self.collects = random.choice(range(0,602))
-        self.status = "live"
         self.place = 1
-        self.duration = -1
-        self.completionTime = "HH:MM:SS"
-        self.finishTimeAbsolute = None
+        self.mode = int(mode)
+        if state_data == {}:
+            self.collects = 0
+            if debug:
+                self.collects = random.choice(range(0,self.mode))
+            self.status = "live"
+            self.duration = -1
+            self.completionTime = "HH:MM:SS"
+            self.finishTimeAbsolute = None
+        else:
+            self.collects = state_data['score']
+            self.status = state_data['status']
+            self.duration = state_data['duration']
+            self.completionTime = state_data['duration-str']
+            self.finishTimeAbsolute = None
+            if state_data['finishtime'] != '':
+                self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
+        
         try:
             self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
         except pygame.error:
@@ -28,10 +41,10 @@ class Player:
 
     def update(self, count):
         if self.status == "live":
-            if 0 <= count < 602:
+            if 0 <= count < self.mode:
                 self.collects = count
                 return self.hasCollected()
-            elif count == 602:
+            elif count == self.mode:
                 self.collects = count
                 self.finish(self.getStartTime())
                 return self.nameCaseSensitive + " has finished!"
@@ -85,22 +98,27 @@ class Player:
             return datetime.datetime.fromisoformat(raw_time)
 
     def hasCollected(self):
-        tempStars = self.collects
-        game=""
-        buffer=""
-        noun="Star"
-        if tempStars <= 120:
-            game="Super Mario 64"
-        elif tempStars <= 240:
-            game="Super Mario Galaxy"
-            tempStars -= 120
-        elif tempStars <= 360:
-            game="Super Mario Sunshine"
-            tempStars -= 240
-            noun="Shine"
-        elif tempStars <= 602:
-            game="Super Mario Galaxy 2"
-            tempStars -= 360
-        if tempStars != 1:
-            buffer = "s"
-        return self.nameCaseSensitive + " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
+        tmp = ""
+        if self.mode == 602:
+            tmp = mode_602.collected(self.collects)
+        elif self.mode == 1120:
+            tmp = mode_1120.collected(self.collects)
+        return self.nameCaseSensitive + tmp
+    
+    def backup(self):
+        p = {}
+        p['score'] = self.collects
+        p['status'] = self.status
+        p['duration'] = self.duration
+        p['duration-str'] = self.completionTime
+        if type(self.finishTimeAbsolute) == datetime.datetime:
+            p['finishtime'] = self.finishTimeAbsolute.isoformat().split(".")[0]
+        else:
+            p['finishtime'] = ""
+        
+        with open('backup.json', 'r+') as f:
+            j = json.load(f)
+            j[self.name] = p
+            f.seek(0)
+            json.dump(j, f, indent=4)
+            f.truncate()
