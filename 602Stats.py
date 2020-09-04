@@ -1,23 +1,14 @@
-import socket
-import math
-import sys
-import pygame
 import datetime
-import pickle
-import random
 import json
 import traceback
-import requests
-import urllib
 import os
-import time
 import threading
+import pygame
+import users
 import chatroom
-import srl
 import twitch
 import player
-import google_sheets
-import users
+import srl
 import mode_602
 import mode_1120
 
@@ -39,19 +30,18 @@ with open('settings.json', 'r') as f:
     NICK = j['bot-twitch-username']
     PASSWORD = j['bot-twitch-auth']
     if debug:
-        CHANNEL = "#" + j['test-chat']
+        CHANNEL = j['test-chat']
     else:
-        CHANNEL = "#" + j['main-chat']
+        CHANNEL = j['main-chat']
     debug = json.loads(j['debug'].lower())
     startTime = datetime.datetime.fromisoformat(j['start-time'])
     use_backups = json.loads(j['use-player-backups'].lower())
     mode = j['mode']
-
-twitch.fetchProfiles(users.racersL)
+    extra_chats = j['extra-chat-rooms']
 
 #---------------player object assignments--------------
 playerLookup = {}
-print("Joining Twitch channels, please wait...", end="", flush=True)
+print("Joining Twitch channels, please wait... ", end="", flush=True)
 
 j = {}
 if not os.path.isfile("backup.json"):
@@ -62,7 +52,7 @@ try:
         j = json.load(f)
 except Exception as e:
     print(traceback.format_exc())
-       
+
 if use_backups and j != {}:
     for racer in users.racersCS:
         state_data = {}
@@ -73,7 +63,24 @@ else:
     for racer in users.racersCS:
         playerLookup[racer.lower()] = player.Player(racer, NICK, PASSWORD, debug, mode, {})
 
-print(" Done.")
+#------------create and start irc threads------------
+chat_pool = []
+for player in playerLookup.keys():
+    chat_pool.append(playerLookup[player].chat)
+for e in extra_chats:
+    e = e.lower()
+    if e not in users.racersL:
+        chat_pool.append(chatroom.ChatRoom(e, NICK, PASSWORD))
+    else:
+        print("skipping extra channel "+e+" which is already a racer")
+for c in chat_pool:
+    t = threading.Thread(target=fetchIRC, args=(c,))
+    t.daemon = True
+    t.start()
+#SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat, playerLookup,))
+#SRL.start()
+print("Done.")
+
 #---------------------pygame setup----------------------
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
@@ -81,27 +88,10 @@ pygame.display.set_caption("Multi-Mario Stats Program")
 pygame.display.flip()
 redraw = True
 
-#------------create and start irc threads------------
-for player in playerLookup.keys():
-    room = playerLookup[player].chat
-    t = threading.Thread(target=fetchIRC, args=(room,))
-    t.start()
-
-mainChat = chatroom.ChatRoom(CHANNEL, NICK, PASSWORD)
-t = threading.Thread(target=fetchIRC, args=(mainChat,))
-t.start()
-#SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat,))
-#SRL.start()
 #--------------------main bot loop--------------------
 done = False
 while not done:
-    for i in range(0, len(users.racersL)+1):
-
-        if i == len(users.racersL):
-            currentChat = mainChat
-        else:
-            currentChat = playerLookup[users.racersL[i]].chat
-
+    for currentChat in chat_pool:
         try:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

@@ -37,7 +37,7 @@ class Player:
         except pygame.error:
             self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
         time.sleep(1)
-        self.chat = chatroom.ChatRoom("#"+self.name, NICK, PASSWORD)
+        self.chat = chatroom.ChatRoom(self.name, NICK, PASSWORD)
 
     def update(self, count):
         if self.status == "live":

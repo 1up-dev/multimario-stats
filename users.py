@@ -39,6 +39,7 @@ def load_all():
     racersL = []
     for racer in racersCS:
         racersL.append(racer.lower())
+    twitch.fetchProfiles(racersL)
 
 def push_all():
     with open('users.json','w') as f:

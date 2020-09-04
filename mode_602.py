@@ -64,30 +64,24 @@ def draw(screen, playerLookup):
         if len(sortedRacers) == 0:
             sortedRacers.append(key)
         elif playerLookup[key].collects == 602:
-            added = False
             for index, racer in enumerate(sortedRacers):
-                if added:
-                    pass
-                elif playerLookup[racer].collects < 602:
+                if playerLookup[racer].collects < 602:
                     sortedRacers.insert(index, key)
-                    added = True
+                    break
                 elif playerLookup[key].duration < playerLookup[racer].duration:
                     sortedRacers.insert(index, key)
-                    added = True
+                    break
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
-                    added = True
+                    break
         else:
-            added = False
             for index, racer in enumerate(sortedRacers):
-                if added:
-                    pass
-                elif playerLookup[key].collects >= playerLookup[racer].collects:
+                if playerLookup[key].collects >= playerLookup[racer].collects:
                     sortedRacers.insert(index, key)
-                    added = True
+                    break
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
-                    added = True
+                    break
 
     #---------place number assignments--------
     for index, racer in enumerate(sortedRacers):
