@@ -13,22 +13,28 @@ def load_all():
     with open('settings.json','r') as f:
         j = json.load(f)
         debug = json.loads(j['debug'].lower())
-        test_racers = j['test-racers-short']
+        use_short_list = json.loads(j['use-short-list'].lower())
     
-    if not debug:
-        twitch.updateUsernamesByID()
+    #twitch.updateUsernamesByID()
 
     with open('users.json','r') as f:
         j = json.load(f)
-        global admins, blacklist, updaters
+        global admins, blacklist, updaters, test_racers
         admins = j['admins']
         blacklist = j['blacklist']
         updaters = j['updaters']
+        test_racers = j['debug-racers']
     
     #load racers
     global racersCS
     if debug:
-        racersCS = list(test_racers.keys())
+        if use_short_list:
+            tmp = {}
+            for i, key in enumerate(test_racers.keys()):
+                if i >= 38:
+                    break
+                tmp[key] = test_racers[key]
+        racersCS = list(tmp.keys())
     else:
         racersCS = google_sheets.getRacers()
         for r in racersCS:
@@ -43,7 +49,7 @@ def load_all():
 
 def push_all():
     with open('users.json','w') as f:
-        j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters}
+        j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters, 'debug-racers': test_racers}
         json.dump(j, f, indent=4)
 
 def add(user, role: Role):
@@ -77,7 +83,7 @@ def remove(user, role: Role):
 def status(user, playerLookup):
     returnString = user + ": "
     if user in racersL:
-        returnString += "Racer ("+playerLookup[user].status +"), "
+        returnString += "Racer ("+playerLookup[user].status +", "+ playerLookup[user].collects +"), "
     if user in admins:
         returnString += "Admin, "
     if user in updaters:

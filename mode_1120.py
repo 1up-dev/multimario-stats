@@ -1,5 +1,6 @@
 import pygame
 import math
+import sort
 
 star  = pygame.image.load('./resources/star.png')
 shine = pygame.image.load('./resources/shine.png')
@@ -10,11 +11,17 @@ smsBG = pygame.image.load('./resources/sms.png')
 smoBG = pygame.image.load('./resources/smo.png')
 finishBG = pygame.image.load('./resources/finish_1120.png')
 
+total = 1120
 
+#slots = [
+    #(10,290),(407,290),(804,290),(1201,290),
+    #(10,495),(407,495),(804,495),(1201,495),
+    #(10,700),(407,700),(804,700),(1201,700),(1600,900)
+#] #387 x 175 scorecards
 slots = [
-    (10,290),(407,290),(804,290),(1201,290),
-    (10,495),(407,495),(804,495),(1201,495),
-    (10,700),(407,700),(804,700),(1201,700),(1600,900)
+             (407,290),(804,290),
+    (200,495),(607,495),(1014,495),
+    (200,700),(607,700),(1014,700),(1600,900)
 ] #387 x 175 scorecards
 
 def collected(tempStars):
@@ -41,53 +48,14 @@ def getFont(size):
 
 def draw(screen, playerLookup):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
+    sortedRacers = sort.sort(playerLookup)
 
-    #------sorting runners for display------
-    sortedRacers = []
-    for key in playerLookup:
-        if len(sortedRacers) == 0:
-            sortedRacers.append(key)
-        elif playerLookup[key].collects == 602:
-            for index, racer in enumerate(sortedRacers):
-                if playerLookup[racer].collects < 602:
-                    sortedRacers.insert(index, key)
-                    break
-                elif playerLookup[key].duration < playerLookup[racer].duration:
-                    sortedRacers.insert(index, key)
-                    break
-                elif index == len(sortedRacers)-1:
-                    sortedRacers.append(key)
-                    break
-        else:
-            for index, racer in enumerate(sortedRacers):
-                if playerLookup[key].collects >= playerLookup[racer].collects:
-                    sortedRacers.insert(index, key)
-                    break
-                elif index == len(sortedRacers)-1:
-                    sortedRacers.append(key)
-                    break
-
-    #---------place number assignments--------
-    for index, racer in enumerate(sortedRacers):
-        if index == 0:
-            playerLookup[racer].place = 1
-        else:
-            current = playerLookup[racer]
-            previous = playerLookup[sortedRacers[index-1]]
-            if current.collects != 1120:
-                if current.collects == previous.collects:
-                    current.place = previous.place
-                else:
-                    playerLookup[racer].place = index+1
-            else:
-                playerLookup[racer].place = index+1
-
-    #------------slot assignments-----------
+    #1120 fall 2020 slots
     racerIndex=0
     for s in range(0,len(sortedRacers)):
         if s==-1: #leaving empty slots for spacing
             pass
-        elif racerIndex < 12:
+        elif racerIndex < 8:
             playerLookup[sortedRacers[racerIndex]].corner = slots[s]
             racerIndex+=1
         else:
@@ -102,12 +70,6 @@ def draw(screen, playerLookup):
 
         score = currentPlayer.collects
         if currentPlayer.status == "live":
-            # if currentPlayer.place <=3:
-            #     completion = getFont(16).render(str("Completion: {0}%".format(math.floor((score/602)*100))), 1, (239,195,0))
-            # else:
-            #     completion = getFont(16).render(str("Completion: {0}%".format(math.floor((score/602)*100))), 1, (140,140,156))
-            # screen.blit(completion, (62+currentPlayer.corner[0], 32+currentPlayer.corner[1]))
-
             smocount = 0
             smscount = 0
             sm64count = 0
@@ -191,21 +153,21 @@ def draw(screen, playerLookup):
             quitTag = getFont(70).render("Quit", 1, (255, 0, 0))
             screen.blit(quitTag, (130+currentPlayer.corner[0], 55+currentPlayer.corner[1]))
 
-            label = getFont(24).render("Completion: "+str(score)+"/1120 in "+currentPlayer.completionTime, 1, (220,220,220))
+            label = getFont(24).render("Completion: "+str(score)+"/"+str(total)+" in "+currentPlayer.completionTime, 1, (220,220,220))
             screen.blit(label, (50+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "disqualified":    #shows disqualified tag
             forfeitTag = getFont(50).render("Disqualified", 1, (255, 0, 0))
             screen.blit(forfeitTag, (80+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
 
-            label = getFont(24).render("Completion: "+str(score)+"/1120", 1, (220,220,220))
+            label = getFont(24).render("Completion: "+str(score)+"/"+str(total), 1, (220,220,220))
             screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
         elif currentPlayer.status == "noshow":    #shows no-show tag
             forfeitTag = getFont(50).render("No-Show", 1, (255, 0, 0))
             screen.blit(forfeitTag, (110+currentPlayer.corner[0], 70+currentPlayer.corner[1]))
 
-            label = getFont(24).render("Completion: "+str(score)+"/1120", 1, (220,220,220))
+            label = getFont(24).render("Completion: "+str(score)+"/"+str(total), 1, (220,220,220))
             screen.blit(label, (100+currentPlayer.corner[0], 140+currentPlayer.corner[1]))
 
 

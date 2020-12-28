@@ -33,10 +33,12 @@ class Player:
                 self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
         
         try:
-            self.profile = pygame.transform.scale(pygame.image.load("./profiles/{0}.png".format(name)), (60,60))
+            #self.profile = pygame.transform.scale(pygame.image.load(f"./profiles/{self.name}.png"), (60,60))
+            self.profile = pygame.image.load(f"./profiles/{self.name}.png")
         except pygame.error:
-            self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
-        time.sleep(1)
+            print(name)
+            #self.profile = pygame.transform.scale(pygame.image.load("./resources/error.png"), (60,60))
+            self.profile = pygame.image.load("./resources/error.png")
         self.chat = chatroom.ChatRoom(self.name, NICK, PASSWORD)
 
     def update(self, count):
@@ -66,7 +68,6 @@ class Player:
         extraHours=""
         if len(delta)==1:
             extraHours = delta[0]
-            pass
         elif len(delta)==2:
             days = delta[0]
             days = int(days)

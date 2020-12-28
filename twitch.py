@@ -76,11 +76,19 @@ def updateUsernamesByID():
         admins = j['admins']
         updaters = j['updaters']
         blacklist = j['blacklist']
+        test_racers = j['debug-racers']
+        
     admins_new = updateSet(admins)
     updaters_new = updateSet(updaters)
     blacklist_new = updateSet(blacklist)
+    racers_new = updateSet(test_racers)
+    if (admins_new is None) or (updaters_new is None) or (blacklist_new is None) or (racers_new is None):
+        print("api returned none or error, not updating usernames.")
+        return
+    
     with open('users.json','w') as f:
         j['admins'] = admins_new
         j['updaters'] = updaters_new
         j['blacklist'] = blacklist_new
+        j['debug-racers'] = racers_new
         json.dump(j, f, indent=4)

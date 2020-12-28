@@ -10,7 +10,7 @@ class ChatRoom:
         self.channel = "#"+channel
         self.currentSocket = socket.socket()
         self.inputBuffer = ""
-        self.reconnect()
+        #self.reconnect() #allow the host to trigger the first connection
     def message(self, msg):
         try:
             self.currentSocket.send(bytes("PRIVMSG "+self.channel+" :"+msg+"\n", "UTF-8"))
@@ -23,13 +23,11 @@ class ChatRoom:
         self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
         self.currentSocket.send(bytes("JOIN "+self.channel+"\n", "UTF-8"))
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
-        timeNow = datetime.datetime.now().isoformat()[0]
-        #self.message("602 Stats Bot joined "+self.channel+" on "+timeNow)
+        #self.message("602 Stats Bot joined "+self.channel)
         #print("[Twitch IRC] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
             self.currentSocket.send(bytes("PONG tmi.twitch.tv\r\n", "UTF-8"))
-            timeNow = datetime.datetime.now().isoformat()[0]
-            print("[Twitch] "+ timeNow +": Pong attempted.")
+            print("[Twitch IRC] "+ datetime.datetime.now().isoformat()[0] +": Pong attempted.")
         except socket.error:
             print("[Twitch IRC] Socket error when attempting pong.")
