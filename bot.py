@@ -9,6 +9,7 @@ def fetchIRC(thisChat, playerLookup):
         try:
             readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if readbuffer == "": #reconnect on server disconnect
+                print(datetime.datetime.now().isoformat().split(".")[0], "Empty readbuffer so reconnect:", thisChat.channel)
                 thisChat.reconnect()
             thisChat.inputBuffer += readbuffer
             process(thisChat, playerLookup)

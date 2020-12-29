@@ -83,7 +83,7 @@ def remove(user, role: Role):
 def status(user, playerLookup):
     returnString = user + ": "
     if user in racersL:
-        returnString += "Racer ("+playerLookup[user].status +", "+ playerLookup[user].collects +"), "
+        returnString += "Racer ("+playerLookup[user].status +": "+ str(playerLookup[user].collects) +"), "
     if user in admins:
         returnString += "Admin, "
     if user in updaters:
