@@ -67,14 +67,13 @@ def collected(tempStars):
         buffer = "s"
     return " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
 
-def draw(screen, playerLookup):
+def draw(screen, playerLookup, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     sortedRacers = sort.sort(playerLookup)
 
-    timer = drawTimer(screen)
-    timer = timer.split(":")
-    #print(timer[2][0])
-    if timer[2][0] in ['1','3','5','7','9']:
+    #drawTimer(screen)
+    
+    if page == 2:
         slot = 0
         for i, r in enumerate(sortedRacers):
             if 2 < i < 28:

@@ -91,7 +91,7 @@ settings.doQuit = False
 settings.redraw = True
 
 done = False
-count = 100
+count = 0
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -99,15 +99,20 @@ while not done:
     if settings.doQuit == True:
         done = True
     
-    if settings.redraw == True:
-        screen = draw.draw(screen, mode, playerLookup)
-        settings.redraw = False
-    elif count >= 100:
-        screen = draw.draw(screen, mode, playerLookup)
+    if count <= 120:
+        #draw page 1: 12 seconds
+        if count == 0 or settings.redraw == True:
+            screen = draw.draw(screen, mode, playerLookup, 1)
+            settings.redraw = False
+    else:
+        #draw page 2: 8 seconds
+        if count == 121 or settings.redraw == True:
+            screen = draw.draw(screen, mode, playerLookup, 2)
+            settings.redraw = False
+    count += 1
+    if count > 200:
         count = 0
     draw.drawTimer(screen)
-
     time.sleep(0.1)
-    count += 1
 
 pygame.quit()
