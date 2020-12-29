@@ -72,9 +72,9 @@ for player in playerLookup.keys():
     chat_pool.append(playerLookup[player].chat)
 
 #join channels in the background with a thread
-# t = threading.Thread(target=threadSpawner, args=(chat_pool,))
-# t.daemon = True
-# t.start()
+t = threading.Thread(target=threadSpawner, args=(chat_pool,))
+t.daemon = True
+t.start()
 
 #SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat, playerLookup,))
 #SRL.start()
