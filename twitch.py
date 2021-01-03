@@ -76,7 +76,7 @@ def updateUsernamesByID():
         admins = j['admins']
         updaters = j['updaters']
         blacklist = j['blacklist']
-        test_racers = j['debug-racers']
+        test_racers = j['test-racers']
         
     admins_new = updateSet(admins)
     updaters_new = updateSet(updaters)
@@ -90,5 +90,5 @@ def updateUsernamesByID():
         j['admins'] = admins_new
         j['updaters'] = updaters_new
         j['blacklist'] = blacklist_new
-        j['debug-racers'] = racers_new
+        j['test-racers'] = racers_new
         json.dump(j, f, indent=4)

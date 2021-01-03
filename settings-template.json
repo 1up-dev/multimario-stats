@@ -1,0 +1,17 @@
+{
+    "debug": true,
+    "mode": "602",
+    "use-player-backups": true,
+    "start-time": "2020-12-26T19:05:00",
+    "bot-twitch-username": "",
+    "bot-twitch-auth": "oauth:",
+    "extra-chat-rooms": [
+        "602race",
+        "Odme_"
+    ],
+    "srl-username": "",
+    "srl-auth": "",
+    "twitch-api-clientid": "",
+    "twitch-api-auth": "",
+    "google-api-key": ""
+}

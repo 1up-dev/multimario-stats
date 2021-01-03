@@ -1,17 +1,27 @@
 # 602Stats
-This is the program that runs the scoreboard and Twitch chat bot for [The 602 Race](https://docs.google.com/spreadsheets/d/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/).  
-See [this video archive](https://www.twitch.tv/videos/356727983) from December 2018 for an example of it in use.  
-![Example](https://i.imgur.com/vZSinTe.jpg)
+This is the program that runs the scoreboard and Twitch chat bot for [The 602 Race](https://docs.google.com/spreadsheets/d/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/) and other Multi-Mario endurance races.  
+See [this video archive](https://www.twitch.tv/videos/857024553) from December 2020 for an example of it in use.  
+![Example](https://i.imgur.com/SrzvvD1.jpeg)
 
 ## What is the 602 Race?  
->The 602 Race is a race to 100% completion of four 3D Super Mario games, for a total of 602 stars.  
->The four games in order are:  Super Mario 64: 120 Stars, Super Mario Galaxy: 120 Stars, Super Mario Sunshine: 120 Shines, and Super Mario Galaxy 2: 242 Stars.
-  
-## Stats stream bot commands:
+>The 602 Race is an endurance race to 100% completion of four 3D Super Mario games, with a total of 602 Stars to be collected.  
+>The four games in order are: Super Mario 64: 120 Stars, Super Mario Galaxy: 120 Stars, Super Mario Sunshine: 120 Shines, and Super Mario Galaxy 2: 242 Stars.
+
+## Technical info
+- Rename `settings-template.json` to `settings.json` and fill out the fields before running.
+- Running the program will make the bot active in the Twitch chats of all the racers & the extra chat rooms specified in settings.json.
+- The Twitch username and password (authentication token) for the bot are pulled from settings.json. Get the authentication token here: http://twitchapps.com/tmi/.  
+- The Twitch developer app Client-ID is for API requests, get it here: https://dev.twitch.tv/dashboard/apps.  
+- The Google API Key is to get the list of racers from the 602 Race spreadsheet. Get it here: https://console.developers.google.com/apis/dashboard
+- Setting `"debug": true` in settings.json will have a few effects:
+    - The test racers list from users.json will be used instead of the actual racers list from Google Sheets.
+    - Each racer will be given a random score when the program starts.
+
+## Bot commands:
 ### **Commands for Anyone:**
-#### !status
+#### !roles
 - Shows the roles of the user that sent the command.
-#### !status [twitchname]
+#### !roles [twitchname]
 - Shows the roles of [twitchname]
 
 ### **Commands for Updaters:**
@@ -35,7 +45,7 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 #### !quit
 - Quit the race.
 #### !rejoin
-- Re-enter the race after quitting or finishing.
+- Re-enter the race after quitting or accidentally finishing too early.
 #### !whitelist/!unwhitelist [twitchname]
 - Adds or removes [twitchname] as a star count updater.
   
@@ -55,15 +65,5 @@ See [this video archive](https://www.twitch.tv/videos/356727983) from December 2
 #### !blacklist/!unblacklist [twitchname]
 - Add/remove a user to the updater blacklist, preventing them from updating star counts.
 #### !admin [twitchname]
+- Add a new admin.
   
-## Before you attempt to run the program
-- WARNING: Running the program will join all the Twitch chats specified in racers.txt and make the bot active. Make sure racers.txt has the correct names in it before starting.  
-- The program pulls the Twitch username and password (authentication token) for the bot from settings.json. Get the authentication token from http://twitchapps.com/tmi/.  
-- The Twitch developer app Client-ID is for API requests, get it from https://dev.twitch.tv/dashboard/apps.  
-- The Google API Key is to get the list of racers from the 602 Race spreadsheet. Get it here: https://console.developers.google.com/apis/dashboard
-
-
-## Debug mode
-- Setting "debug" to "true" in settings.json will have a few effects:
-    - The test racers list from settings.json will be used instead of the actual racers list from Google Sheets.
-    - Each racer will be given a random score when the program starts.

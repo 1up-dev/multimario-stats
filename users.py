@@ -12,9 +12,11 @@ class Role(Enum):
 def load_all():
     with open('settings.json','r') as f:
         j = json.load(f)
-        debug = json.loads(j['debug'].lower())
-        use_short_list = json.loads(j['use-short-list'].lower())
+        debug = j['debug']
     
+    # TODO spawn a thread to do this since it takes a while?
+    # possible issues since the rest of the program may depend
+    # on the correct users being loaded?
     #twitch.updateUsernamesByID()
 
     with open('users.json','r') as f:
@@ -23,18 +25,19 @@ def load_all():
         admins = j['admins']
         blacklist = j['blacklist']
         updaters = j['updaters']
-        test_racers = j['debug-racers']
+        test_racers = j['test-racers']
     
     #load racers
     global racersCS
     if debug:
-        if use_short_list:
-            tmp = {}
-            for i, key in enumerate(test_racers.keys()):
-                if i >= 38:
-                    break
-                tmp[key] = test_racers[key]
-        racersCS = list(tmp.keys())
+        #code for using less racers
+        # tmp = {}
+        # for i, key in enumerate(test_racers.keys()):
+        #     if i >= 8:
+        #         break
+        #     tmp[key] = test_racers[key]
+        # test_racers = tmp
+        racersCS = list(test_racers.keys())
     else:
         racersCS = google_sheets.getRacers()
         for r in racersCS:
@@ -49,7 +52,7 @@ def load_all():
 
 def push_all():
     with open('users.json','w') as f:
-        j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters, 'debug-racers': test_racers}
+        j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters, 'test-racers': test_racers}
         json.dump(j, f, indent=4)
 
 def add(user, role: Role):
