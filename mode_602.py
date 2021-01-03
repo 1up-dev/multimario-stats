@@ -67,10 +67,8 @@ def collected(tempStars):
         buffer = "s"
     return " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
 
-def draw(screen, playerLookup, page):
+def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    sortedRacers = sort.sort(playerLookup)
-
     #drawTimer(screen)
     
     if page == 2:

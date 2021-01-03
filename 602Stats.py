@@ -14,6 +14,7 @@ import player
 import srl
 import settings
 import draw
+import sort
 from bot import fetchIRC
 
 def threadSpawner(chat_pool):
@@ -31,9 +32,9 @@ with open('settings.json', 'r') as f:
     j = json.load(f)
     NICK = j['bot-twitch-username']
     PASSWORD = j['bot-twitch-auth']
-    debug = json.loads(j['debug'].lower())
+    debug = j['debug']
     settings.startTime = datetime.datetime.fromisoformat(j['start-time'])
-    use_backups = json.loads(j['use-player-backups'].lower())
+    use_backups = j['use-player-backups']
     mode = j['mode']
     extra_chats = j['extra-chat-rooms']
 
@@ -98,16 +99,19 @@ while not done:
             done = True
     if settings.doQuit == True:
         done = True
+
+    if settings.redraw == True:
+        sortedRacers = sort.sort(playerLookup)
     
     if count <= 120:
         #draw page 1: 12 seconds
         if count == 0 or settings.redraw == True:
-            screen = draw.draw(screen, mode, playerLookup, 1)
+            screen = draw.draw(screen, mode, playerLookup, sortedRacers, 1)
             settings.redraw = False
     else:
         #draw page 2: 8 seconds
         if count == 121 or settings.redraw == True:
-            screen = draw.draw(screen, mode, playerLookup, 2)
+            screen = draw.draw(screen, mode, playerLookup, sortedRacers, 2)
             settings.redraw = False
     count += 1
     if count > 200:

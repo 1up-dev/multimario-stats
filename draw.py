@@ -50,8 +50,8 @@ def drawTimer(screen):
     pygame.display.update(r)
     return cur_time
 
-def draw(screen, mode, playerLookup, page):
+def draw(screen, mode, playerLookup, sortedRacers, page):
     if mode == "602":
-        return mode_602.draw(screen,playerLookup, page)
+        return mode_602.draw(screen, playerLookup, sortedRacers, page)
     elif mode == "1120":
         return mode_1120.draw(screen,playerLookup)
