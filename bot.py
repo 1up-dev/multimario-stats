@@ -209,18 +209,26 @@ def process(currentChat, playerLookup):
                         currentChat.message(command[1] + " has been revived.")
                 elif command[0] == "!settime":
                     if len(command) == 3 and command[1] in playerLookup.keys():
-                        player = command[1]
-                        if playerLookup[player].status == "done" or playerLookup[player].status == "quit":
-                            newTime = command[2]
-                            stringTime = command[2]
-                            newTime = newTime.split(":")
-                            if len(newTime) == 3:
-                                duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
-                                playerLookup[player].duration = duration
-                                playerLookup[player].completionTime = stringTime
-                                playerLookup[player].manualDuration(settings.startTime)
-                                settings.redraw = True
-                                currentChat.message(command[1]+"'s time has been updated.")
+                        player = playerLookup[command[1]]
+                        stringTime = command[2]
+                        newTime = command[2].split(":")
+                        if len(newTime) != 3:
+                            currentChat.message("Invalid time string.")
+                            continue
+                        try:
+                            duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
+                        except ValueError:
+                            currentChat.message("Invalid time string.")
+                            continue
+                        if int(newTime[1]) >= 60 or int(newTime[2]) >= 60:
+                            currentChat.message("Invalid time string.")
+                            continue
+                        
+                        player.duration = duration
+                        player.completionTime = stringTime
+                        player.manualDuration(settings.startTime)
+                        settings.redraw = True
+                        currentChat.message(player.nameCaseSensitive+"'s time has been updated.")
                 elif command[0] == "!blacklist" and len(command) == 2:
                     if command[1] not in users.blacklist:
                         users.add(command[1],users.Role.BLACKLIST)
