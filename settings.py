@@ -7,3 +7,5 @@ def init():
     doQuit = False
     global redraw
     redraw = True
+
+init()

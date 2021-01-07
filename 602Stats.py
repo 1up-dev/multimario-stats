@@ -41,15 +41,12 @@ with open('settings.json', 'r') as f:
 #---------------player object assignments--------------
 playerLookup = {}
 j = {}
-# TODO use the correct open arguments to create the file for writing automatically if it doesn't exist
+# create the backup file if it doesn't exist
 if not os.path.isfile("backup.json"):
     with open('backup.json', 'w+') as f:
         json.dump(j, f, indent=4)
-try:
-    with open('backup.json', 'r') as f:
-        j = json.load(f)
-except Exception as e:
-    print(traceback.format_exc())
+with open('backup.json', 'r') as f:
+    j = json.load(f)
 
 if use_backups and j != {}:
     for racer in users.racersCS:
@@ -72,7 +69,7 @@ for e in extra_chats:
 for player in playerLookup.keys():
     chat_pool.append(playerLookup[player].chat)
 
-#join channels in the background with a thread
+#join Twitch channels
 t = threading.Thread(target=threadSpawner, args=(chat_pool,))
 t.daemon = True
 t.start()
@@ -85,11 +82,6 @@ pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats Program")
 pygame.display.flip()
-redraw = True
-
-# TODO why aren't these initialized in settings.py?
-settings.doQuit = False
-settings.redraw = True
 
 done = False
 count = 0
