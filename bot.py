@@ -76,7 +76,7 @@ def process(currentChat, playerLookup):
             # global commands
             if command[0] == "!ping":
                 currentChat.message("Hi. Bot is alive.")
-            if command[0] == "!602commands":
+            if command[0] == "!racecommands":
                 currentChat.message("Command list: https://pastebin.com/d7mPZd13")
             if command[0] == "!roles":
                 if len(command) == 1:
@@ -136,7 +136,7 @@ def process(currentChat, playerLookup):
                     currentChat.message(playerLookup[user].nameCaseSensitive + " has quit.")
 
             # updater commands
-            if ((user in users.updaters) or (ismod==True)) and (user not in users.blacklist):
+            if ((user in users.updaters) or (ismod==True) or (user in users.racersL)) and (user not in users.blacklist):
                 if (command[0] == "!add" or command[0] == "!set") and len(command) == 3:
                     player = command[1]
                     try:
