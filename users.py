@@ -2,6 +2,8 @@ from enum import Enum
 import json
 import twitch
 import google_sheets
+import threading
+import datetime
 
 class Role(Enum):
     ADMIN = 1
@@ -9,46 +11,31 @@ class Role(Enum):
     BLACKLIST = 3
     UPDATER = 4
 
-def load_all():
-    with open('settings.json','r') as f:
-        j = json.load(f)
-        debug = j['debug']
-    
-    # TODO spawn a thread to do this since it takes a while?
-    # possible issues since the rest of the program may depend
-    # on the correct users being loaded?
-    #twitch.updateUsernamesByID()
+def updateUsersByID():
+    print("Updating usernames by id using the Twitch API...")
 
     with open('users.json','r') as f:
         j = json.load(f)
-        global admins, blacklist, updaters, test_racers
-        admins = j['admins']
-        blacklist = j['blacklist']
-        updaters = j['updaters']
-        test_racers = j['test-racers']
+        sets = [ j['admins'], j['updaters'], j['blacklist'], j['test-racers'] ]
     
-    #load racers
-    global racersCS
-    if debug:
-        #code for using less racers
-        # tmp = {}
-        # for i, key in enumerate(test_racers.keys()):
-        #     if i >= 8:
-        #         break
-        #     tmp[key] = test_racers[key]
-        # test_racers = tmp
-        racersCS = list(test_racers.keys())
-    else:
-        racersCS = google_sheets.getRacers()
-        for r in racersCS:
-            if r.lower() not in updaters:
-                add(r.lower(), Role.UPDATER)
-    print("Racers: " + str(racersCS))
-    global racersL
-    racersL = []
-    for racer in racersCS:
-        racersL.append(racer.lower())
-    twitch.fetchProfiles(racersL)
+    for i, s in enumerate(sets):
+        s_new = twitch.updateSet(s)
+        if s_new != None:
+            sets[i] = s_new
+
+    with open('users.json','w') as f:
+        j['admins'] = sets[0]
+        j['updaters'] = sets[1]
+        j['blacklist'] = sets[2]
+        j['test-racers'] = sets[3]
+        json.dump(j, f, indent=4)
+    
+    global admins, updaters, blacklist
+    admins = sets[0]
+    updaters = sets[1]
+    blacklist = sets[2]
+
+    print("Done updating Twitch usernames.")
 
 def push_all():
     with open('users.json','w') as f:
@@ -97,4 +84,51 @@ def status(user, playerLookup):
         returnString += "None, "
     return returnString[0:-2]
 
-load_all()
+
+racersCS, racersL, test_racers, admins, blacklist, updaters = [], [], [], [], [], []
+#global racersCS, racersL, test_racers, admins, blacklist, updaters
+
+with open('settings.json','r') as f:
+    j = json.load(f)
+    debug = j['debug']
+    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
+
+#load racers
+if debug:
+    with open('users.json','r') as f:
+        j = json.load(f)
+        test_racers = j['test-racers']
+
+    #code for using less racers
+    # tmp = {}
+    # for i, key in enumerate(test_racers.keys()):
+    #     if i >= 8:
+    #         break
+    #     tmp[key] = test_racers[key]
+    # racersCS = list(tmp.keys())
+    racersCS = list(test_racers.keys())
+else:
+    racersCS = google_sheets.getRacers()
+print("Racers: " + str(racersCS))
+racersL = []
+for racer in racersCS:
+    racersL.append(racer.lower())
+twitch.fetchProfiles(racersL)
+
+with open('users.json','r') as f:
+    j = json.load(f)
+    admins = j['admins']
+    blacklist = j['blacklist']
+    updaters = j['updaters']
+
+# update usernames by ID if it hasn't been done in the last day
+if (datetime.datetime.now() - last_id_update).total_seconds() > 86400:
+    t = threading.Thread(target=updateUsersByID, args=())
+    t.daemon = True
+    t.start()
+    with open('settings.json', 'r+') as f:
+        j = json.load(f)
+        j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()

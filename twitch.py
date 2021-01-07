@@ -47,48 +47,23 @@ def getTwitchId(user):
         print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
         return None
 
-def updateUsernamesByID():
-    def updateSet(data):
-        updated = {}
-        for user in data:
-            id = data[user]
-            url = "https://api.twitch.tv/helix/users?id="+id
-            headers = {"Client-ID":cId, "Authorization":AUTH}
-            response = requests.get(url, headers=headers)
-            if response.status_code in range(200,300):
-                responseData = json.loads(response.content.decode("UTF-8"))['data']
-                if len(responseData)==0:
-                    print("[API] Twitch id "+id+" does not exist.")
-                else:
-                    newUsername = responseData[0]['login']
-                    updated[newUsername] = id
-                    if user != newUsername:
-                        print("[API] Updated username of Twitch id "+id+": "+user+" -> "+newUsername)
+def updateSet(data):
+    updated = {}
+    for user in data:
+        id = data[user]
+        url = "https://api.twitch.tv/helix/users?id="+id
+        headers = {"Client-ID":cId, "Authorization":AUTH}
+        response = requests.get(url, headers=headers)
+        if response.status_code in range(200,300):
+            responseData = json.loads(response.content.decode("UTF-8"))['data']
+            if len(responseData)==0:
+                print("[API] Twitch id "+id+" does not exist.")
             else:
-                print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-                return None
-        return updated
-
-    print("Updating usernames by id using the Twitch API...")
-    j = {}
-    with open('users.json','r') as f:
-        j = json.load(f)
-        admins = j['admins']
-        updaters = j['updaters']
-        blacklist = j['blacklist']
-        test_racers = j['test-racers']
-        
-    admins_new = updateSet(admins)
-    updaters_new = updateSet(updaters)
-    blacklist_new = updateSet(blacklist)
-    racers_new = updateSet(test_racers)
-    if (admins_new is None) or (updaters_new is None) or (blacklist_new is None) or (racers_new is None):
-        print("api returned none or error, not updating usernames.")
-        return
-    
-    with open('users.json','w') as f:
-        j['admins'] = admins_new
-        j['updaters'] = updaters_new
-        j['blacklist'] = blacklist_new
-        j['test-racers'] = racers_new
-        json.dump(j, f, indent=4)
+                newUsername = responseData[0]['login']
+                updated[newUsername] = id
+                if user != newUsername:
+                    print("[API] Updated username of Twitch id "+id+": "+user+" -> "+newUsername)
+        else:
+            print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
+            return None
+    return updated
