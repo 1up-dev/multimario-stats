@@ -64,8 +64,8 @@ for e in extra_chats:
         chat_pool.append(chatroom.ChatRoom(e, NICK, PASSWORD))
     else:
         print("skipping extra channel "+e+" which is already a racer")
-# for player in playerLookup.keys():
-#     chat_pool.append(playerLookup[player].chat)
+for player in playerLookup.keys():
+    chat_pool.append(playerLookup[player].chat)
 
 #join Twitch channels
 t = threading.Thread(target=threadSpawner, args=(chat_pool,))

@@ -46,7 +46,7 @@ def updateSet(data):
     for user in data:
         id = data[user]
         url = "https://api.twitch.tv/helix/users?id="+id
-        headers = {"Client-ID":client_id, "Authorization":f'OAuth {token}'}
+        headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
         response = requests.get(url, headers=headers)
         if response.status_code in range(200,300):
             responseData = json.loads(response.content.decode("UTF-8"))['data']
@@ -64,7 +64,7 @@ def updateSet(data):
 
 def check_token():
     print("Validating Twitch API token...")
-    r = requests.get('https://id.twitch.tv/oauth2/validate', headers={'Client-ID': client_id, 'Authorization': f'OAuth {token}'})
+    r = requests.get('https://id.twitch.tv/oauth2/validate', headers={'Client-ID': client_id, 'Authorization': f'Bearer {token}'})
     #print(r.json())
     if r.status_code != 200:
         print("Token invalid. Requesting a new one...")
