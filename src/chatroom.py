@@ -23,7 +23,7 @@ class ChatRoom:
         self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
         self.currentSocket.send(bytes("JOIN "+self.channel+"\n", "UTF-8"))
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
-        #self.message("602 Stats Bot joined "+self.channel)
+        #self.message("Multimario Stats Bot joined "+self.channel)
         #print("[Twitch IRC] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:

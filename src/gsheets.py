@@ -33,4 +33,3 @@ def getRacers():
                 print("[!] Can't request from Google Sheets API. Giving up.")
                 success=True
     return sheetRacers
-
