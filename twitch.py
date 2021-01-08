@@ -3,17 +3,12 @@ import json
 import urllib
 import os
 
-with open('settings.json', 'r') as f:
-    j = json.load(f)
-    AUTH = "Bearer " + j['twitch-api-auth']
-    cId = j['twitch-api-clientid']
-
 # Uses the Twitch API to fetch profile pictures of racers
 def fetchProfiles(users):
     for user in users:
         if not os.path.isfile("./profiles/"+user+".png"):
             url = "https://api.twitch.tv/helix/users?login="+user
-            headers = {"Client-ID":cId, "Authorization":AUTH}
+            headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
             response = requests.get(url, headers=headers)
             if response.status_code in range(200,300):
                 responseData = json.loads(response.content.decode("UTF-8"))['data']
@@ -27,12 +22,11 @@ def fetchProfiles(users):
                     print("[API] Fetched profile of Twitch user "+user+".")
             else:
                 print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-                return None
     return
 
 def getTwitchId(user):
     url = "https://api.twitch.tv/helix/users?login="+user
-    headers = {"Client-ID":cId, "Authorization":AUTH}
+    headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
     response = requests.get(url, headers=headers)
     if response.status_code in range(200,300):
         responseData = json.loads(response.content.decode("UTF-8"))['data']
@@ -52,7 +46,7 @@ def updateSet(data):
     for user in data:
         id = data[user]
         url = "https://api.twitch.tv/helix/users?id="+id
-        headers = {"Client-ID":cId, "Authorization":AUTH}
+        headers = {"Client-ID":client_id, "Authorization":f'OAuth {token}'}
         response = requests.get(url, headers=headers)
         if response.status_code in range(200,300):
             responseData = json.loads(response.content.decode("UTF-8"))['data']
@@ -67,3 +61,38 @@ def updateSet(data):
             print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
             return None
     return updated
+
+def check_token():
+    print("Validating Twitch API token...")
+    r = requests.get('https://id.twitch.tv/oauth2/validate', headers={'Client-ID': client_id, 'Authorization': f'OAuth {token}'})
+    #print(r.json())
+    if r.status_code != 200:
+        print("Token invalid. Requesting a new one...")
+        new_token()
+    elif r.json()['expires_in'] < 604800:
+        print("Old token. Requesting a new one...")
+        #token expires in < 1 week
+        new_token()
+    else:
+        print("Token is valid.")
+
+def new_token():
+    r2 = requests.post('https://id.twitch.tv/oauth2/token', data={'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
+    #print(r2.json())
+    global token
+    token = r2.json()['access_token']
+    with open('settings.json', 'r+') as f:
+        j = json.load(f)
+        j['twitch-api-token'] = token
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()
+    print("New token received.")
+
+with open('settings.json', 'r') as f:
+    j = json.load(f)
+    token = j['twitch-api-token']
+    client_id = j['twitch-api-clientid']
+    client_secret = j['twitch-api-secret']
+
+check_token()

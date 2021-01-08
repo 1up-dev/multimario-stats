@@ -12,7 +12,8 @@
     "srl-username": "",
     "srl-auth": "",
     "twitch-api-clientid": "",
-    "twitch-api-auth": "",
+    "twitch-api-secret": "",
+    "twitch-api-token": "",
     "last-id-update": "2021-01-06T09:00:00",
     "google-api-key": ""
 }
