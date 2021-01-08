@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import twitch
-import google_sheets
+import gsheets
 import threading
 import datetime
 
@@ -108,7 +108,7 @@ if debug:
     # racersCS = list(tmp.keys())
     racersCS = list(test_racers.keys())
 else:
-    racersCS = google_sheets.getRacers()
+    racersCS = gsheets.getRacers()
 print("Racers: " + str(racersCS))
 racersL = []
 for racer in racersCS:

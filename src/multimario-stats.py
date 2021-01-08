@@ -79,16 +79,16 @@ t.start()
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats Program")
-pygame.display.flip()
 
-done = False
 count = 0
-while not done:
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+            pygame.quit()
+            break
     if settings.doQuit == True:
-        done = True
+        pygame.quit()
+        break
 
     if settings.redraw == True:
         sortedRacers = sort.sort(playerLookup)
@@ -108,5 +108,3 @@ while not done:
         count = 0
     draw.drawTimer(screen)
     time.sleep(0.1)
-
-pygame.quit()
