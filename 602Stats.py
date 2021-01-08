@@ -13,13 +13,13 @@ import srl
 import settings
 import draw
 import sort
-from bot import fetchIRC
+import bot
 
 def threadSpawner(chat_pool):
     print("Joining Twitch channels...")
     for c in chat_pool:
         c.reconnect()
-        t = threading.Thread(target=fetchIRC, args=(c,playerLookup))
+        t = threading.Thread(target=bot.fetchIRC, args=(c,playerLookup))
         t.daemon = True
         t.start()
         time.sleep(1)
