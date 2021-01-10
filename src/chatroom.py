@@ -1,5 +1,6 @@
 import socket
 import datetime
+import time
 
 class ChatRoom:
     def __init__(self, channel, nick, password):
@@ -17,6 +18,7 @@ class ChatRoom:
         except socket.error:
             print("[Twitch IRC] Socket error.")
     def reconnect(self):
+        self.currentSocket.close()
         self.currentSocket = socket.socket()
         self.currentSocket.connect((self.HOST,self.PORT))
         self.currentSocket.send(bytes("PASS "+self.PASSWORD+"\n", "UTF-8"))
@@ -27,7 +29,7 @@ class ChatRoom:
         #print("[Twitch IRC] "+ "Joined Twitch channel "+self.channel+".")
     def pong(self):
         try:
-            self.currentSocket.send(bytes("PONG tmi.twitch.tv\r\n", "UTF-8"))
-            print("[Twitch IRC] "+ datetime.datetime.now().isoformat()[0] +": Pong attempted.")
+            self.currentSocket.send(bytes("PONG :tmi.twitch.tv\r\n", "UTF-8"))
+            print(datetime.datetime.now().isoformat().split(".")[0], "Pong sent:", self.channel)
         except socket.error:
             print("[Twitch IRC] Socket error when attempting pong.")

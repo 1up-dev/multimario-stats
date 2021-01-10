@@ -3,6 +3,7 @@ import json
 import traceback
 import users
 import settings
+import time
 
 def fetchIRC(thisChat, playerLookup):
     while True:
@@ -11,10 +12,7 @@ def fetchIRC(thisChat, playerLookup):
             if readbuffer == "": #reconnect on server disconnect
                 print(datetime.datetime.now().isoformat().split(".")[0], "Empty readbuffer so reconnect:", thisChat.channel)
                 thisChat.reconnect()
-
-            thisChat.inputBuffer += readbuffer
-            lines = thisChat.inputBuffer.split("\n")
-            thisChat.inputBuffer = ""
+            lines = readbuffer.split("\n")
             for line in lines:
                 process_line(line, thisChat, playerLookup)
         except ConnectionResetError:
@@ -26,50 +24,57 @@ def fetchIRC(thisChat, playerLookup):
         except Exception:
             print(datetime.datetime.now().isoformat().split(".")[0], "Unexpected error in", thisChat.channel)
             print(traceback.format_exc())
+            time.sleep(1)
             thisChat.reconnect()
 
 def process_line(line, currentChat, playerLookup):
-    out = ""
-    user = ""
+    if line == "":
+        return
+    #print(line)
     line = line.rstrip().split()
-
+    if len(line) == 0:
+        return
+    
+    user = ""
     ismod = False
     userId = -1
-    if len(line) > 0:
-        if line[0][0] == "@":
-            tags = line.pop(0)
+    if line[0][0] == "@":
+        tags = line.pop(0)
+        tmp8 = tags.split("mod=")
+        if len(tmp8) > 1:
+            if tmp8[1][0] == "1":
+                ismod = True
+        tmp9 = tags.split("user-id=")
+        if len(tmp9) > 1:
+            userId = tmp9[1].split(";")[0]
+    
+    with open(f"irc/{currentChat.channel}.log", 'a') as f:
+        f.write(datetime.datetime.now().isoformat().split(".")[0] + " " + " ".join(line) + "\n")
 
-            tmp8 = tags.split("mod=")
-            if len(tmp8) > 1:
-                if tmp8[1][0] == "1":
-                    ismod = True
-            
-            tmp9 = tags.split("user-id=")
-            if len(tmp9) > 1:
-                userId = tmp9[1].split(";")[0]
-
+    command = []
     for index, word in enumerate(line):
         if index == 0:
             user = word.split('!')[0]
-            user = user[0:24]
+            #user = user[0:24] # what's this for?
+            if user == "PING":
+                currentChat.pong()
+                return
+            # if user.__contains__("."):
+            #     return
+            if len(line) < 4:
+                return
         if index == 3:
-            out += word
-            out = out[1:]
+            if len(word) <= 1:
+                return
+            command.append(word.lower()[1:])
         if index >= 4:
-            out += " " + word
-
-    command = out.lower().split(" ")
-
-    if command[0] == '':
+            command.append(word)
+    
+    
+    #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
+    
+    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit']:
         return
-    elif user == "PING":
-        currentChat.pong()
-        return
-    elif user.__contains__("."):
-        return
-    elif command[0][0] != "!":
-        return
-
     user = user.lower()[1:]
     print("[In chat "+currentChat.channel+"] "+user+":"+str(command))
 

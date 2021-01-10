@@ -79,6 +79,7 @@ t.start()
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats Program")
+pygame.mixer.stop()
 
 count = 0
 while True:
