@@ -15,17 +15,27 @@ import draw
 import sort
 import bot
 
-def threadSpawner(chat_pool):
+def chat_init(playerLookup):
     print("Joining Twitch channels...")
-    for c in chat_pool:
-        c.reconnect()
-        t = threading.Thread(target=bot.fetchIRC, args=(c,playerLookup))
-        t.daemon = True
-        t.start()
-        time.sleep(1)
+    channels = []
+    for c in extra_chats:
+        if c not in users.racersL:
+            channels.append(c)
+        else:
+            print("skipping extra channel", c, "which is already a racer")
+    for c in users.racersL:
+        channels.append(c)
+
+    c = chatroom.ChatRoom(channels, NICK, PASSWORD)
+    c.reconnect()
+    time.sleep(1)
+    
+    t = threading.Thread(target=bot.fetchIRC, args=(c, playerLookup))
+    t.daemon = True
+    t.start()
     print("Done joining Twitch channels.")
 
-#---------loading & processing settings-------------
+# loading & processing settings
 with open('settings.json', 'r') as f:
     j = json.load(f)
     NICK = j['bot-twitch-username']
@@ -36,16 +46,16 @@ with open('settings.json', 'r') as f:
     mode = j['mode']
     extra_chats = j['extra-chat-rooms']
 
-#---------------player object assignments--------------
-playerLookup = {}
-j = {}
 # create the backup file if it doesn't exist
+j = {}
 if not os.path.isfile("backup.json"):
     with open('backup.json', 'w+') as f:
         json.dump(j, f, indent=4)
 with open('backup.json', 'r') as f:
     j = json.load(f)
 
+# player object instantiation
+playerLookup = {}
 if use_backups and j != {}:
     for racer in users.racersCS:
         state_data = {}
@@ -56,31 +66,21 @@ else:
     for racer in users.racersCS:
         playerLookup[racer.lower()] = player.Player(racer, NICK, PASSWORD, debug, mode, {})
 
-#------------set up chat rooms------------
-chat_pool = []
-for e in extra_chats:
-    e = e.lower()
-    if e not in users.racersL:
-        chat_pool.append(chatroom.ChatRoom(e, NICK, PASSWORD))
-    else:
-        print("skipping extra channel "+e+" which is already a racer")
-for player in playerLookup.keys():
-    chat_pool.append(playerLookup[player].chat)
-
-#join Twitch channels
-t = threading.Thread(target=threadSpawner, args=(chat_pool,))
+# join Twitch channels
+t = threading.Thread(target=chat_init, args=(playerLookup,))
 t.daemon = True
 t.start()
 
 #SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat, playerLookup,))
 #SRL.start()
 
-#---------------------pygame setup----------------------
+# pygame setup
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats Program")
 pygame.mixer.stop()
 
+# main display loop
 count = 0
 while True:
     for event in pygame.event.get():
