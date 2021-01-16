@@ -16,8 +16,8 @@ smsBG = pygame.image.load('./resources/sms.png')
 smg2BG = pygame.image.load('./resources/smg2.png')
 finishBG = pygame.image.load('./resources/finish_602.png')
 
-total = 602
-star_counts = (120,120,120,242)
+total = 246
+star_counts = (70,61,44,71)
 
 #387 x 175 scorecards
 # slots = [
@@ -52,18 +52,18 @@ def collected(tempStars):
     game=""
     buffer=""
     noun="Star"
-    if tempStars <= 120:
+    if tempStars <= 70:
         game="Super Mario 64"
-    elif tempStars <= 240:
+    elif tempStars <= 131:
         game="Super Mario Galaxy"
-        tempStars -= 120
-    elif tempStars <= 360:
+        tempStars -= 70
+    elif tempStars <= 175:
         game="Super Mario Sunshine"
-        tempStars -= 240
+        tempStars -= 131
         noun="Shine"
-    elif tempStars <= 602:
+    elif tempStars <= 246:
         game="Super Mario Galaxy 2"
-        tempStars -= 360
+        tempStars -= 175
     if tempStars != 1:
         buffer = "s"
     return " now has " + str(tempStars) + " "+ noun+buffer + " in " + game + "."
@@ -108,36 +108,36 @@ def draw(screen, playerLookup, sortedRacers, page):
         score = currentPlayer.collects
         if currentPlayer.status == "live":
             sm64count = smgcount = smscount = smg2count = 0
-            if score < 120:
+            if score < 70:
                 bg = sm64BG
                 sm64count = score
-            elif score < 240:
+            elif score < 131:
                 bg = smgBG
-                sm64count = 120
-                smgcount = score-120
-            elif score < 360:
+                sm64count = 70
+                smgcount = score-70
+            elif score < 175:
                 bg = smsBG
-                sm64count = 120
-                smgcount = 120
-                smscount = score-240
-            elif score < 602:
+                sm64count = 70
+                smgcount = 61
+                smscount = score-131
+            elif score < 246:
                 bg = smg2BG
-                sm64count = 120
-                smgcount = 120
-                smscount = 120
-                smg2count = score-360
+                sm64count = 70
+                smgcount = 61
+                smscount = 44
+                smg2count = score-175
             img = pygame.transform.scale(bg,(310,138))
             screen.blit(img, (corner[0]+2, corner[1]+2))
 
             smallBar = 110 #136
             largeBar = 260 #322
             barHeight = 20
-            sm64length = math.floor((sm64count/120)*smallBar)
+            sm64length = math.floor((sm64count/70)*smallBar)
             #smglength = math.floor((smgcount/120)*largeBar)
-            smglength = math.floor((smgcount/120)*smallBar)
-            smslength = math.floor((smscount/120)*smallBar)
+            smglength = math.floor((smgcount/61)*smallBar)
+            smslength = math.floor((smscount/44)*smallBar)
             #smg2length = math.floor((smg2count/242)*largeBar)
-            smg2length = math.floor((smg2count/242)*smallBar)
+            smg2length = math.floor((smg2count/71)*smallBar)
 
             # base boxes
             s = pygame.Surface((smallBar+4, barHeight), pygame.SRCALPHA)

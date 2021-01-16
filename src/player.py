@@ -7,6 +7,7 @@ import chatroom
 import json
 import mode_602
 import mode_1120
+import mode_246
 
 class Player:
     def __init__(self, name, NICK, PASSWORD, debug, mode, state_data):
@@ -102,7 +103,9 @@ class Player:
             tmp = mode_602.collected(self.collects)
         elif self.mode == 1120:
             tmp = mode_1120.collected(self.collects)
-        return self.nameCaseSensitive + tmp
+        if self.mode == 246:
+            tmp = mode_246.collected(self.collects)
+        return self.nameCaseSensitive + tmp + " (Place: #" + str(self.place) + ")"
     
     def backup(self):
         p = {}

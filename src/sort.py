@@ -2,7 +2,7 @@ def sort(playerLookup):
     for key in playerLookup:
         playerLookup[key].backup()
 
-    #------sorting runners for display------
+    # sorting runners for display
     sortedRacers = []
     for key in playerLookup:
         if len(sortedRacers) == 0:
@@ -27,7 +27,7 @@ def sort(playerLookup):
                     sortedRacers.append(key)
                     break
 
-    #---------place number assignments--------
+    # place number assignments
     for index, racer in enumerate(sortedRacers):
         if index == 0:
             playerLookup[racer].place = 1

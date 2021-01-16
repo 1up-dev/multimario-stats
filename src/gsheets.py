@@ -14,6 +14,8 @@ def getRacers():
             url = "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="+api_key
         elif mode == "1120":
             url = "https://sheets.googleapis.com/v4/spreadsheets/1NcNeCpKScarA7BdJCIDf4O7cPf5_7ECN5-IQTIqJsbI/values/A6:A?key="+api_key
+        elif mode == "246":
+            url = "https://sheets.googleapis.com/v4/spreadsheets/1ZVY3-EabTrI1b0XItUCt-lJnk0OtH93yJPfaKJepJzA/values/A6:A?key="+api_key
         response = requests.get(url, headers={})
         tries+=1
         if response.status_code in range(200,300):
