@@ -214,7 +214,6 @@ def draw(screen, playerLookup, sortedRacers, page):
         nameRender = getFont(24).render(str(currentPlayer.nameCaseSensitive), 1, color)
         placeRender = getFont(40).render(str(currentPlayer.place), 1, color)
 
-        # TODO use the get_rect of the name to see if it overlaps with the place get_rect and if it does, decrease the font size for this name
         screen.blit(nameRender, (65+currentPlayer.corner[0], 15+currentPlayer.corner[1]))
         #topright justify the place text
         place_r = placeRender.get_rect(topright=(currentPlayer.corner[0]+304,currentPlayer.corner[1]+5))

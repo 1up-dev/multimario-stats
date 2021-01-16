@@ -58,7 +58,6 @@ def srlThread(channel, twitchChat, playerLookup):
                 racebotMessage = tmp.split("\n")[0][2:].replace("4", "")
                 twitchChat.message("[SRL] RaceBot: "+racebotMessage)
 
-                #TODO check for an eaten message, this doesn't work right now
                 tmp3 = tmp.split("\n")[1]
                 if tmp3.find(":RaceBot!RaceBot") != -1:
                     tmp3 = tmp3.split(":RaceBot!RaceBot")

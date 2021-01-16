@@ -2,6 +2,7 @@
 *.code-workspace
 __pycache__/
 profiles/*
+irc/*
 backup.json
 settings.json
 test.py
