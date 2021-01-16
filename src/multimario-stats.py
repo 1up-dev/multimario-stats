@@ -14,6 +14,7 @@ import settings
 import draw
 import sort
 import bot
+import draw_t
 
 def chat_init(playerLookup):
     print("Joining Twitch channels...")
@@ -107,5 +108,5 @@ while True:
     count += 1
     if count > 200:
         count = 0
-    draw.drawTimer(screen)
+    draw_t.drawTimer(screen)
     time.sleep(0.1)
