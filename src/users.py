@@ -86,7 +86,6 @@ def status(user, playerLookup):
 
 
 racersCS, racersL, test_racers, admins, blacklist, updaters = [], [], [], [], [], []
-#global racersCS, racersL, test_racers, admins, blacklist, updaters
 
 with open('settings.json','r') as f:
     j = json.load(f)
@@ -94,11 +93,13 @@ with open('settings.json','r') as f:
     last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
 
 #load racers
+with open('users.json','r') as f:
+    j = json.load(f)
+    admins = j['admins']
+    blacklist = j['blacklist']
+    updaters = j['updaters']
+    test_racers = j['test-racers']
 if debug:
-    with open('users.json','r') as f:
-        j = json.load(f)
-        test_racers = j['test-racers']
-
     #code for using less racers
     # tmp = {}
     # for i, key in enumerate(test_racers.keys()):
@@ -114,12 +115,6 @@ racersL = []
 for racer in racersCS:
     racersL.append(racer.lower())
 twitch.fetchProfiles(racersL)
-
-with open('users.json','r') as f:
-    j = json.load(f)
-    admins = j['admins']
-    blacklist = j['blacklist']
-    updaters = j['updaters']
 
 # update usernames by ID if it hasn't been done in the last day
 if (datetime.datetime.now() - last_id_update).total_seconds() > 86400:
