@@ -86,8 +86,7 @@ count = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            break
+            settings.doQuit = True
     if settings.doQuit == True:
         pygame.quit()
         break
