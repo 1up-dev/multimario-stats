@@ -5,21 +5,19 @@ import datetime
 import math
 import chatroom
 import json
-import mode_602
-import mode_1120
-import mode_246
+import mode
+import settings
 
 class Player:
-    def __init__(self, name, NICK, PASSWORD, debug, mode, state_data):
+    def __init__(self, name, state_data):
         self.name = name.lower()
         self.nameCaseSensitive = name
         self.corner = (0,0)
         self.place = 1
-        self.mode = int(mode)
         if state_data == {}:
             self.collects = 0
-            if debug:
-                self.collects = random.choice(range(0,self.mode))
+            if settings.debug:
+                self.collects = random.choice(range(0, settings.max_score))
             self.status = "live"
             self.duration = -1
             self.completionTime = "HH:MM:SS"
@@ -37,17 +35,15 @@ class Player:
             self.profile = pygame.image.load(f"./profiles/{self.name}.png")
         except pygame.error:
             self.profile = pygame.image.load("./resources/error.png")
-        
-        self.chat = chatroom.ChatRoom(self.name, NICK, PASSWORD)
 
     def update(self, count):
         if self.status == "live":
-            if 0 <= count < self.mode:
+            if 0 <= count < settings.max_score:
                 self.collects = count
-                return self.hasCollected()
-            elif count == self.mode:
+                return self.nameCaseSensitive + mode.hasCollected(self.collects) + " (Place: #" + str(self.place) + ")"
+            elif count == settings.max_score:
                 self.collects = count
-                self.finish(self.getStartTime())
+                self.finish()
                 return self.nameCaseSensitive + " has finished!"
         return ""
     
@@ -81,31 +77,15 @@ class Player:
         finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
         self.completionTime = finishTime
 
-    def finish(self, startTime):
+    def finish(self):
         self.finishTimeAbsolute = datetime.datetime.now()
-        self.calculateCompletionTime(startTime)
+        self.calculateCompletionTime(settings.startTime)
         self.status = "done"
 
-    def fail(self, status, startTime):
+    def fail(self, status):
         self.finishTimeAbsolute = datetime.datetime.now()
-        self.calculateCompletionTime(startTime)
+        self.calculateCompletionTime(settings.startTime)
         self.status = status
-
-    def getStartTime(self):
-        with open('settings.json','r') as f:
-            j = json.load(f)
-            raw_time = j['start-time']
-            return datetime.datetime.fromisoformat(raw_time)
-
-    def hasCollected(self):
-        tmp = ""
-        if self.mode == 602:
-            tmp = mode_602.collected(self.collects)
-        elif self.mode == 1120:
-            tmp = mode_1120.collected(self.collects)
-        if self.mode == 246:
-            tmp = mode_246.collected(self.collects)
-        return self.nameCaseSensitive + tmp + " (Place: #" + str(self.place) + ")"
     
     def backup(self):
         p = {}

@@ -11,10 +11,10 @@ import chatroom
 import player
 import srl
 import settings
-import draw
 import sort
 import bot
 import draw_t
+import mode
 
 def chat_init(playerLookup):
     print("Joining Twitch channels...")
@@ -41,10 +41,7 @@ with open('settings.json', 'r') as f:
     j = json.load(f)
     NICK = j['bot-twitch-username']
     PASSWORD = j['bot-twitch-auth']
-    debug = j['debug']
-    settings.startTime = datetime.datetime.fromisoformat(j['start-time'])
     use_backups = j['use-player-backups']
-    mode = j['mode']
     extra_chats = j['extra-chat-rooms']
 
 # create the backup file if it doesn't exist
@@ -62,10 +59,10 @@ if use_backups and j != {}:
         state_data = {}
         if racer.lower() in j.keys():
             state_data = j[racer.lower()]
-        playerLookup[racer.lower()] = player.Player(racer, NICK, PASSWORD, debug, mode, state_data)
+        playerLookup[racer.lower()] = player.Player(racer, state_data)
 else:
     for racer in users.racersCS:
-        playerLookup[racer.lower()] = player.Player(racer, NICK, PASSWORD, debug, mode, {})
+        playerLookup[racer.lower()] = player.Player(racer, {})
 
 # join Twitch channels
 t = threading.Thread(target=chat_init, args=(playerLookup,))
@@ -97,12 +94,12 @@ while True:
     if count <= 120:
         #draw page 1: 12 seconds
         if count == 0 or settings.redraw == True:
-            screen = draw.draw(screen, mode, playerLookup, sortedRacers, 1)
+            screen = mode.draw(screen, playerLookup, sortedRacers, 1)
             settings.redraw = False
     else:
         #draw page 2: 8 seconds
         if count == 121 or settings.redraw == True:
-            screen = draw.draw(screen, mode, playerLookup, sortedRacers, 2)
+            screen = mode.draw(screen, playerLookup, sortedRacers, 2)
             settings.redraw = False
     count += 1
     if count > 200:

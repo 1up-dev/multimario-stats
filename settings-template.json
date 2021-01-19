@@ -1,6 +1,10 @@
 {
     "debug": true,
-    "mode": "602",
+    "mode":{
+        "name":"602",
+        "max-score":602,
+        "gsheet":"https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="
+    },
     "use-player-backups": true,
     "start-time": "2020-12-26T19:05:00",
     "bot-twitch-username": "",
