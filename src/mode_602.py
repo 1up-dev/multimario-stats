@@ -70,7 +70,7 @@ def collected(tempStars):
 
 def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    #drawTimer(screen)
+    drawTimer(screen)
     
     if page == 2:
         slot = 0
