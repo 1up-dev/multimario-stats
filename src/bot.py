@@ -1,9 +1,11 @@
 import datetime
 import json
 import traceback
+import time
+import pyautogui
+from pynput.keyboard import Key, Controller
 import users
 import settings
-import time
 
 def fetchIRC(thisChat, playerLookup):
     while True:
@@ -82,7 +84,7 @@ def process_line(line, currentChat, playerLookup):
     
     #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
     
-    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit']:
+    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream']:
         return
     user = user.lower()[1:]
     print("[In chat "+channel+"] "+user+":"+str(command))
@@ -103,16 +105,18 @@ def process_line(line, currentChat, playerLookup):
     # shared commands
     if (user in users.admins) or (user in users.racersL):
         if command[0] == "!whitelist" and len(command) == 2:
-            if command[1] in users.blacklist:
+            subject = command[1].lower()
+            if subject in users.blacklist:
                 currentChat.message(channel, "Sorry, " + command[1] + " is on the blacklist.")
-            elif command[1] not in users.updaters:
-                users.add(command[1],users.Role.UPDATER)
+            elif subject not in users.updaters:
+                users.add(subject,users.Role.UPDATER)
                 currentChat.message(channel, command[1] + " is now an updater.")
             else:
                 currentChat.message(channel, command[1] + " is already an updater.")
         elif command[0] == "!unwhitelist" and len(command) == 2:
-            if command[1] in users.updaters:
-                users.remove(command[1],users.Role.UPDATER)
+            subject = command[1].lower()
+            if subject in users.updaters:
+                users.remove(subject,users.Role.UPDATER)
                 currentChat.message(channel, command[1] + " is no longer an updater.")
             else:
                 currentChat.message(channel, command[1] + " is already not an updater.")
@@ -152,7 +156,7 @@ def process_line(line, currentChat, playerLookup):
     # updater commands
     if ((user in users.updaters) or (ismod==True) or (user in users.racersL)) and (user not in users.blacklist):
         if (command[0] == "!add" or command[0] == "!set") and len(command) == 3:
-            player = command[1]
+            player = command[1].lower()
             try:
                 number = int(command[2])
                 if player in playerLookup.keys():
@@ -194,36 +198,37 @@ def process_line(line, currentChat, playerLookup):
                     playerLookup[player].calculateCompletionTime(settings.startTime)
                 settings.redraw = True
         elif command[0] == "!forcequit":
-            if len(command) == 2 and command[1] in playerLookup.keys():
-                player = command[1]
+            player = command[1].lower()
+            if len(command) == 2 and player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
                     playerLookup[player].fail("quit", settings.startTime)
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been forcequit.")
         elif command[0] == "!noshow":
-            if len(command) == 2 and command[1] in playerLookup.keys():
-                player = command[1]
+            player = command[1].lower()
+            if len(command) == 2 and player in playerLookup.keys():
                 playerLookup[player].fail("noshow", settings.startTime)
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " set to No-show.")
         elif command[0] == "!dq":
-            if len(command) == 2 and command[1] in playerLookup.keys():
-                player = command[1]
+            player = command[1].lower()
+            if len(command) == 2 and player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
                     playerLookup[player].fail("disqualified", settings.startTime)
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been disqualified.")
         elif command[0] == "!revive":
-            if len(command) == 2 and command[1] in playerLookup.keys():
-                player = command[1]
+            player = command[1].lower()
+            if len(command) == 2 and player in playerLookup.keys():
                 if playerLookup[player].status == "done":
                     playerLookup[player].collects -= 1
                 playerLookup[player].status = "live"
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " has been revived.")
         elif command[0] == "!settime":
-            if len(command) == 3 and command[1] in playerLookup.keys():
-                player = playerLookup[command[1]]
+            subject = command[1].lower()
+            if len(command) == 3 and subject in playerLookup.keys():
+                player = playerLookup[subject]
                 stringTime = command[2]
                 newTime = command[2].split(":")
                 if len(newTime) != 3:
@@ -244,24 +249,34 @@ def process_line(line, currentChat, playerLookup):
                 settings.redraw = True
                 currentChat.message(channel, player.nameCaseSensitive+"'s time has been updated.")
         elif command[0] == "!blacklist" and len(command) == 2:
-            if command[1] not in users.blacklist:
-                users.add(command[1],users.Role.BLACKLIST)
-                if command[1] in users.updaters:
-                    users.remove(command[1],users.Role.UPDATER)
+            subject = command[1].lower()
+            if subject not in users.blacklist:
+                users.add(subject,users.Role.BLACKLIST)
+                if subject in users.updaters:
+                    users.remove(subject,users.Role.UPDATER)
                 currentChat.message(channel, command[1] + " has been blacklisted.")
             else:
                 currentChat.message(channel, command[1] + " is already blacklisted.")
         elif command[0] == "!unblacklist" and len(command) == 2:
-            if command[1] in users.blacklist:
-                users.remove(command[1],users.Role.BLACKLIST)
+            subject = command[1].lower()
+            if subject in users.blacklist:
+                users.remove(subject,users.Role.BLACKLIST)
                 currentChat.message(channel, command[1] + " is no longer blacklisted.")
             else:
                 currentChat.message(channel, command[1] + " is already not blacklisted.")
         elif command[0] == "!admin" and len(command) == 2:
-            if command[1] not in users.admins:
-                users.add(command[1],users.Role.ADMIN)
+            subject = command[1].lower()
+            if subject not in users.admins:
+                users.add(subject,users.Role.ADMIN)
                 currentChat.message(channel, command[1] + " is now an admin.")
             else:
                 currentChat.message(channel, command[1] + " is already an admin.")
         elif command[0] == "!debugquit":
+            currentChat.message(channel, "Quitting program.")
             settings.doQuit = True
+        elif command[0] == "!togglestream":
+            #pyautogui.hotkey("ctrl","5")
+            kb = Controller()
+            with kb.pressed(Key.ctrl):
+                kb.tap("5")
+            currentChat.message(channel, "Toggled stream.")
