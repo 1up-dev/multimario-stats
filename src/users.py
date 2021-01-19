@@ -35,6 +35,13 @@ def updateUsersByID():
     updaters = sets[1]
     blacklist = sets[2]
 
+    with open('settings.json', 'r+') as f:
+        j = json.load(f)
+        j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()
+
     print("Done updating Twitch usernames.")
 
 def push_all():
@@ -121,9 +128,3 @@ if (datetime.datetime.now() - last_id_update).total_seconds() > 86400:
     t = threading.Thread(target=updateUsersByID, args=())
     t.daemon = True
     t.start()
-    with open('settings.json', 'r+') as f:
-        j = json.load(f)
-        j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
-        f.seek(0)
-        json.dump(j, f, indent=4)
-        f.truncate()
