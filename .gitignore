@@ -3,6 +3,7 @@
 __pycache__/
 profiles/*
 irc/*
+log/*
 backup.json
 settings.json
 test.py
