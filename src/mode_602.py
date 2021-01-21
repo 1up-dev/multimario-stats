@@ -2,6 +2,7 @@ import pygame
 import math
 import sort
 import datetime
+import settings
 from settings import getFont
 from draw_t import drawTimer
 
@@ -15,9 +16,6 @@ smgBG = pygame.image.load('./resources/smg.png')
 smsBG = pygame.image.load('./resources/sms.png')
 smg2BG = pygame.image.load('./resources/smg2.png')
 finishBG = pygame.image.load('./resources/finish_602.png')
-
-total = 602
-star_counts = (120,120,120,242)
 
 #387 x 175 scorecards
 # slots = [
@@ -154,6 +152,7 @@ def draw(screen, playerLookup, sortedRacers, page):
             r4 = pygame.draw.rect(screen, (150,150,150,254), [190+corner[0]+2, 110+corner[1]+2, smg2length, barHeight-4])
 
             # individual game counts
+            star_counts = (120,120,120,242)
             for i, gme in enumerate([(sm64count,r1),(smgcount,r2),(smscount,r3),(smg2count,r4)]):
                 if gme[0] < star_counts[i]/2:
                     label = getFont(18).render(str(gme[0]), 1, (220,220,220))
@@ -186,7 +185,7 @@ def draw(screen, playerLookup, sortedRacers, page):
         else:
             text = ""
             offset = 0
-            label = getFont(23).render("Completion: "+str(score)+"/"+str(total) +" in "+currentPlayer.completionTime, 1, (220,220,220))
+            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+currentPlayer.completionTime, 1, (220,220,220))
             if currentPlayer.status == "quit":
                 text = "Quit"
             elif currentPlayer.status == "disqualified":
