@@ -2,7 +2,7 @@ import datetime
 import json
 import traceback
 import time
-import pyautogui
+#import pyautogui
 from pynput.keyboard import Key, Controller
 import users
 import settings
