@@ -16,7 +16,7 @@ smgBG = pygame.image.load('./resources/smg.png')
 smsBG = pygame.image.load('./resources/sms.png')
 smg2BG = pygame.image.load('./resources/smg2.png')
 smoBG = pygame.image.load('./resources/smo.png')
-finishBG = pygame.image.load('./resources/finish_602.png')
+finishBG = pygame.image.load('./resources/finish_1120.png')
 
 star_counts = (124,44,70)
 
