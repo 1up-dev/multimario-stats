@@ -149,7 +149,7 @@ def process_line(line, currentChat, playerLookup):
             settings.redraw = True
         
         if command[0] == "!quit" and playerLookup[user].status == "live":
-            playerLookup[user].fail("quit", settings.startTime)
+            playerLookup[user].fail("quit")
             settings.redraw = True
             currentChat.message(channel, playerLookup[user].nameCaseSensitive + " has quit.")
 
@@ -201,20 +201,20 @@ def process_line(line, currentChat, playerLookup):
             player = command[1].lower()
             if len(command) == 2 and player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                    playerLookup[player].fail("quit", settings.startTime)
+                    playerLookup[player].fail("quit")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been forcequit.")
         elif command[0] == "!noshow":
             player = command[1].lower()
             if len(command) == 2 and player in playerLookup.keys():
-                playerLookup[player].fail("noshow", settings.startTime)
+                playerLookup[player].fail("noshow")
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " set to No-show.")
         elif command[0] == "!dq":
             player = command[1].lower()
             if len(command) == 2 and player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                    playerLookup[player].fail("disqualified", settings.startTime)
+                    playerLookup[player].fail("disqualified")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been disqualified.")
         elif command[0] == "!revive":

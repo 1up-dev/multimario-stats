@@ -2,6 +2,7 @@ import pygame
 import math
 import sort
 import datetime
+import settings
 from settings import getFont
 from draw_t import drawTimer
 
