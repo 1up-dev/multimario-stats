@@ -124,7 +124,8 @@ def draw(screen, playerLookup, sortedRacers, page):
             screen.blit(s, (40+corner[0], 80+corner[1]) )
             screen.blit(s, (190+corner[0], 80+corner[1]) )
             screen.blit(s, (40+corner[0], 110+corner[1]) )
-            screen.blit(s, (190+corner[0], 110+corner[1]) )
+            if len(games) == 4:
+                screen.blit(s, (190+corner[0], 110+corner[1]) )
 
             # filled boxes
             gray = (150,150,150)
@@ -132,7 +133,8 @@ def draw(screen, playerLookup, sortedRacers, page):
             rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 80+corner[1]+2, barLengths[0], barHeight-4]))
             rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 110+corner[1]+2, barLengths[1], barHeight-4]))
             rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 80+corner[1]+2, barLengths[2], barHeight-4]))
-            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 110+corner[1]+2, barLengths[3], barHeight-4]))
+            if len(games) == 4:
+                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 110+corner[1]+2, barLengths[3], barHeight-4]))
 
             # individual game counts
             for i in range(len(gameCounts)):
