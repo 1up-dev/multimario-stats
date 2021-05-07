@@ -13,7 +13,7 @@ import srl
 import settings
 import sort
 import bot
-import draw_t
+import timer
 import mode
 
 def chat_init(playerLookup):
@@ -97,5 +97,5 @@ while True:
     count += 1
     if count > 200:
         count = 0
-    draw_t.drawTimer(screen)
+    timer.drawTimer(screen)
     time.sleep(0.1)

@@ -7,7 +7,7 @@ import settings
 # import mode_1120
 # import mode_246
 # import mode_sandbox
-from draw_t import drawTimer
+import timer
 from settings import getFont
 
 games = copy.deepcopy(settings.modeInfo['games'])
@@ -59,7 +59,7 @@ height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    drawTimer(screen)
+    timer.drawTimer(screen)
     
     if page == 2:
         slot = 0
