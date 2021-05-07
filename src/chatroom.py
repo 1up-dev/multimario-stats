@@ -1,13 +1,15 @@
 import socket
+import os
 import datetime
 import time
+import settings
 
 class ChatRoom:
-    def __init__(self, channels, nick, password):
+    def __init__(self, channels):
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
-        self.NICK = nick
-        self.PASSWORD = password
+        self.NICK = settings.twitch_nick
+        self.PASSWORD = settings.twitch_pw
         self.channels = channels
         self.currentSocket = socket.socket()
     def message(self, channel, msg):
@@ -32,7 +34,7 @@ class ChatRoom:
     def pong(self):
         try:
             self.currentSocket.send(bytes("PONG :tmi.twitch.tv\r\n", "UTF-8"))
-            with open(f"irc/0-main.log", 'a') as f:
+            with open(os.path.join(settings.baseDir,"irc/0-main.log"), 'a') as f:
                 f.write(datetime.datetime.now().isoformat().split(".")[0] + " Pong sent." + "\n")
             # print(datetime.datetime.now().isoformat().split(".")[0], "Pong sent")
         except socket.error:

@@ -3,22 +3,22 @@ import math
 import copy
 import pygame
 import settings
-import mode_602
-import mode_1120
-import mode_246
-import mode_sandbox
+# import mode_602
+# import mode_1120
+# import mode_246
+# import mode_sandbox
 from draw_t import drawTimer
 from settings import getFont
 
 games = copy.deepcopy(settings.modeInfo['games'])
 for g in games:
-    bg = pygame.image.load(g['background'])
-    icon = pygame.image.load(g['icon'])
+    bg = pygame.image.load(os.path.join(settings.baseDir,g['background']))
+    icon = pygame.image.load(os.path.join(settings.baseDir,g['icon']))
     g['background'] = bg
     g['icon'] = icon
 
-finishBG = pygame.image.load(settings.modeInfo['finish-bg'])
-background = pygame.image.load('./resources/background.png')
+finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
+background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
 
 def draw_old(screen, playerLookup, sortedRacers, page):
     if settings.mode == "602":

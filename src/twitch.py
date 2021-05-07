@@ -2,11 +2,13 @@ import requests
 import json
 import urllib
 import os
+import settings
 
 # Uses the Twitch API to fetch profile pictures of racers
 def fetchProfiles(users):
     for user in users:
-        if not os.path.isfile("./profiles/"+user+".png"):
+        path = os.path.join(settings.baseDir,"profiles/"+user+".png")
+        if not os.path.isfile(path):
             url = "https://api.twitch.tv/helix/users?login="+user
             headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
             response = requests.get(url, headers=headers)
@@ -81,7 +83,7 @@ def new_token():
     #print(r2.json())
     global token
     token = r2.json()['access_token']
-    with open('settings.json', 'r+') as f:
+    with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
         j = json.load(f)
         j['twitch-api-token'] = token
         f.seek(0)
@@ -89,10 +91,8 @@ def new_token():
         f.truncate()
     print("New token received.")
 
-with open('settings.json', 'r') as f:
-    j = json.load(f)
-    token = j['twitch-api-token']
-    client_id = j['twitch-api-clientid']
-    client_secret = j['twitch-api-secret']
+token = settings.twitch_token
+client_id = settings.twitch_clientid
+client_secret = settings.twitch_secret
 
 check_token()

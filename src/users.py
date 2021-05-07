@@ -1,9 +1,12 @@
 from enum import Enum
 import json
-import twitch
-import gsheets
+import os
 import threading
 import datetime
+import twitch
+import gsheets
+import settings
+from settings import baseDir
 
 class Role(Enum):
     ADMIN = 1
@@ -14,7 +17,7 @@ class Role(Enum):
 def updateUsersByID():
     print("Updating usernames by id using the Twitch API...")
 
-    with open('users.json','r') as f:
+    with open(os.path.join(baseDir,'users.json'),'r') as f:
         j = json.load(f)
         sets = [ j['admins'], j['updaters'], j['blacklist'], j['test-racers'] ]
     
@@ -23,7 +26,7 @@ def updateUsersByID():
         if s_new != None:
             sets[i] = s_new
 
-    with open('users.json','w') as f:
+    with open(os.path.join(baseDir,'users.json'),'w') as f:
         j['admins'] = sets[0]
         j['updaters'] = sets[1]
         j['blacklist'] = sets[2]
@@ -35,7 +38,7 @@ def updateUsersByID():
     updaters = sets[1]
     blacklist = sets[2]
 
-    with open('settings.json', 'r+') as f:
+    with open(os.path.join(baseDir,'settings.json'), 'r+') as f:
         j = json.load(f)
         j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
         f.seek(0)
@@ -45,7 +48,7 @@ def updateUsersByID():
     print("Done updating Twitch usernames.")
 
 def push_all():
-    with open('users.json','w') as f:
+    with open(os.path.join(baseDir,'users.json'),'w') as f:
         j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters, 'test-racers': test_racers}
         json.dump(j, f, indent=4)
 
@@ -94,13 +97,11 @@ def status(user, playerLookup):
 
 racersCS, racersL, test_racers, admins, blacklist, updaters = [], [], [], [], [], []
 
-with open('settings.json','r') as f:
-    j = json.load(f)
-    debug = j['debug']
-    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
+debug = settings.debug
+last_id_update = settings.last_id_update
 
 #load racers
-with open('users.json','r') as f:
+with open(os.path.join(baseDir,'users.json'),'r') as f:
     j = json.load(f)
     admins = j['admins']
     blacklist = j['blacklist']

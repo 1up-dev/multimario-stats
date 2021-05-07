@@ -3,12 +3,12 @@ import datetime
 import time
 import pickle
 import json
+import os
+import settings
 
 def srlThread(channel, twitchChat, playerLookup):
-    with open('settings.json') as f:
-        j = json.load(f)
-        NICK = j['srl-username']
-        PASS = j['srl-auth']
+    NICK = settings.srl_nick
+    PASS = settings.srl_pw
     HOST = "irc.speedrunslive.com"
     PORT = 6667
     joinedRoom = False
@@ -68,7 +68,7 @@ def srlThread(channel, twitchChat, playerLookup):
                 if tmp.find("GO!") != -1:
                     startTime = datetime.datetime.now()
                     redraw = True
-                    with open('settings.json', 'r+') as f:
+                    with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
                         j = json.load(f)
                         j['start-time'] = startTime.isoformat().split(".")[0]
                         f.seek(0)
