@@ -9,7 +9,7 @@ background = pygame.image.load('./resources/background.png')
 sm64BG = pygame.image.load('./resources/sm64.png')
 smsBG = pygame.image.load('./resources/sms.png')
 smoBG = pygame.image.load('./resources/smo.png')
-finishBG = pygame.image.load('./resources/finish_1120.png')
+finishBG = pygame.image.load('./resources/finish-sm64.png')
 
 total = 1120
 

@@ -15,7 +15,7 @@ sm64BG = pygame.image.load('./resources/sm64.png')
 smgBG = pygame.image.load('./resources/smg.png')
 smsBG = pygame.image.load('./resources/sms.png')
 smg2BG = pygame.image.load('./resources/smg2.png')
-finishBG = pygame.image.load('./resources/finish_602.png')
+finishBG = pygame.image.load('./resources/finish-smg2-242.png')
 
 #387 x 175 scorecards
 # slots = [
