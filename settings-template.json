@@ -19,7 +19,6 @@
     "modes":{
         "602":{
             "name": "602",
-            "max-score": 602,
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -55,7 +54,6 @@
         },
         "246": {
             "name": "246",
-            "max-score": 246,
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -91,7 +89,6 @@
         },
         "1120": {
             "name": "1120",
-            "max-score": 1120,
             "games":[
                 {
                     "name": "Super Mario Odyssey",
@@ -120,7 +117,6 @@
         },
         "sandbox": {
             "name": "sandbox",
-            "max-score": 238,
             "games":[
                 {
                     "name": "Super Mario Odyssey",
