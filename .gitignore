@@ -6,5 +6,4 @@ irc/*
 log/*
 backup.json
 settings.json
-test.py
-test.json
+*test*
