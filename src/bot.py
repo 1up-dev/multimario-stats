@@ -1,4 +1,5 @@
 import datetime
+import os
 import json
 import traceback
 import time
@@ -79,7 +80,8 @@ def process_line(line, currentChat, playerLookup):
         channel = "00-main"
     if channel[0] != "#":
         channel = "00-main"
-    with open(f"irc/{channel[1:]}.log", 'a') as f:
+    path = f"irc/{channel[1:]}.log"
+    with open(os.path.join(settings.baseDir,path), 'a') as f:
         f.write(datetime.datetime.now().isoformat().split(".")[0] + " " + " ".join(line) + "\n")
     
     #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
@@ -187,7 +189,7 @@ def process_line(line, currentChat, playerLookup):
                 currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29@09:00")
             if type(newTime) == datetime.datetime:
                 settings.startTime = newTime
-                with open('settings.json', 'r+') as f:
+                with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
                     j = json.load(f)
                     j['start-time'] = settings.startTime.isoformat().split(".")[0]
                     f.seek(0)

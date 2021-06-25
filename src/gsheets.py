@@ -6,14 +6,11 @@ def getRacers():
     success=False
     tries = 0
     sheetRacers = []
-    with open('settings.json','r') as f:
-        j = json.load(f)
-        api_key = j['google-api-key']
-        race_num = 0
-        if settings.mode == 'sandbox':
-            race_num = j['mode']['race-num']
+    race_num = 0
+    if settings.mode == 'sandbox':
+        race_num = settings.modeInfo['race-num']
 
-    url = settings.gsheet + api_key
+    url = settings.gsheet + settings.google_api_key
 
     while not success:
         response = requests.get(url, headers={})

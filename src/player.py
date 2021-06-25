@@ -1,4 +1,5 @@
 import random
+import os
 import pygame
 import time
 import datetime
@@ -32,9 +33,9 @@ class Player:
                 self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
         
         try:
-            self.profile = pygame.image.load(f"./profiles/{self.name}.png")
+            self.profile = pygame.image.load(os.path.join(settings.baseDir,f"profiles/{self.name}.png"))
         except pygame.error:
-            self.profile = pygame.image.load("./resources/error.png")
+            self.profile = pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
 
     def update(self, count):
         if self.status == "live":
@@ -98,7 +99,7 @@ class Player:
         else:
             p['finishtime'] = ""
         
-        with open('backup.json', 'r+') as f:
+        with open(os.path.join(settings.baseDir,'backup.json'), 'r+') as f:
             j = json.load(f)
             j[self.name] = p
             f.seek(0)

@@ -1,13 +1,9 @@
 {
     "debug": true,
-    "mode":{
-        "name":"602",
-        "max-score":602,
-        "gsheet":"https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="
-    },
+    "mode":"602",
     "use-player-backups": true,
-    "start-time": "2020-12-26T19:05:00",
-    "bot-twitch-username": "",
+    "start-time": "2021-01-16T09:17:42",
+    "bot-twitch-username": "602race",
     "bot-twitch-auth": "oauth:",
     "extra-chat-rooms": [
         "602race",
@@ -18,6 +14,135 @@
     "twitch-api-clientid": "",
     "twitch-api-secret": "",
     "twitch-api-token": "",
-    "last-id-update": "2021-01-06T09:00:00",
-    "google-api-key": ""
+    "last-id-update": "2021-05-06T16:56:38",
+    "google-api-key": "",
+    "modes":{
+        "602":{
+            "name": "602",
+            "games":[
+                {
+                    "name": "Super Mario 64",
+                    "collectable": "Star",
+                    "count": 120,
+                    "background":"resources/sm64.png",
+                    "icon":"resources/star.png"
+                },
+                {
+                    "name": "Super Mario Galaxy",
+                    "collectable": "Star",
+                    "count": 120,
+                    "background":"resources/smg.png",
+                    "icon":"resources/luma.png"
+                },
+                {
+                    "name": "Super Mario Sunshine",
+                    "collectable": "Shine",
+                    "count": 120,
+                    "background":"resources/sms.png",
+                    "icon":"resources/shine.png"
+                },
+                {
+                    "name": "Super Mario Galaxy 2",
+                    "collectable": "Star",
+                    "count": 242,
+                    "background":"resources/smg2.png",
+                    "icon":"resources/yoshi.png"
+                }
+            ],
+            "finish-bg":"resources/finish-smg2-242.png",
+            "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="
+        },
+        "246": {
+            "name": "246",
+            "games":[
+                {
+                    "name": "Super Mario 64",
+                    "collectable": "Star",
+                    "count": 70,
+                    "background":"resources/sm64.png",
+                    "icon":"resources/star.png"
+                },
+                {
+                    "name": "Super Mario Galaxy",
+                    "collectable": "Star",
+                    "count": 61,
+                    "background":"resources/smg.png",
+                    "icon":"resources/luma.png"
+                },
+                {
+                    "name": "Super Mario Sunshine",
+                    "collectable": "Shine",
+                    "count": 44,
+                    "background":"resources/sms.png",
+                    "icon":"resources/shine.png"
+                },
+                {
+                    "name": "Super Mario Galaxy 2",
+                    "collectable": "Star",
+                    "count": 71,
+                    "background":"resources/smg2.png",
+                    "icon":"resources/yoshi.png"
+                }
+            ],
+            "finish-bg":"resources/finish-smg2-242.png",
+            "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ZVY3-EabTrI1b0XItUCt-lJnk0OtH93yJPfaKJepJzA/values/A6:A?key="
+        },
+        "1120": {
+            "name": "1120",
+            "games":[
+                {
+                    "name": "Super Mario Odyssey",
+                    "collectable": "Moon",
+                    "count": 880,
+                    "background":"resources/smo.png",
+                    "icon":"resources/moon.png"
+                },
+                {
+                    "name": "Super Mario Sunshine",
+                    "collectable": "Shine",
+                    "count": 120,
+                    "background":"resources/sms.png",
+                    "icon":"resources/shine.png"
+                },
+                {
+                    "name": "Super Mario 64",
+                    "collectable": "Star",
+                    "count": 120,
+                    "background":"resources/sm64.png",
+                    "icon":"resources/star.png"
+                }
+            ],
+            "finish-bg":"resources/finish-sm64.png",
+            "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1NcNeCpKScarA7BdJCIDf4O7cPf5_7ECN5-IQTIqJsbI/values/A6:A?key="
+        },
+        "sandbox": {
+            "name": "sandbox",
+            "games":[
+                {
+                    "name": "Super Mario Odyssey",
+                    "collectable": "Moon",
+                    "count": 124,
+                    "background":"resources/smo.png",
+                    "icon":"resources/moon.png"
+                },
+                {
+                    "name": "Super Mario Sunshine",
+                    "collectable": "Shine",
+                    "count": 44,
+                    "background":"resources/sms.png",
+                    "icon":"resources/shine.png"
+                },
+                {
+                    "name": "Super Mario 64",
+                    "collectable": "Star",
+                    "count": 70,
+                    "background":"resources/sm64.png",
+                    "icon":"resources/star.png"
+                }
+            ],
+            "finish-bg":"resources/finish-sm64.png",
+            "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1U8rnxZc8y2hzCXSWQ6spcZ36O6njhK0sgYa8kIOgbC8/values/A6:D?key=",
+            "race-num": 1
+        }
+    }
 }

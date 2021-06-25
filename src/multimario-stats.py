@@ -13,13 +13,13 @@ import srl
 import settings
 import sort
 import bot
-import draw_t
+import timer
 import mode
 
 def chat_init(playerLookup):
     print("Joining Twitch channels...")
     channels = []
-    for c in extra_chats:
+    for c in settings.extra_chats:
         if c not in users.racersL:
             channels.append(c)
         else:
@@ -27,7 +27,7 @@ def chat_init(playerLookup):
     for c in users.racersL:
         channels.append(c)
 
-    c = chatroom.ChatRoom(channels, NICK, PASSWORD)
+    c = chatroom.ChatRoom(channels)
     c.reconnect()
     time.sleep(1)
     
@@ -36,25 +36,18 @@ def chat_init(playerLookup):
     t.start()
     print("Done joining Twitch channels.")
 
-# loading & processing settings
-with open('settings.json', 'r') as f:
-    j = json.load(f)
-    NICK = j['bot-twitch-username']
-    PASSWORD = j['bot-twitch-auth']
-    use_backups = j['use-player-backups']
-    extra_chats = j['extra-chat-rooms']
-
 # create the backup file if it doesn't exist
 j = {}
-if not os.path.isfile("backup.json"):
-    with open('backup.json', 'w+') as f:
+backupFile = os.path.join(settings.baseDir,"backup.json")
+if not os.path.isfile(backupFile):
+    with open(backupFile, 'w+') as f:
         json.dump(j, f, indent=4)
-with open('backup.json', 'r') as f:
+with open(backupFile, 'r') as f:
     j = json.load(f)
 
 # player object instantiation
 playerLookup = {}
-if use_backups and j != {}:
+if settings.use_backups and j != {}:
     for racer in users.racersCS:
         state_data = {}
         if racer.lower() in j.keys():
@@ -75,7 +68,7 @@ t.start()
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
-pygame.display.set_caption("Multi-Mario Stats Program")
+pygame.display.set_caption("Multi-Mario Stats")
 pygame.mixer.stop()
 
 # main display loop
@@ -104,5 +97,5 @@ while True:
     count += 1
     if count > 200:
         count = 0
-    draw_t.drawTimer(screen)
+    timer.drawTimer(screen)
     time.sleep(0.1)
