@@ -6,4 +6,4 @@ irc/*
 log/*
 backup.json
 settings.json
-test*
+*test*
