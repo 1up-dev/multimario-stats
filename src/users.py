@@ -81,6 +81,7 @@ def remove(user, role: Role):
     push_all()
 
 def status(user, playerLookup):
+    user = user.lower()
     returnString = user + ": "
     if user in racersL:
         returnString += "Racer ("+playerLookup[user].status +": "+ str(playerLookup[user].collects) +"), "

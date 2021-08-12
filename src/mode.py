@@ -100,12 +100,14 @@ def draw(screen, playerLookup, sortedRacers, page):
             gameCounts, barLengths, gameMaxes = [], [], []
             done = False
             smallBar, largeBar, barHeight = 110, 260, 20
-            for g in games:
+            for i, g in enumerate(games):
                 gameCounts.append(0)
                 if done:
                     pass
                 elif score <= g['count']:
                     bg = g['background']
+                    if score == g['count']:
+                        bg = games[i+1]['background']
                     gameCounts[-1] = score
                     done = True
                     score -= g['count']
