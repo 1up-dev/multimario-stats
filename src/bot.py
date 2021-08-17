@@ -199,37 +199,37 @@ def process_line(line, currentChat, playerLookup):
                 for player in playerLookup.keys():
                     playerLookup[player].calculateCompletionTime(settings.startTime)
                 settings.redraw = True
-        elif command[0] == "!forcequit":
+        elif command[0] == "!forcequit" and len(command) == 2:
             player = command[1].lower()
-            if len(command) == 2 and player in playerLookup.keys():
+            if player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
                     playerLookup[player].fail("quit")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been forcequit.")
-        elif command[0] == "!noshow":
+        elif command[0] == "!noshow" and len(command) == 2:
             player = command[1].lower()
-            if len(command) == 2 and player in playerLookup.keys():
+            if player in playerLookup.keys():
                 playerLookup[player].fail("noshow")
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " set to No-show.")
-        elif command[0] == "!dq":
+        elif command[0] == "!dq" and len(command) == 2:
             player = command[1].lower()
-            if len(command) == 2 and player in playerLookup.keys():
+            if player in playerLookup.keys():
                 if playerLookup[player].status == "live" or playerLookup[player].status == "done":
                     playerLookup[player].fail("disqualified")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been disqualified.")
-        elif command[0] == "!revive":
+        elif command[0] == "!revive" and len(command) == 2:
             player = command[1].lower()
-            if len(command) == 2 and player in playerLookup.keys():
+            if player in playerLookup.keys():
                 if playerLookup[player].status == "done":
                     playerLookup[player].collects -= 1
                 playerLookup[player].status = "live"
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " has been revived.")
-        elif command[0] == "!settime":
+        elif command[0] == "!settime" and len(command) == 3:
             subject = command[1].lower()
-            if len(command) == 3 and subject in playerLookup.keys():
+            if subject in playerLookup.keys():
                 player = playerLookup[subject]
                 stringTime = command[2]
                 newTime = command[2].split(":")
