@@ -24,11 +24,25 @@ class ChatRoom:
         self.currentSocket.send(bytes("PASS "+self.PASSWORD+"\n", "UTF-8"))
         self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
 
+        # Join Twitch channels in batches of 20 or less, to comply
+        # with rate limiting.
+        # https://dev.twitch.tv/docs/irc/guide#rate-limits
         channel_list = ""
+        i = 0
         for c in self.channels:
             channel_list += "#"+c+","
-        channel_list = channel_list[0:-1]
-        self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
+            i += 1
+            if i == 20 or c == self.channels[-1]:
+                # Sleep >10 seconds if not on the first batch of joins to comply with rate limiting
+                if channel_list.split(",")[0][1:] != self.channels[0]:
+                    print("sleeping:",channel_list.split(",")[0], self.channels[0])
+                    time.sleep(11)
+
+                channel_list = channel_list[0:-1]
+                self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
+                print("attempted to join:",channel_list)
+                i = 0
+                channel_list = ""
 
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
     def pong(self):
