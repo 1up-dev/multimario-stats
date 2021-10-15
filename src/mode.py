@@ -60,7 +60,7 @@ height = 142
 def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.drawTimer(screen)
-    if settings.mode == "246":
+    if (settings.mode == "246") or (settings.mode == "sandbox"):
         page = 1
     
     if page == 2:
