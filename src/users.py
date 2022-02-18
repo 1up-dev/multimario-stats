@@ -56,7 +56,7 @@ def add(user, role: Role):
     id = twitch.getTwitchId(user)
     if id == None:
         print("Twitch user not found. Aborting.")
-        return
+        return False
     if role == Role.UPDATER:
         updaters[user] = id
     elif role == Role.ADMIN:
@@ -64,6 +64,7 @@ def add(user, role: Role):
     elif role == Role.BLACKLIST:
         blacklist[user] = id
     push_all()
+    return True
 
 def remove(user, role: Role):
     if role == Role.UPDATER:
