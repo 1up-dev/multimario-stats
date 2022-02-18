@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 import json
 import traceback
 import time
@@ -89,8 +90,8 @@ def process_line(line, currentChat, playerLookup):
     if len(command) < 1:
         print("error: command is empty.",)
         return
-
-    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream']:
+    
+    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart']:
         return
     user = user.lower()[1:]
     print("[In chat "+channel+"] "+user+":"+str(command))
@@ -115,8 +116,10 @@ def process_line(line, currentChat, playerLookup):
             if subject in users.blacklist:
                 currentChat.message(channel, "Sorry, " + command[1] + " is on the blacklist.")
             elif subject not in users.updaters:
-                users.add(subject,users.Role.UPDATER)
-                currentChat.message(channel, command[1] + " is now an updater.")
+                if users.add(subject,users.Role.UPDATER):
+                    currentChat.message(channel, command[1] + " is now an updater.")
+                else:
+                    currentChat.message(channel, "Twitch username {0} not found: ".format(command[1]))
             else:
                 currentChat.message(channel, command[1] + " is already an updater.")
         elif command[0] == "!unwhitelist" and len(command) == 2:
@@ -286,3 +289,6 @@ def process_line(line, currentChat, playerLookup):
             with kb.pressed(Key.ctrl):
                 kb.tap("5")
             currentChat.message(channel, "Toggled stream.")
+        # elif command[0] == '!restart':
+        #     currentChat.message(channel, "Restarting...")
+        #     os.execv(sys.executable, ["python"] + sys.argv)
