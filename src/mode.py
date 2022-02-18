@@ -63,10 +63,24 @@ def draw(screen, playerLookup, sortedRacers, page):
     if (settings.mode == "246") or (settings.mode == "sandbox"):
         page = 1
     
-    if page == 2:
+    if page == 3:
         slot = 0
         for i, r in enumerate(sortedRacers):
-            if 2 < i < 28:
+            if 3 <= i <= 52:
+                playerLookup[r].corner = slots[len(slots)-1]
+                continue
+            if slot >= len(slots):
+                playerLookup[r].corner = slots[len(slots)-1]
+            else:
+                playerLookup[r].corner = slots[slot]
+            if slot == 2:
+                slot += 3
+            else:
+                slot += 1
+    elif page == 2:
+        slot = 0
+        for i, r in enumerate(sortedRacers):
+            if 3 <= i <= 27:
                 playerLookup[r].corner = slots[len(slots)-1]
                 continue
             if slot >= len(slots):
@@ -93,6 +107,9 @@ def draw(screen, playerLookup, sortedRacers, page):
     for key in playerLookup:
         currentPlayer = playerLookup[key]
         corner = currentPlayer.corner
+
+        if corner == slots[len(slots)-1]:
+            continue
         
         pygame.draw.rect(screen, (25, 25, 25), [corner[0], corner[1], 314, 142])
 
