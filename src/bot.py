@@ -86,6 +86,10 @@ def process_line(line, currentChat, playerLookup):
     
     #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
     
+    if len(command) < 1:
+        print("error: command is empty.",)
+        return
+
     if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream']:
         return
     user = user.lower()[1:]
