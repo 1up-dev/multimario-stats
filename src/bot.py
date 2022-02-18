@@ -232,6 +232,8 @@ def process_line(line, currentChat, playerLookup):
                 if playerLookup[player].status == "done":
                     playerLookup[player].collects -= 1
                 playerLookup[player].status = "live"
+                if playerLookup[player].collects == settings.max_score:
+                    playerLookup[player].status = "done"
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " has been revived.")
         elif command[0] == "!settime" and len(command) == 3:
