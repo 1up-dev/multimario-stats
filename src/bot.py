@@ -10,30 +10,31 @@ import users
 import settings
 
 def fetchIRC(thisChat, playerLookup):
+    recon = False
     while True:
         try:
+            if recon:
+                recon = False
+                thisChat.reconnect()
+                time.sleep(1)
             readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if readbuffer == "": #reconnect on server disconnect
                 print(datetime.datetime.now().isoformat().split(".")[0], "Empty readbuffer")
-                thisChat.reconnect()
-                time.sleep(1)
-                
+                recon = True
+                continue
             lines = readbuffer.split("\n")
             for line in lines:
                 process_line(line, thisChat, playerLookup)
         except ConnectionResetError:
             print(datetime.datetime.now().isoformat().split(".")[0], "ConnectionResetError")
-            thisChat.reconnect()
-            time.sleep(1)
+            recon = True
         except TimeoutError:
             print(datetime.datetime.now().isoformat().split(".")[0], "TimeoutError")
-            thisChat.reconnect()
-            time.sleep(1)
+            recon = True
         except Exception:
             print(datetime.datetime.now().isoformat().split(".")[0], "Unexpected error")
             print(traceback.format_exc())
-            thisChat.reconnect()
-            time.sleep(1)
+            recon = True
 
 def process_line(line, currentChat, playerLookup):
     if line == "":
