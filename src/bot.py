@@ -25,8 +25,14 @@ def fetchIRC(thisChat, playerLookup):
             lines = readbuffer.split("\n")
             for line in lines:
                 process_line(line, thisChat, playerLookup)
+        except UnicodeEncodeError:
+            print(datetime.datetime.now().isoformat().split(".")[0], "UnicodeEncodeError (emoji or other non-ascii character encountered. fix?)")
+            recon = True
         except ConnectionResetError:
             print(datetime.datetime.now().isoformat().split(".")[0], "ConnectionResetError")
+            recon = True
+        except ConnectionAbortedError:
+            print(datetime.datetime.now().isoformat().split(".")[0], "ConnectionAbortedError")
             recon = True
         except TimeoutError:
             print(datetime.datetime.now().isoformat().split(".")[0], "TimeoutError")
