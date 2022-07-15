@@ -28,7 +28,13 @@ def chat_init(playerLookup):
         channels.append(c)
 
     c = chatroom.ChatRoom(channels)
-    c.reconnect()
+    attempts = 0
+    while(c.reconnect() == False):
+        attempts += 1
+        time.sleep(1)
+        if attempts > 5:
+            print("Failed to connect to Twitch IRC successfully.")
+            return
     time.sleep(1)
     
     t = threading.Thread(target=bot.fetchIRC, args=(c, playerLookup))

@@ -3,6 +3,7 @@ import os
 import datetime
 import time
 import settings
+import traceback
 
 class ChatRoom:
     def __init__(self, channels):
@@ -39,7 +40,12 @@ class ChatRoom:
                     time.sleep(11)
 
                 channel_list = channel_list[0:-1]
-                self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
+                try:
+                    self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
+                except:
+                    print(traceback.format_exc())
+                    print("Exception while connecting")
+                    return False
                 print("attempted to join:",channel_list)
                 i = 0
                 channel_list = ""

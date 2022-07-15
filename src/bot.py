@@ -89,8 +89,14 @@ def process_line(line, currentChat, playerLookup):
     if channel[0] != "#":
         channel = "00-main"
     path = f"irc/{channel[1:]}.log"
+    
+    #filter out non-ascii text to prevent UnicodeEncodeError on write() call
+    full_line = " "
+    for word in line:
+        full_line += "".join(c if ord(c)<128 else "." for c in word) + " "
+    full_line = full_line[0:-1]
     with open(os.path.join(settings.baseDir,path), 'a') as f:
-        f.write(datetime.datetime.now().isoformat().split(".")[0] + " " + " ".join(line) + "\n")
+        f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line + "\n")
     
     #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
     
