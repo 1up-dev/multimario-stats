@@ -18,9 +18,8 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
     debug = j['debug']
 
-    modeId = j['mode']
-    modeInfo = j['modes'][modeId]
-    mode = modeInfo['name']
+    mode = j['mode']
+    modeInfo = j['modes'][mode]
     gsheet = modeInfo['gsheet']
     for g in modeInfo['games']:
         max_score += g['count']

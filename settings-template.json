@@ -18,7 +18,6 @@
     "google-api-key": "",
     "modes":{
         "602":{
-            "name": "602",
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -53,7 +52,6 @@
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="
         },
         "246": {
-            "name": "246",
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -88,7 +86,6 @@
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ZVY3-EabTrI1b0XItUCt-lJnk0OtH93yJPfaKJepJzA/values/A6:A?key="
         },
         "1120": {
-            "name": "1120",
             "games":[
                 {
                     "name": "Super Mario Odyssey",
@@ -116,7 +113,6 @@
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1NcNeCpKScarA7BdJCIDf4O7cPf5_7ECN5-IQTIqJsbI/values/A6:A?key="
         },
         "sandbox": {
-            "name": "sandbox",
             "games":[
                 {
                     "name": "Super Mario Odyssey",
