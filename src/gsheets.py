@@ -7,7 +7,7 @@ def getRacers():
     tries = 0
     sheetRacers = []
     race_num = 0
-    if settings.mode == 'sandbox':# or settings.mode == '246':
+    if 'race-num' in settings.modeInfo:
         race_num = settings.modeInfo['race-num']
 
     url = settings.gsheet + settings.google_api_key
