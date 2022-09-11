@@ -35,7 +35,10 @@ def drawTimer(screen):
         cur_time = "-"+cur_time
     #print(cur_time)
 
-    r = pygame.Rect([0,0,400,100])
+    border = pygame.Rect([0,0,400,100])
+    border.center = (1277,84)
+    pygame.draw.rect(screen, (200, 200, 200), border)
+    r = pygame.Rect([0,0,394,94])
     r.center = (1277,84)
     pygame.draw.rect(screen, (40, 40, 40), r)
     timer = settings.getFont(65).render(cur_time, 1, (200,200,200))

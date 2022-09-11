@@ -3,11 +3,6 @@ import math
 import copy
 import pygame
 import settings
-# import mode_602
-# import mode_1120
-# import mode_246
-# import mode_sandbox
-import mode_540
 import timer
 from settings import getFont
 
@@ -19,17 +14,7 @@ for g in games:
     g['icon'] = icon
 
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
-background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
-
-def draw_old(screen, playerLookup, sortedRacers, page):
-    if settings.mode == "602":
-        return mode_602.draw(screen, playerLookup, sortedRacers, page)
-    elif settings.mode == "1120":
-        return mode_1120.draw(screen,playerLookup)
-    elif settings.mode == "246":
-        return mode_246.draw(screen, playerLookup, sortedRacers, 1)
-    elif settings.mode == "sandbox":
-        return mode_sandbox.draw(screen, playerLookup, sortedRacers, 1)
+background = pygame.image.load(os.path.join(settings.baseDir,'resources/papers.co-vt28-abstract-polygon-dark-bw-pattern-1600x900.jpg'))
 
 def hasCollected(score):
     game=""
@@ -47,7 +32,7 @@ def hasCollected(score):
     return " now has " + str(score) + " "+ noun+suffix + " in " + game + "."
 
 slots = [
-    (7,12), (325,12), (643,12), (961,12), (1279,12),
+    (7,12),  (325,12),  (643,12),  (961,12),  (1279,12),
     (7,169),(325,169),(643,169),(961,169),(1279,169),
     (7,315),(325,315),(643,315),(961,315),(1279,315),
     (7,461),(325,461),(643,461),(961,461),(1279,461),
@@ -59,12 +44,9 @@ length = 314
 height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
-    if settings.mode == "540":
-        return mode_540.draw(screen, playerLookup, sortedRacers, page)
-    
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.drawTimer(screen)
-    if (settings.mode == "246") or (settings.mode == "sandbox"):
+    if (settings.mode == "540"):
         page = 1
     
     if page == 3:
@@ -115,7 +97,7 @@ def draw(screen, playerLookup, sortedRacers, page):
         if corner == slots[len(slots)-1]:
             continue
         
-        pygame.draw.rect(screen, (25, 25, 25), [corner[0], corner[1], 314, 142])
+        pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
 
         score = currentPlayer.collects
         if currentPlayer.status == "live":
@@ -146,20 +128,22 @@ def draw(screen, playerLookup, sortedRacers, page):
             # base boxes
             s = pygame.Surface((smallBar+4, barHeight), pygame.SRCALPHA)
             s.fill((60,60,60,192))
-            screen.blit(s, (40+corner[0], 80+corner[1]) )
-            screen.blit(s, (190+corner[0], 80+corner[1]) )
-            screen.blit(s, (40+corner[0], 110+corner[1]) )
-            if len(games) == 4:
-                screen.blit(s, (190+corner[0], 110+corner[1]) )
+            screen.blit(s, (40+corner[0], 65+corner[1]) )
+            screen.blit(s, (40+corner[0], 90+corner[1]) )
+            screen.blit(s, (40+corner[0], 115+corner[1]) )
+            screen.blit(s, (190+corner[0], 65+corner[1]) )
+            screen.blit(s, (190+corner[0], 90+corner[1]) )
+            screen.blit(s, (190+corner[0], 115+corner[1]) )
 
             # filled boxes
             gray = (150,150,150)
             rects = []
-            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 80+corner[1]+2, barLengths[0], barHeight-4]))
-            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 110+corner[1]+2, barLengths[1], barHeight-4]))
-            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 80+corner[1]+2, barLengths[2], barHeight-4]))
-            if len(games) == 4:
-                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 110+corner[1]+2, barLengths[3], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 65+corner[1]+2, barLengths[0], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 90+corner[1]+2, barLengths[1], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 115+corner[1]+2, barLengths[2], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 65+corner[1]+2, barLengths[3], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 90+corner[1]+2, barLengths[4], barHeight-4]))
+            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 115+corner[1]+2, barLengths[5], barHeight-4]))
 
             # individual game counts
             for i in range(len(gameCounts)):
@@ -174,13 +158,17 @@ def draw(screen, playerLookup, sortedRacers, page):
             # game icons
             for i, g in enumerate(games):
                 if i == 0:
-                    x, y = 6, 75
+                    x, y = 6, 60
                 elif i == 1:
-                    x, y = 6, 103
+                    x, y = 6, 85
                 elif i == 2:
-                    x, y = 157, 70
+                    x, y = 6, 110
                 elif i == 3:
-                    x, y = 157, 108
+                    x, y = 157, 60
+                elif i == 4:
+                    x, y = 157, 85
+                elif i == 5:
+                    x, y = 159, 115
                 screen.blit(g['icon'], (x+corner[0], y+corner[1]))
 
         elif currentPlayer.status == "done":    #shows done tag
