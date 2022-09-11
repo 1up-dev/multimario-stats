@@ -14,7 +14,7 @@ for g in games:
     g['icon'] = icon
 
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
-background = pygame.image.load(os.path.join(settings.baseDir,'resources/papers.co-vt28-abstract-polygon-dark-bw-pattern-1600x900.jpg'))
+background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
 
 def hasCollected(score):
     game=""
