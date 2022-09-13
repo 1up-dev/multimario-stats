@@ -56,7 +56,7 @@ def process_line(line, currentChat, playerLookup):
     if line[0][0] == "@":
         tags = line.pop(0)
         tmp8 = tags.split("mod=")
-        if len(tmp8) > 1:
+        if len(tmp8) > 1 and len(tmp8[1])> 0:
             if tmp8[1][0] == "1":
                 ismod = True
         tmp9 = tags.split("user-id=")
