@@ -25,30 +25,27 @@ class ChatRoom:
         self.currentSocket.send(bytes("PASS "+self.PASSWORD+"\n", "UTF-8"))
         self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
 
-        # Join Twitch channels in batches of 20 or less, to comply
-        # with rate limiting.
+        # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
         # https://dev.twitch.tv/docs/irc/guide#rate-limits
-        channel_list = ""
-        i = 0
-        for c in self.channels:
-            channel_list += "#"+c+","
-            i += 1
-            if i == 20 or c == self.channels[-1]:
-                # Sleep >10 seconds if not on the first batch of joins to comply with rate limiting
-                if channel_list.split(",")[0][1:] != self.channels[0]:
-                    print("sleeping:",channel_list.split(",")[0], self.channels[0])
-                    time.sleep(11)
-
-                channel_list = channel_list[0:-1]
-                try:
-                    self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
-                except:
-                    print(traceback.format_exc())
-                    print("Exception while connecting")
-                    return False
-                print("attempted to join:",channel_list)
-                i = 0
-                channel_list = ""
+        j = 0
+        while True:
+            channel_list = "#"+",#".join(self.channels[j:j+20])
+            if j != 0:
+                print("Sleeping for 11 seconds. Next channel:",channel_list.split(",")[0])
+                time.sleep(11)
+            try:
+                # Errors produced by this line:
+                # ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+                # BrokenPipeError: [Errno 32] Broken pipe
+                self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
+            except:
+                print("Exception while connecting:")
+                print(traceback.format_exc())
+                return False
+            print("Joined",channel_list)
+            j += 20
+            if self.channels[j:j+20] == []:
+                break
 
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
     def pong(self):
