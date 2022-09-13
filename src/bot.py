@@ -127,12 +127,12 @@ def process_line(line, currentChat, playerLookup):
         if command[0] == "!whitelist" and len(command) == 2:
             subject = command[1].lower()
             if subject in users.blacklist:
-                currentChat.message(channel, "Sorry, " + command[1] + " is on the blacklist.")
+                currentChat.message(channel, "Sorry, {0} is on the blacklist.".format(command[1]))
             elif subject not in users.updaters:
                 if users.add(subject,users.Role.UPDATER):
                     currentChat.message(channel, command[1] + " is now an updater.")
                 else:
-                    currentChat.message(channel, "Twitch username {0} not found: ".format(command[1]))
+                    currentChat.message(channel, "Twitch username {0} not found.".format(command[1]))
             else:
                 currentChat.message(channel, command[1] + " is already an updater.")
         elif command[0] == "!unwhitelist" and len(command) == 2:
