@@ -3,10 +3,6 @@ import math
 import copy
 import pygame
 import settings
-# import mode_602
-# import mode_1120
-# import mode_246
-# import mode_sandbox
 import mode_540
 import timer
 from settings import getFont
@@ -20,16 +16,6 @@ for g in games:
 
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
 background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
-
-def draw_old(screen, playerLookup, sortedRacers, page):
-    if settings.mode == "602":
-        return mode_602.draw(screen, playerLookup, sortedRacers, page)
-    elif settings.mode == "1120":
-        return mode_1120.draw(screen,playerLookup)
-    elif settings.mode == "246":
-        return mode_246.draw(screen, playerLookup, sortedRacers, 1)
-    elif settings.mode == "sandbox":
-        return mode_sandbox.draw(screen, playerLookup, sortedRacers, 1)
 
 def hasCollected(score):
     game=""
