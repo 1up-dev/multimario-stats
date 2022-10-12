@@ -100,7 +100,12 @@ while True:
     if settings.redraw == True:
         sortedRacers = sort.sort(playerLookup)
     
-    if count <= 100:
+    if max_count == 100:
+        # if there is only one page, never redraw it on a timer
+        if settings.redraw == True:
+            screen = mode.draw(screen, playerLookup, sortedRacers, 1)
+            settings.redraw = False
+    elif count <= 100:
         if count == 0 or settings.redraw == True:
             screen = mode.draw(screen, playerLookup, sortedRacers, 1)
             settings.redraw = False
@@ -114,7 +119,7 @@ while True:
             settings.redraw = False
     count += 1
 
-    if count > max_count:
+    if count >= max_count:
         count = 0
     timer.drawTimer(screen)
     time.sleep(0.1)
