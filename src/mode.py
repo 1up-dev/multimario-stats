@@ -99,7 +99,8 @@ def draw(screen, playerLookup, sortedRacers, page):
         if corner == slots[len(slots)-1]:
             continue
         
-        pygame.draw.rect(screen, (25, 25, 25), [corner[0], corner[1], 314, 142])
+        pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
+        pygame.draw.rect(screen, (25, 25, 25), [corner[0]+2, corner[1]+2, 310, 138])
 
         score = currentPlayer.collects
         if currentPlayer.status == "live":

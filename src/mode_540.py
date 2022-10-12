@@ -16,23 +16,8 @@ for g in games:
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
 background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
 
-def hasCollected(score):
-    game=""
-    noun=""
-    suffix=""
-    for g in games:
-        if score <= g['count']:
-            game = g['name']
-            noun = g['collectable']
-            break
-        score -= g['count']
-    
-    if score != 1:
-        suffix = "s"
-    return " now has " + str(score) + " "+ noun+suffix + " in " + game + "."
-
 slots = [
-    (7,12),  (325,12),  (643,12),  (961,12),  (1279,12),
+    (7,12), (325,12), (643,12), (961,12), (1279,12),
     (7,169),(325,169),(643,169),(961,169),(1279,169),
     (7,315),(325,315),(643,315),(961,315),(1279,315),
     (7,461),(325,461),(643,461),(961,461),(1279,461),
