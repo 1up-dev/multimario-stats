@@ -48,9 +48,14 @@ def updateUsersByID():
     print("Done updating Twitch usernames.")
 
 def push_all():
-    with open(os.path.join(baseDir,'users.json'),'w') as f:
-        j = {'admins': admins, 'blacklist': blacklist, 'updaters': updaters, 'test-racers': test_racers}
+    with open(os.path.join(baseDir,'users.json'),'r+') as f:
+        j = json.load(f)
+        j['admins'] = admins
+        j['blacklist'] = blacklist
+        j['updaters'] = updaters
+        f.seek(0)
         json.dump(j, f, indent=4)
+        f.truncate()
 
 def add(user, role: Role):
     id = twitch.getTwitchId(user)
@@ -84,7 +89,7 @@ def remove(user, role: Role):
 def status(user, playerLookup):
     user = user.lower()
     returnString = user + ": "
-    if user in racersL:
+    if user in playerLookup.keys():
         returnString += "Racer ("+playerLookup[user].status +": "+ str(playerLookup[user].collects) +"), "
     if user in admins:
         returnString += "Admin, "
@@ -96,38 +101,25 @@ def status(user, playerLookup):
         returnString += "None, "
     return returnString[0:-2]
 
+admins, updaters, blacklist = [], [], []
 
-racersCS, racersL, test_racers, admins, blacklist, updaters = [], [], [], [], [], []
+def init_users():
+    global admins, updaters, blacklist
+    with open(os.path.join(baseDir,'users.json'),'r') as f:
+        j = json.load(f)
+        admins = j['admins']
+        blacklist = j['blacklist']
+        updaters = j['updaters']
+        if settings.debug:
+            racers = list(j['test-racers'].keys())
+    if not settings.debug:
+        racers = gsheets.getRacers()
+    twitch.fetchProfiles(racers)
 
-debug = settings.debug
-last_id_update = settings.last_id_update
-
-#load racers
-with open(os.path.join(baseDir,'users.json'),'r') as f:
-    j = json.load(f)
-    admins = j['admins']
-    blacklist = j['blacklist']
-    updaters = j['updaters']
-    test_racers = j['test-racers']
-if debug:
-    #code for using less racers
-    # tmp = {}
-    # for i, key in enumerate(test_racers.keys()):
-    #     if i >= 8:
-    #         break
-    #     tmp[key] = test_racers[key]
-    # racersCS = list(tmp.keys())
-    racersCS = list(test_racers.keys())
-else:
-    racersCS = gsheets.getRacers()
-print("Racers: " + str(racersCS))
-racersL = []
-for racer in racersCS:
-    racersL.append(racer.lower())
-twitch.fetchProfiles(racersL)
-
-# update usernames by ID if it hasn't been done in the last day
-if (datetime.datetime.now() - last_id_update).total_seconds() > 86400:
-    t = threading.Thread(target=updateUsersByID, args=())
-    t.daemon = True
-    t.start()
+    # update usernames by ID if it hasn't been done in the last day
+    if (datetime.datetime.now() - settings.last_id_update).total_seconds() > 86400:
+        t = threading.Thread(target=updateUsersByID, args=())
+        t.daemon = True
+        t.start()
+    
+    return racers

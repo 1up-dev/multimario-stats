@@ -7,6 +7,7 @@ import settings
 # Uses the Twitch API to fetch profile pictures of racers
 def fetchProfiles(users):
     for user in users:
+        user =  user.lower()
         path = os.path.join(settings.baseDir,"profiles/"+user+".png")
         if not os.path.isfile(path):
             url = "https://api.twitch.tv/helix/users?login="+user

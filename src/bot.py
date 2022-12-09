@@ -113,7 +113,7 @@ def process_line(line, currentChat, playerLookup):
     if command[0] == "!ping":
         currentChat.message(channel, "Hi. Bot is alive.")
     if command[0] == "!racecommands":
-        currentChat.message(channel, "Command list: https://pastebin.com/d7mPZd13")
+        currentChat.message(channel, "Multimario race bot command list: https://pastebin.com/d7mPZd13")
     if command[0] == "!roles":
         if len(command) == 1:
             statusMsg = users.status(user, playerLookup)
@@ -123,7 +123,7 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, statusMsg)
 
     # shared commands
-    if (user in users.admins) or (user in users.racersL):
+    if (user in users.admins) or (user in playerLookup.keys()):
         if command[0] == "!whitelist" and len(command) == 2:
             subject = command[1].lower()
             if subject in users.blacklist:
@@ -144,7 +144,7 @@ def process_line(line, currentChat, playerLookup):
                 currentChat.message(channel, command[1] + " is already not an updater.")
 
     # racer commands
-    if user in users.racersL:
+    if user in playerLookup.keys():
         if command[0] in ["!add","!set"] and len(command) == 2:
             try:
                 number = int(command[1])
@@ -179,7 +179,7 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, playerLookup[user].nameCaseSensitive + " has quit.")
 
     # updater commands
-    if ((user in users.updaters) or (ismod) or (user in users.racersL)) and (user not in users.blacklist):
+    if ((user in users.updaters) or (ismod) or (user in playerLookup.keys())) and (user not in users.blacklist):
         if command[0] in ["!add","!set"] and len(command) == 3:
             player = command[1].lower()
             try:

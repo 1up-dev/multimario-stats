@@ -20,11 +20,11 @@ def chat_init(playerLookup):
     print("Joining Twitch channels...")
     channels = []
     for c in settings.extra_chats:
-        if c not in users.racersL:
+        if c not in playerLookup.keys():
             channels.append(c)
         else:
             print("skipping extra channel", c, "which is already a racer")
-    for c in users.racersL:
+    for c in playerLookup.keys():
         channels.append(c)
 
     c = chatroom.ChatRoom(channels)
@@ -52,16 +52,14 @@ with open(backupFile, 'r') as f:
     j = json.load(f)
 
 # player object instantiation
+racers = users.init_users()
 playerLookup = {}
-if settings.use_backups and j != {}:
-    for racer in users.racersCS:
-        state_data = {}
-        if racer.lower() in j.keys():
-            state_data = j[racer.lower()]
-        playerLookup[racer.lower()] = player.Player(racer, state_data)
-else:
-    for racer in users.racersCS:
-        playerLookup[racer.lower()] = player.Player(racer, {})
+for racer in racers:
+    state_data = {}
+    if settings.use_backups and j != {} and racer.lower() in j.keys():
+        state_data = j[racer.lower()]
+    playerLookup[racer.lower()] = player.Player(racer, state_data)
+print("Racers: " + str(list(playerLookup.keys())))
 
 # join Twitch channels
 t = threading.Thread(target=chat_init, args=(playerLookup,))
@@ -79,7 +77,7 @@ pygame.mixer.stop()
 
 # determine number of pages
 max_count = 99
-num_players = len(users.racersL)
+num_players = len(playerLookup.keys())
 i1 = 28
 while True:
     if num_players <= i1:
