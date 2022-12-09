@@ -145,20 +145,23 @@ def process_line(line, currentChat, playerLookup):
 
     # racer commands
     if user in users.racersL:
-        if (command[0] == "!add" or command[0] == "!set") and len(command) == 2:
+        if command[0] in ["!add","!set"] and len(command) == 2:
             try:
                 number = int(command[1])
-                if user in playerLookup.keys():
-                    response = ""
-                    if command[0] == "!add":
-                        response = playerLookup[user].update(playerLookup[user].collects + number)
-                    elif command[0] == "!set":
-                        response = playerLookup[user].update(number)
-                    if response != "":
-                        currentChat.message(channel, response)
-                    settings.redraw = True
             except ValueError:
-                pass
+                currentChat.message(channel, user+": Not a number.")
+                return
+            if user not in playerLookup.keys():
+                currentChat.message(channel, user+": Racer not found.")
+                return
+            response = ""
+            if command[0] == "!add":
+                response = playerLookup[user].update(playerLookup[user].collects + number)
+            elif command[0] == "!set":
+                response = playerLookup[user].update(number)
+            if response != "":
+                currentChat.message(channel, response)
+            settings.redraw = True
         
         if command[0] in ["!rejoin", "!unquit"]:
             if playerLookup[user].status == "quit":
@@ -176,22 +179,25 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, playerLookup[user].nameCaseSensitive + " has quit.")
 
     # updater commands
-    if ((user in users.updaters) or (ismod==True) or (user in users.racersL)) and (user not in users.blacklist):
-        if (command[0] == "!add" or command[0] == "!set") and len(command) == 3:
+    if ((user in users.updaters) or (ismod) or (user in users.racersL)) and (user not in users.blacklist):
+        if command[0] in ["!add","!set"] and len(command) == 3:
             player = command[1].lower()
             try:
                 number = int(command[2])
-                if player in playerLookup.keys():
-                    response = ""
-                    if command[0] == "!add":
-                        response = playerLookup[player].update(playerLookup[player].collects + number)
-                    elif command[0] == "!set":
-                        response = playerLookup[player].update(number)
-                    if response != "":
-                        currentChat.message(channel, response)
-                    settings.redraw = True
             except ValueError:
-                pass
+                currentChat.message(channel, user+": Not a number.")
+                return
+            if player not in playerLookup.keys():
+                currentChat.message(channel, user+": Racer not found.")
+                return
+            response = ""
+            if command[0] == "!add":
+                response = playerLookup[player].update(playerLookup[player].collects + number)
+            elif command[0] == "!set":
+                response = playerLookup[player].update(number)
+            if response != "":
+                currentChat.message(channel, response)
+            settings.redraw = True
 
     # admin commands
     if user in users.admins:
