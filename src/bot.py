@@ -160,7 +160,7 @@ def process_line(line, currentChat, playerLookup):
             except ValueError:
                 pass
         
-        if (command[0] == "!rejoin"):
+        if command[0] in ["!rejoin", "!unquit"]:
             if playerLookup[user].status == "quit":
                 playerLookup[user].status = "live"
                 currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
