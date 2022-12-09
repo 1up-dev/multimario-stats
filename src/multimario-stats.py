@@ -78,7 +78,7 @@ pygame.display.set_caption("Multi-Mario Stats")
 pygame.mixer.stop()
 
 # determine number of pages
-max_count = 100
+max_count = 99
 num_players = len(users.racersL)
 i1 = 28
 while True:
@@ -100,26 +100,14 @@ while True:
     if settings.redraw == True:
         sortedRacers = sort.sort(playerLookup)
     
-    if max_count == 100:
-        # if there is only one page, never redraw it on a timer
-        if settings.redraw == True:
-            screen = mode.draw(screen, playerLookup, sortedRacers, 1)
-            settings.redraw = False
-    elif count <= 100:
-        if count == 0 or settings.redraw == True:
-            screen = mode.draw(screen, playerLookup, sortedRacers, 1)
-            settings.redraw = False
-    elif count <= 200:
-        if count == 101 or settings.redraw == True:
-            screen = mode.draw(screen, playerLookup, sortedRacers, 2)
-            settings.redraw = False
-    else:
-        if count == 201 or settings.redraw == True:
-            screen = mode.draw(screen, playerLookup, sortedRacers, 3)
-            settings.redraw = False
+    # redraw every 10 seconds or if redraw is requested
+    # draw page 0 from 0-99, page 1 from 100-199, etc.
+    if count%100 == 0 or settings.redraw == True:
+        screen = mode.draw(screen, playerLookup, sortedRacers, count//100)
+        settings.redraw = False
     count += 1
 
-    if count >= max_count:
+    if count > max_count:
         count = 0
     timer.drawTimer(screen)
     time.sleep(0.1)

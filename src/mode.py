@@ -51,7 +51,7 @@ def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.drawTimer(screen)
     
-    if page == 3:
+    if page == 2:
         slot = 0
         for i, r in enumerate(sortedRacers):
             if 3 <= i <= 52:
@@ -65,7 +65,7 @@ def draw(screen, playerLookup, sortedRacers, page):
                 slot += 3
             else:
                 slot += 1
-    elif page == 2:
+    elif page == 1:
         slot = 0
         for i, r in enumerate(sortedRacers):
             if 3 <= i <= 27:
