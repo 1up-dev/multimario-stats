@@ -23,7 +23,6 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     gsheet = modeInfo['gsheet']
     for g in modeInfo['games']:
         max_score += g['count']
-    print(max_score)
 
     twitch_nick = j['bot-twitch-username']
     twitch_pw = j['bot-twitch-auth']
