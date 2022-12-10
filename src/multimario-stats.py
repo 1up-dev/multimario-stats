@@ -16,7 +16,6 @@ import timer
 import mode
 
 def chat_init(playerLookup):
-    print("Joining Twitch channels...")
     channels = []
     for c in settings.extra_chats:
         if c not in playerLookup.keys():
@@ -39,7 +38,6 @@ def chat_init(playerLookup):
     t = threading.Thread(target=bot.fetchIRC, args=(c, playerLookup))
     t.daemon = True
     t.start()
-    print("Done joining Twitch channels.")
 
 # create the backup file if it doesn't exist
 j = {}

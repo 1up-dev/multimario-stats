@@ -139,7 +139,7 @@ def process_line(line, currentChat, playerLookup):
                     currentChat.message(channel, "Twitch username {0} not found.".format(command[1]))
             else:
                 currentChat.message(channel, command[1] + " is already an updater.")
-        elif command[0] == "!unwhitelist" and len(command) == 2:
+        if command[0] == "!unwhitelist" and len(command) == 2:
             subject = command[1].lower()
             if subject in users.updaters:
                 users.remove(subject,users.Role.UPDATER)
@@ -305,17 +305,26 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, "Toggled stream.")
         elif command[0] == "!fetchracers":
             newRacers = gsheets.getRacers()
-            new_racer_found = False
+            new_racers_lower = []
+
+            # add new racers from the sheet
             for r in newRacers:
+                new_racers_lower.append(r.lower())
                 if r.lower() not in playerLookup.keys():
-                    new_racer_found = True
                     currentChat.message(channel, "Adding new racer {0} found on the Google spreadsheet.".format(r))
                     playerLookup[r.lower()] = player.Player(r, {})
                     currentChat.channels.append(r.lower())
                     time.sleep(0.5)
-            if new_racer_found:
-                #tell the loop to reconnect to chat with new channel(s)
-                recon = True
-                settings.redraw = True
-                return
-            currentChat.message(channel, "No new racers found on the Google spreadsheet.")
+            
+            #delete racers that have been removed from the sheet
+            p_keys = list(playerLookup.keys())
+            for p in p_keys:
+                if p not in new_racers_lower:
+                    currentChat.message(channel, "Removing racer {0} not found on the Google spreadsheet.".format(playerLookup[p].nameCaseSensitive))
+                    playerLookup.pop(p)
+                    time.sleep(0.5)
+
+            # tell the loop to reconnect to chat with new channel(s)
+            # and trigger a sort and redraw to remove old player cards
+            recon = True
+            settings.redraw = True
