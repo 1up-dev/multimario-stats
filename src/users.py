@@ -86,11 +86,11 @@ def remove(user, role: Role):
             print("Removed user "+user+".")
     push_all()
 
-def status(user, playerLookup):
+def roles(user, playerLookup):
     user = user.lower()
     returnString = user + ": "
     if user in playerLookup.keys():
-        returnString += "Racer ("+playerLookup[user].status +": "+ str(playerLookup[user].collects) +"), "
+        returnString += "Racer ("+"Place: #"+str(playerLookup[user].place)+", Status: "+playerLookup[user].status +", Score: "+ str(playerLookup[user].collects) +"), "
     if user in admins:
         returnString += "Admin, "
     if user in updaters:

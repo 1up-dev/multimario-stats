@@ -120,9 +120,9 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, "Multimario race bot command list: https://pastebin.com/d7mPZd13")
     if command[0] == "!roles":
         if len(command) == 1:
-            statusMsg = users.status(user, playerLookup)
+            statusMsg = users.roles(user, playerLookup)
         else:
-            statusMsg = users.status(command[1], playerLookup)
+            statusMsg = users.roles(command[1], playerLookup)
         if statusMsg is not None:
             currentChat.message(channel, statusMsg)
 
