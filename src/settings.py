@@ -35,8 +35,5 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
 
     google_api_key = j['google-api-key']
 
-    srl_nick = j['srl-username']
-    srl_pw = j['srl-auth']
-
 def getFont(size):
     return pygame.font.Font(os.path.join(baseDir,"resources/Lobster 1.4.otf"), size)

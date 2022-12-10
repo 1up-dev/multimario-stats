@@ -9,7 +9,6 @@ import pygame
 import users
 import chatroom
 import player
-import srl
 import settings
 import sort
 import bot
@@ -65,9 +64,6 @@ print("Racers: " + str(list(playerLookup.keys())))
 t = threading.Thread(target=chat_init, args=(playerLookup,))
 t.daemon = True
 t.start()
-
-#SRL = threading.Thread(target=srl.srlThread, args=("#speedrunslive", mainChat, playerLookup,))
-#SRL.start()
 
 # pygame setup
 pygame.init()
