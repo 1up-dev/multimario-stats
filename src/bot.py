@@ -8,9 +8,13 @@ import time
 from pynput.keyboard import Key, Controller
 import users
 import settings
+import gsheets
+import player
+
+recon = False
 
 def fetchIRC(thisChat, playerLookup):
-    recon = False
+    global recon
     while True:
         try:
             if recon:
@@ -43,6 +47,7 @@ def fetchIRC(thisChat, playerLookup):
             recon = True
 
 def process_line(line, currentChat, playerLookup):
+    global recon
     if line == "":
         return
     #print(line)
@@ -98,16 +103,15 @@ def process_line(line, currentChat, playerLookup):
     with open(os.path.join(settings.baseDir,path), 'a') as f:
         f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line + "\n")
     
-    #print("[user]", user, "[command]", command, "[userid]", userid, "[ismod]", ismod)
-    
+    user = user.lower()[1:]
+
     if len(command) < 1:
         print("error: command is empty.",)
         return
-    
-    if command[0] not in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart']:
+    if command[0][0] != '!':
         return
-    user = user.lower()[1:]
-    print("[In chat "+channel+"] "+user+":"+str(command))
+    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers"]:
+        print("[In chat "+channel+"] "+user+":"+str(command))
 
     # global commands
     if command[0] == "!ping":
@@ -181,20 +185,20 @@ def process_line(line, currentChat, playerLookup):
     # updater commands
     if ((user in users.updaters) or (ismod) or (user in playerLookup.keys())) and (user not in users.blacklist):
         if command[0] in ["!add","!set"] and len(command) == 3:
-            player = command[1].lower()
+            racer = command[1].lower()
             try:
                 number = int(command[2])
             except ValueError:
                 currentChat.message(channel, user+": Not a number.")
                 return
-            if player not in playerLookup.keys():
+            if racer not in playerLookup.keys():
                 currentChat.message(channel, user+": Racer not found.")
                 return
             response = ""
             if command[0] == "!add":
-                response = playerLookup[player].update(playerLookup[player].collects + number)
+                response = playerLookup[racer].update(playerLookup[racer].collects + number)
             elif command[0] == "!set":
-                response = playerLookup[player].update(number)
+                response = playerLookup[racer].update(number)
             if response != "":
                 currentChat.message(channel, response)
             settings.redraw = True
@@ -222,43 +226,43 @@ def process_line(line, currentChat, playerLookup):
                     json.dump(j, f, indent=4)
                     f.truncate()
                 currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0])
-                for player in playerLookup.keys():
-                    playerLookup[player].calculateCompletionTime(settings.startTime)
+                for racer in playerLookup.keys():
+                    playerLookup[racer].calculateCompletionTime(settings.startTime)
                 settings.redraw = True
         elif command[0] == "!forcequit" and len(command) == 2:
-            player = command[1].lower()
-            if player in playerLookup.keys():
-                if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                    playerLookup[player].fail("quit")
+            racer = command[1].lower()
+            if racer in playerLookup.keys():
+                if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
+                    playerLookup[racer].fail("quit")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been forcequit.")
         elif command[0] == "!noshow" and len(command) == 2:
-            player = command[1].lower()
-            if player in playerLookup.keys():
-                playerLookup[player].fail("noshow")
+            racer = command[1].lower()
+            if racer in playerLookup.keys():
+                playerLookup[racer].fail("noshow")
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " set to No-show.")
         elif command[0] == "!dq" and len(command) == 2:
-            player = command[1].lower()
-            if player in playerLookup.keys():
-                if playerLookup[player].status == "live" or playerLookup[player].status == "done":
-                    playerLookup[player].fail("disqualified")
+            racer = command[1].lower()
+            if racer in playerLookup.keys():
+                if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
+                    playerLookup[racer].fail("disqualified")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been disqualified.")
         elif command[0] == "!revive" and len(command) == 2:
-            player = command[1].lower()
-            if player in playerLookup.keys():
-                if playerLookup[player].status == "done":
-                    playerLookup[player].collects -= 1
-                playerLookup[player].status = "live"
-                if playerLookup[player].collects == settings.max_score:
-                    playerLookup[player].status = "done"
+            racer = command[1].lower()
+            if racer in playerLookup.keys():
+                if playerLookup[racer].status == "done":
+                    playerLookup[racer].collects -= 1
+                playerLookup[racer].status = "live"
+                if playerLookup[racer].collects == settings.max_score:
+                    playerLookup[racer].status = "done"
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " has been revived.")
         elif command[0] == "!settime" and len(command) == 3:
             subject = command[1].lower()
             if subject in playerLookup.keys():
-                player = playerLookup[subject]
+                racer = playerLookup[subject]
                 stringTime = command[2]
                 newTime = command[2].split(":")
                 if len(newTime) != 3:
@@ -273,11 +277,11 @@ def process_line(line, currentChat, playerLookup):
                     currentChat.message(channel, "Invalid time string.")
                     return
                 
-                player.duration = duration
-                player.completionTime = stringTime
-                player.manualDuration(settings.startTime)
+                racer.duration = duration
+                racer.completionTime = stringTime
+                racer.manualDuration(settings.startTime)
                 settings.redraw = True
-                currentChat.message(channel, player.nameCaseSensitive+"'s time has been updated.")
+                currentChat.message(channel, racer.nameCaseSensitive+"'s time has been updated.")
         elif command[0] == "!blacklist" and len(command) == 2:
             subject = command[1].lower()
             if subject not in users.blacklist:
@@ -310,6 +314,19 @@ def process_line(line, currentChat, playerLookup):
             with kb.pressed(Key.ctrl):
                 kb.tap("5")
             currentChat.message(channel, "Toggled stream.")
-        # elif command[0] == '!restart':
-        #     currentChat.message(channel, "Restarting...")
-        #     os.execv(sys.executable, ["python"] + sys.argv)
+        elif command[0] == "!fetchracers":
+            newRacers = gsheets.getRacers()
+            new_racer_found = False
+            for r in newRacers:
+                if r.lower() not in playerLookup.keys():
+                    new_racer_found = True
+                    currentChat.message(channel, "Adding new racer {0} found on the Google spreadsheet.".format(r))
+                    playerLookup[r.lower()] = player.Player(r, {})
+                    currentChat.channels.append(r.lower())
+                    time.sleep(0.5)
+            if new_racer_found:
+                #tell the loop to reconnect to chat with new channel(s)
+                recon = True
+                settings.redraw = True
+                return
+            currentChat.message(channel, "No new racers found on the Google spreadsheet.")
