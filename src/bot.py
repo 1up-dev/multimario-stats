@@ -224,30 +224,32 @@ def process_line(line, currentChat, playerLookup):
                 if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
                     playerLookup[racer].finish("quit")
                     settings.redraw = True
-                    currentChat.message(channel, command[1] + " has been forcequit.")
+                    currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been forcequit.")
         elif command[0] == "!noshow" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
                 playerLookup[racer].finish("noshow")
                 settings.redraw = True
-                currentChat.message(channel, command[1] + " set to No-show.")
+                currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " set to No-show.")
         elif command[0] == "!dq" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
                 if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
                     playerLookup[racer].finish("disqualified")
                     settings.redraw = True
-                    currentChat.message(channel, command[1] + " has been disqualified.")
+                    currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been disqualified.")
         elif command[0] == "!revive" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
+                # only subtract 1 if the racer was done at time of issued command.
                 if playerLookup[racer].status == "done":
                     playerLookup[racer].score -= 1
                 playerLookup[racer].status = "live"
+                # if the player had max_score while quit/dqed, set status to done.
                 if playerLookup[racer].score == settings.max_score:
                     playerLookup[racer].status = "done"
                 settings.redraw = True
-                currentChat.message(channel, command[1] + " has been revived.")
+                currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been revived.")
         elif command[0] == "!settime" and len(command) == 3:
             subject = command[1].lower()
             if subject in playerLookup.keys():
