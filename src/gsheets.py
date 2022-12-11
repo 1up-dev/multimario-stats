@@ -24,14 +24,14 @@ def getRacers():
                     continue
 
                 if race_num <= 0:
-                    sheetRacers.append(e[0])
+                    sheetRacers.append(e[0].strip())
                 else:
                     if len(e) < race_num+1:
                         #print(e[0]+": not")
                         pass
                     elif(e[race_num] != ''):
                         #print(e[0]+": racing")
-                        sheetRacers.append(e[0])
+                        sheetRacers.append(e[0].strip())
                     else:
                         #print(e[0]+": not")
                         pass
