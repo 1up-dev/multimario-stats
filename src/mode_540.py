@@ -83,7 +83,7 @@ def draw(screen, playerLookup, sortedRacers, page):
         pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
         pygame.draw.rect(screen, (25, 25, 25), [corner[0]+2, corner[1]+2, 310, 138])
 
-        score = currentPlayer.collects
+        score = currentPlayer.score
         if currentPlayer.status == "live":
             bg = None
             gameCounts, barLengths, gameMaxes = [], [], []
@@ -165,14 +165,14 @@ def draw(screen, playerLookup, sortedRacers, page):
             done_r = doneTag.get_rect(center=((currentPlayer.corner[0]+(length/2), 85+currentPlayer.corner[1])))
             screen.blit(doneTag, done_r)
 
-            label = getFont(24).render(str("Final Time: {0}".format(currentPlayer.completionTime)), 1, (220,220,220))
+            label = getFont(24).render(str("Final Time: {0}".format(currentPlayer.duration_str)), 1, (220,220,220))
             label_r = label.get_rect(center=((currentPlayer.corner[0]+(length/2), 125+currentPlayer.corner[1])))
             screen.blit(label, label_r)
         
         else:
             text = ""
             offset = 0
-            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+currentPlayer.completionTime, 1, (220,220,220))
+            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+currentPlayer.duration_str, 1, (220,220,220))
             if currentPlayer.status == "quit":
                 text = "Quit"
             elif currentPlayer.status == "disqualified":

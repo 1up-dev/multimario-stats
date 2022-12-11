@@ -20,7 +20,7 @@ def sort(playerLookup):
                     break
         else:
             for index, racer in enumerate(sortedRacers):
-                if playerLookup[key].collects > playerLookup[racer].collects:
+                if playerLookup[key].score > playerLookup[racer].score:
                     sortedRacers.insert(index, key)
                     break
                 elif index == len(sortedRacers)-1:
@@ -35,7 +35,7 @@ def sort(playerLookup):
         current = playerLookup[racer]
         previous = playerLookup[sortedRacers[index-1]]
         if current.status != 'done':
-            if current.collects == previous.collects:
+            if current.score == previous.score:
                 current.place = previous.place
             else:
                 playerLookup[racer].place = index+1

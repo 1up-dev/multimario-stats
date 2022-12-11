@@ -154,13 +154,13 @@ def process_line(line, currentChat, playerLookup):
                 playerLookup[user].status = "live"
                 currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
             elif playerLookup[user].status == "done":
-                playerLookup[user].collects -= 1
+                playerLookup[user].score -= 1
                 playerLookup[user].status = "live"
                 currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
             settings.redraw = True
         
         if command[0] == "!quit" and playerLookup[user].status == "live":
-            playerLookup[user].fail("quit")
+            playerLookup[user].finish("quit")
             settings.redraw = True
             currentChat.message(channel, playerLookup[user].nameCaseSensitive + " has quit.")
 
@@ -185,9 +185,9 @@ def process_line(line, currentChat, playerLookup):
             return
         response = ""
         if command[0] == "!add":
-            response = playerLookup[racer].update(playerLookup[racer].collects + number)
+            response = playerLookup[racer].update(playerLookup[racer].score + number, playerLookup)
         elif command[0] == "!set":
-            response = playerLookup[racer].update(number)
+            response = playerLookup[racer].update(number, playerLookup)
         if response != "":
             currentChat.message(channel, response)
         settings.redraw = True
@@ -216,35 +216,35 @@ def process_line(line, currentChat, playerLookup):
                     f.truncate()
                 currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0])
                 for racer in playerLookup.keys():
-                    playerLookup[racer].calculateCompletionTime(settings.startTime)
+                    playerLookup[racer].calculateDuration()
                 settings.redraw = True
         elif command[0] == "!forcequit" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
                 if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
-                    playerLookup[racer].fail("quit")
+                    playerLookup[racer].finish("quit")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been forcequit.")
         elif command[0] == "!noshow" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
-                playerLookup[racer].fail("noshow")
+                playerLookup[racer].finish("noshow")
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " set to No-show.")
         elif command[0] == "!dq" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
                 if playerLookup[racer].status == "live" or playerLookup[racer].status == "done":
-                    playerLookup[racer].fail("disqualified")
+                    playerLookup[racer].finish("disqualified")
                     settings.redraw = True
                     currentChat.message(channel, command[1] + " has been disqualified.")
         elif command[0] == "!revive" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
                 if playerLookup[racer].status == "done":
-                    playerLookup[racer].collects -= 1
+                    playerLookup[racer].score -= 1
                 playerLookup[racer].status = "live"
-                if playerLookup[racer].collects == settings.max_score:
+                if playerLookup[racer].score == settings.max_score:
                     playerLookup[racer].status = "done"
                 settings.redraw = True
                 currentChat.message(channel, command[1] + " has been revived.")
@@ -252,7 +252,6 @@ def process_line(line, currentChat, playerLookup):
             subject = command[1].lower()
             if subject in playerLookup.keys():
                 racer = playerLookup[subject]
-                stringTime = command[2]
                 newTime = command[2].split(":")
                 if len(newTime) != 3:
                     currentChat.message(channel, "Invalid time string.")
@@ -266,9 +265,9 @@ def process_line(line, currentChat, playerLookup):
                     currentChat.message(channel, "Invalid time string.")
                     return
                 
-                racer.duration = duration
-                racer.completionTime = stringTime
-                racer.manualDuration(settings.startTime)
+                racer.finishTimeAbsolute = settings.startTime + datetime.timedelta(seconds=duration)
+                racer.calculateDuration()
+
                 settings.redraw = True
                 currentChat.message(channel, racer.nameCaseSensitive+"'s time has been updated.")
         elif command[0] == "!blacklist" and len(command) == 2:

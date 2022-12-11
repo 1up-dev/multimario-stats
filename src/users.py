@@ -90,7 +90,7 @@ def roles(user, playerLookup):
     user = user.lower()
     returnString = user + ": "
     if user in playerLookup.keys():
-        returnString += "Racer ("+"Place: #"+str(playerLookup[user].place)+", Status: "+playerLookup[user].status +", Score: "+ str(playerLookup[user].collects) +"), "
+        returnString += "Racer ("+"Place: #"+str(playerLookup[user].place)+", Status: "+playerLookup[user].status +", Score: "+ str(playerLookup[user].score) +"), "
     if user in admins:
         returnString += "Admin, "
     if user in updaters:
