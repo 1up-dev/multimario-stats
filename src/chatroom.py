@@ -31,7 +31,7 @@ class ChatRoom:
         while True:
             channel_list = "#"+",#".join(self.channels[j:j+20])
             if j != 0:
-                print("Sleeping for 11 seconds. Next channel:",channel_list.split(",")[0])
+                print("Sleeping 11 seconds before joining next batch of channels...")
                 time.sleep(11)
             try:
                 # Errors produced by this line:
