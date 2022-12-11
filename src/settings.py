@@ -1,5 +1,4 @@
 import datetime
-import pygame
 import json
 import os
 
@@ -34,6 +33,3 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     twitch_secret = j['twitch-api-secret']
 
     google_api_key = j['google-api-key']
-
-def getFont(size):
-    return pygame.font.Font(os.path.join(baseDir,"resources/Lobster 1.4.otf"), size)

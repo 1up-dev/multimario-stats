@@ -2,6 +2,10 @@ import math
 import datetime
 import pygame
 import settings
+import os
+
+def getFont(size):
+    return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
 
 def drawTimer(screen):
     dur = (datetime.datetime.now() - settings.startTime).total_seconds()
@@ -41,7 +45,7 @@ def drawTimer(screen):
     r = pygame.Rect([0,0,394,94])
     r.center = (1277,84)
     pygame.draw.rect(screen, (40, 40, 40), r)
-    timer = settings.getFont(65).render(cur_time, 1, (200,200,200))
+    timer = getFont(65).render(cur_time, 1, (200,200,200))
     timer_r = timer.get_rect(center=(1277,84))#topright=, etc
     screen.blit(timer, timer_r)
 

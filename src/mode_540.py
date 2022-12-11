@@ -4,7 +4,6 @@ import copy
 import pygame
 import settings
 import timer
-from settings import getFont
 
 games = copy.deepcopy(settings.modeInfo['games'])
 for g in games:
@@ -15,6 +14,9 @@ for g in games:
 
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
 background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
+
+def getFont(size):
+    return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
 
 slots = [
     (7,12), (325,12), (643,12), (961,12), (1279,12),
