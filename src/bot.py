@@ -165,7 +165,11 @@ def process_line(line, currentChat, playerLookup):
 
     #!add/!set
     if command[0] in ["!add","!set"]:
-        if len(command) == 3 and ((user in users.updaters) or (ismod) or (user in playerLookup.keys())) and (user not in users.blacklist):
+        if ((user not in users.updaters) and (not ismod) and (user not in playerLookup.keys())) or (user in users.blacklist):
+            currentChat.message(channel, user+": You do not have permission to update score counts.")
+            return
+
+        if len(command) == 3:
             racer = command[1].lower()
             number = command[2]
         elif len(command) == 2 and user in playerLookup.keys():

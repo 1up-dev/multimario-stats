@@ -46,7 +46,9 @@ class Player:
                 self.score = count
                 self.finish("done")
                 return self.nameCaseSensitive + " has finished!"
-        return ""
+            else:
+                return "The requested score is less than 0 or greater than the maximum score."
+        return self.nameCaseSensitive + " is not live, so their score cannot be updated."
 
     def calculateDuration(self):
         # calculate duration in seconds from finishTime - startTime
