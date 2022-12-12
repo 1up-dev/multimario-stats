@@ -50,10 +50,9 @@ def process_line(line, currentChat, playerLookup):
     global recon
     if line == "":
         return
-    #print(line)
     line = line.rstrip().split()
+    # i don't know why line is sometimes (rarely) empty here
     if len(line) == 0:
-        print("this condition is necessary")
         return
 
     ismod = False
