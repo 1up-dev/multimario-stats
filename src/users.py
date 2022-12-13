@@ -60,7 +60,6 @@ def push_all():
 def add(user, role: Role):
     id = twitch.getTwitchId(user)
     if id == None:
-        print("Twitch user not found. Aborting.")
         return False
     if role == Role.UPDATER:
         updaters[user] = id
