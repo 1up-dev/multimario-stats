@@ -4,11 +4,20 @@ import pygame
 import settings
 import os
 
+stopped_time = ""
+
 def getFont(size):
     return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
 
 def drawTimer(screen):
-    dur = (datetime.datetime.now() - settings.startTime).total_seconds()
+    global stopped_time
+    if settings.stopTimer and stopped_time == "":
+        stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()
+    if settings.stopTimer == False:
+        dur = (datetime.datetime.now() - settings.startTime).total_seconds()
+        stopped_time = ""
+    else:
+        dur = stopped_time
     dur = math.floor(dur)
     
     negative = False

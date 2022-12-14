@@ -1,9 +1,12 @@
+import settings
+
 def sort(playerLookup):
     for key in playerLookup:
         playerLookup[key].backup()
 
     # sorting runners for display
     sortedRacers = []
+    all_racers_done = True
     for key in playerLookup:
         if len(sortedRacers) == 0:
             sortedRacers.append(key)
@@ -20,12 +23,19 @@ def sort(playerLookup):
                     break
         else:
             for index, racer in enumerate(sortedRacers):
+                #set all_racers_done flag to False if any racer is live
+                if playerLookup[key].status == "live":
+                    all_racers_done = False
                 if playerLookup[key].score > playerLookup[racer].score:
                     sortedRacers.insert(index, key)
                     break
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
                     break
+    if all_racers_done:
+        settings.stopTimer = True
+    else:
+        settings.stopTimer = False
 
     # place number assignments
     for index, racer in enumerate(sortedRacers):

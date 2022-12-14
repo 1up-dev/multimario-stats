@@ -11,6 +11,7 @@ mode = ""
 max_score = 0
 gsheet = ""
 modeInfo = {}
+stopTimer = False
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)
     startTime = datetime.datetime.fromisoformat(j['start-time'])
