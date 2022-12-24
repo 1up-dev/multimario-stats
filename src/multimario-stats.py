@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 import threading
@@ -11,44 +10,17 @@ import chatroom
 import player
 import settings
 import sort
-import bot
 import timer
 import mode
 
-def chat_init(playerLookup):
-    channels = []
-    for c in settings.extra_chats:
-        if c not in playerLookup.keys():
-            channels.append(c)
-        else:
-            print("skipping extra channel", c, "which is already a racer")
-    for c in playerLookup.keys():
-        channels.append(c)
-
-    c = chatroom.ChatRoom(channels)
-    attempts = 0
-    while(c.reconnect() == False):
-        attempts += 1
-        time.sleep(1)
-        if attempts > 5:
-            print("Failed to connect to Twitch IRC successfully.")
-            return
-    time.sleep(1)
-    
-    t = threading.Thread(target=bot.fetchIRC, args=(c, playerLookup))
-    t.daemon = True
-    t.start()
-
-# create the backup file if it doesn't exist
-j = {}
+# player object instantiation
 backupFile = os.path.join(settings.baseDir,"backup.json")
 if not os.path.isfile(backupFile):
+    # create backup file if it doesn't exist
     with open(backupFile, 'w+') as f:
-        json.dump(j, f, indent=4)
+        json.dump({}, f, indent=4)
 with open(backupFile, 'r') as f:
     j = json.load(f)
-
-# player object instantiation
 racers = users.init_users()
 playerLookup = {}
 for racer in racers:
@@ -56,10 +28,9 @@ for racer in racers:
     if settings.use_backups and j != {} and racer.lower() in j.keys():
         state_data = j[racer.lower()]
     playerLookup[racer.lower()] = player.Player(racer, state_data)
-print("Racers: " + str(list(playerLookup.keys())))
 
-# join Twitch channels
-t = threading.Thread(target=chat_init, args=(playerLookup,))
+# start bot thread
+t = threading.Thread(target=chatroom.bot_init, args=(playerLookup,))
 t.daemon = True
 t.start()
 
@@ -67,7 +38,6 @@ t.start()
 pygame.init()
 screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats")
-pygame.mixer.stop()
 
 # determine number of pages
 max_count = 99

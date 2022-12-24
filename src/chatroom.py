@@ -2,8 +2,9 @@ import socket
 import os
 import datetime
 import time
-import settings
 import traceback
+import settings
+import bot
 
 class ChatRoom:
     def __init__(self, channels):
@@ -56,3 +57,20 @@ class ChatRoom:
             # print(datetime.datetime.now().isoformat().split(".")[0], "Pong sent")
         except socket.error:
             print("[Twitch IRC] Socket error when attempting pong.")
+
+def bot_init(playerLookup):
+    channels = []
+    for c in settings.extra_chats:
+        if c.lower() not in playerLookup.keys():
+            channels.append(c.lower())
+    for c in playerLookup.keys():
+        channels.append(c)
+    c = ChatRoom(channels)
+    attempts = 0
+    while(c.reconnect() == False):
+        attempts += 1
+        time.sleep(1)
+        if attempts > 5:
+            print("Failed to connect to Twitch IRC successfully.")
+            return
+    bot.fetchIRC(c,playerLookup)
