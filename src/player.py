@@ -45,7 +45,8 @@ class Player:
             elif count == settings.max_score:
                 self.score = count
                 self.finish("done")
-                return self.nameCaseSensitive + " has finished!"
+                sort.sort(playerLookup)
+                return f"{self.nameCaseSensitive}  has finished in place #{self.place} with a time of {self.duration_str}! GG!"
             else:
                 return "The requested score is less than 0 or greater than the maximum score."
         return self.nameCaseSensitive + " is not live, so their score cannot be updated."
