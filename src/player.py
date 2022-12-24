@@ -36,20 +36,23 @@ class Player:
             self.profile = pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
 
     def update(self, count, playerLookup):
-        if self.status == "live":
-            if 0 <= count < settings.max_score:
-                self.score = count
-                # sort() reassigns place numbers so the command output will be accurate
-                sort.sort(playerLookup)
-                return self.nameCaseSensitive + mode.hasCollected(self.score) + " (Place: #" + str(self.place) + ")"
-            elif count == settings.max_score:
-                self.score = count
-                self.finish("done")
-                sort.sort(playerLookup)
-                return f"{self.nameCaseSensitive} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
-            else:
-                return "The requested score is less than 0 or greater than the maximum score."
-        return self.nameCaseSensitive + " is not live, so their score cannot be updated."
+        if self.status not in ["live","done"]:
+            return self.nameCaseSensitive + " is not live, so their score cannot be updated."
+        if 0 <= count < settings.max_score:
+            if self.status == "done":
+                #if updating a done racer, set them to live
+                self.status = "live"
+            self.score = count
+            # sort() reassigns place numbers so the command output will be accurate
+            sort.sort(playerLookup)
+            return self.nameCaseSensitive + mode.hasCollected(self.score) + " (Place: #" + str(self.place) + ")"
+        elif count == settings.max_score:
+            self.score = count
+            self.finish("done")
+            sort.sort(playerLookup)
+            return f"{self.nameCaseSensitive} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
+        else:
+            return "The requested score is less than 0 or greater than the maximum score."
 
     def calculateDuration(self):
         # calculate duration in seconds from finishTime - startTime
