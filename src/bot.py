@@ -55,21 +55,29 @@ def process_line(line, currentChat, playerLookup):
     if len(line) == 0:
         return
 
-    ismod = False
+    # Twitch message tag processing
+    ismod_orvip = False
     userId = -1
+    userCS = ""
     if line[0][0] == "@":
         tags = line.pop(0)
-        tmp8 = tags.split("mod=")
-        if len(tmp8) > 1 and len(tmp8[1])> 0:
-            if tmp8[1][0] == "1":
-                ismod = True
-        tmp9 = tags.split("user-id=")
-        if len(tmp9) > 1:
-            userId = tmp9[1].split(";")[0]
+        tmp = tags.split("mod=")
+        if len(tmp) > 1 and len(tmp[1])> 0 and tmp[1][0] == "1":
+            ismod_orvip = True
+        tmp = tags.split("vip=")
+        if len(tmp) > 1 and len(tmp[1])> 0 and tmp[1][0] == "1":
+            ismod_orvip = True
+        tmp = tags.split("user-id=")
+        if len(tmp) > 1:
+            userId = tmp[1].split(";")[0]
+        tmp = tags.split("display-name=")
+        if len(tmp) > 1:
+            userCS = tmp[1].split(";")[0]
 
     user = ""
     command = []
     channel = ""
+    whisper = False
     for index, word in enumerate(line):
         if index == 0:
             user = word.split('!')[0]
@@ -80,6 +88,10 @@ def process_line(line, currentChat, playerLookup):
             if len(line) < 4:
                 return
         if index == 2:
+            # if line[1] == "WHISPER":
+            #     whisper = True
+            #     channel = "#"+user
+            #     continue
             channel = word
         if index == 3:
             if len(word) <= 1:
@@ -105,7 +117,6 @@ def process_line(line, currentChat, playerLookup):
     user = user.lower()[1:]
 
     if len(command) < 1:
-        print("error: command is empty.",)
         return
     if command[0][0] != '!':
         return
@@ -114,6 +125,8 @@ def process_line(line, currentChat, playerLookup):
 
     # global commands
     if command[0] == "!ping":
+        if whisper:
+            currentChat.message(channel, "/w "+user+" Hi. Bot is alive.")
         currentChat.message(channel, "Hi. Bot is alive.")
     if command[0] == "!racecommands":
         currentChat.message(channel, "Multimario race bot command list: https://pastebin.com/d7mPZd13")
@@ -165,7 +178,7 @@ def process_line(line, currentChat, playerLookup):
 
     #!add/!set
     if command[0] in ["!add","!set"]:
-        if ((user not in users.updaters) and (not ismod) and (user not in playerLookup.keys())) or (user in users.blacklist):
+        if ((user not in users.updaters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user in users.blacklist):
             currentChat.message(channel, user+": You do not have permission to update score counts.")
             return
 
@@ -329,6 +342,6 @@ def process_line(line, currentChat, playerLookup):
                     time.sleep(0.5)
 
             # tell the loop to reconnect to chat with new channel(s)
-            # and trigger a sort and redraw to remove old player cards
             recon = True
+            # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
