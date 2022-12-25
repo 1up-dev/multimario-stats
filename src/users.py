@@ -139,6 +139,10 @@ def init_users():
     
 # log 1 update by user id for racer
 def log(id, user, racer):
+    # create file if it doesn't exist
+    if not os.path.isfile('update-log.json'):
+        with open('update-log.json', 'w+') as f:
+            json.dump({}, f, indent=4)
     with open(os.path.join(settings.baseDir,'update-log.json'),'r') as f:
         udlog = json.load(f)
 
