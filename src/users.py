@@ -6,7 +6,7 @@ import datetime
 import twitch
 import gsheets
 import settings
-from settings import baseDir
+import player
 
 class Role(Enum):
     ADMIN = 1
@@ -14,10 +14,12 @@ class Role(Enum):
     BLACKLIST = 3
     UPDATER = 4
 
+admins, updaters, blacklist = [], [], []
+
 def updateUsersByID():
     print("Updating usernames by id using the Twitch API...")
 
-    with open(os.path.join(baseDir,'users.json'),'r') as f:
+    with open(os.path.join(settings.baseDir,'users.json'),'r') as f:
         j = json.load(f)
         sets = [ j['admins'], j['updaters'], j['blacklist'], j['test-racers'] ]
     
@@ -26,7 +28,7 @@ def updateUsersByID():
         if s_new != None:
             sets[i] = s_new
 
-    with open(os.path.join(baseDir,'users.json'),'w') as f:
+    with open(os.path.join(settings.baseDir,'users.json'),'w') as f:
         j['admins'] = sets[0]
         j['updaters'] = sets[1]
         j['blacklist'] = sets[2]
@@ -38,7 +40,7 @@ def updateUsersByID():
     updaters = sets[1]
     blacklist = sets[2]
 
-    with open(os.path.join(baseDir,'settings.json'), 'r+') as f:
+    with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
         j = json.load(f)
         j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
         f.seek(0)
@@ -48,7 +50,7 @@ def updateUsersByID():
     print("Done updating Twitch usernames.")
 
 def push_all():
-    with open(os.path.join(baseDir,'users.json'),'r+') as f:
+    with open(os.path.join(settings.baseDir,'users.json'),'r+') as f:
         j = json.load(f)
         j['admins'] = admins
         j['blacklist'] = blacklist
@@ -100,11 +102,9 @@ def roles(user, playerLookup):
         returnString += "None, "
     return returnString[0:-2]
 
-admins, updaters, blacklist = [], [], []
-
 def init_users():
     global admins, updaters, blacklist
-    with open(os.path.join(baseDir,'users.json'),'r') as f:
+    with open(os.path.join(settings.baseDir,'users.json'),'r') as f:
         j = json.load(f)
         admins = j['admins']
         blacklist = j['blacklist']
@@ -121,4 +121,38 @@ def init_users():
         t.daemon = True
         t.start()
     
-    return racers
+    # player object instantiation
+    playerLookup = {}
+    backupFile = os.path.join(settings.baseDir,"backup.json")
+    if not os.path.isfile(backupFile):
+        # create backup file if it doesn't exist
+        with open(backupFile, 'w+') as f:
+            json.dump({}, f, indent=4)
+    with open(backupFile, 'r') as f:
+        j = json.load(f)
+    for racer in racers:
+        state_data = {}
+        if settings.use_backups and j != {} and racer.lower() in j.keys():
+            state_data = j[racer.lower()]
+        playerLookup[racer.lower()] = player.Player(racer, state_data)
+    return playerLookup
+    
+# log 1 update by user id for racer
+def log(id, user, racer):
+    with open(os.path.join(settings.baseDir,'update-log.json'),'r') as f:
+        udlog = json.load(f)
+
+    if id in udlog.keys():
+        udlog[id]["total"] += 1
+        if racer in udlog[id]["by-channel"].keys():
+            udlog[id]["by-channel"][racer] += 1
+        else:
+            udlog[id]["by-channel"][racer] = 1
+    else:
+        # construct user object
+        udlog[id] = {"user":user, "total":1, "by-channel":{racer:1}}
+    
+    with open(os.path.join(settings.baseDir,'update-log.json'),'r+') as f:
+        f.seek(0)
+        json.dump(udlog, f, indent=4)
+        f.truncate()

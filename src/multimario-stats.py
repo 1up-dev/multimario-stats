@@ -1,4 +1,3 @@
-import json
 import os
 import threading
 import time
@@ -7,27 +6,13 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import users
 import chatroom
-import player
 import settings
 import sort
 import timer
 import mode
 
-# player object instantiation
-backupFile = os.path.join(settings.baseDir,"backup.json")
-if not os.path.isfile(backupFile):
-    # create backup file if it doesn't exist
-    with open(backupFile, 'w+') as f:
-        json.dump({}, f, indent=4)
-with open(backupFile, 'r') as f:
-    j = json.load(f)
-racers = users.init_users()
-playerLookup = {}
-for racer in racers:
-    state_data = {}
-    if settings.use_backups and j != {} and racer.lower() in j.keys():
-        state_data = j[racer.lower()]
-    playerLookup[racer.lower()] = player.Player(racer, state_data)
+# load users and racers, construct player objects
+playerLookup = users.init_users()
 
 # start bot thread
 t = threading.Thread(target=chatroom.bot_init, args=(playerLookup,))

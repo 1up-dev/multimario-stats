@@ -1,10 +1,8 @@
 import random
 import os
 import pygame
-import time
 import datetime
 import math
-import chatroom
 import json
 import mode
 import settings

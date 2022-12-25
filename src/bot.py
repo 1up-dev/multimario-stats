@@ -1,10 +1,8 @@
 import datetime
 import os
-import sys
 import json
 import traceback
 import time
-#import pyautogui
 from pynput.keyboard import Key, Controller
 import users
 import settings
@@ -57,7 +55,7 @@ def process_line(line, currentChat, playerLookup):
 
     # Twitch message tag processing
     ismod_orvip = False
-    userId = -1
+    userId = ""
     userCS = ""
     if line[0][0] == "@":
         tags = line.pop(0)
@@ -204,6 +202,10 @@ def process_line(line, currentChat, playerLookup):
             response = playerLookup[racer].update(playerLookup[racer].score + number, playerLookup)
         elif command[0] == "!set":
             response = playerLookup[racer].update(number, playerLookup)
+        
+        # Log score update in external file
+        users.log(userId, user, racer)
+
         if response != "":
             currentChat.message(channel, response)
         settings.redraw = True
@@ -315,7 +317,6 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, "Quitting program.")
             settings.doQuit = True
         elif command[0] == "!togglestream":
-            #pyautogui.hotkey("ctrl","5")
             kb = Controller()
             with kb.pressed(Key.ctrl):
                 kb.tap("5")
