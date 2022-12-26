@@ -149,6 +149,7 @@ def log(id, user, racer):
         udlog = json.load(f)
 
     if id in udlog.keys():
+        udlog[id]["user"] = user
         udlog[id]["total"] += 1
         if racer in udlog[id]["by-racer"].keys():
             udlog[id]["by-racer"][racer] += 1
