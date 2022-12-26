@@ -26,7 +26,7 @@ def hasCollected(score):
     for g in games:
         if score <= g['count']:
             game = g['name']
-            noun = g['collectable']
+            noun = g['collectible']
             break
         score -= g['count']
     
