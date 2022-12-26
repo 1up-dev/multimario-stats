@@ -139,6 +139,8 @@ def init_users():
     
 # log 1 update by user id for racer
 def log(id, user, racer):
+    if id == "":
+        return
     # create file if it doesn't exist
     if not os.path.isfile('update-log.json'):
         with open('update-log.json', 'w+') as f:
@@ -148,13 +150,13 @@ def log(id, user, racer):
 
     if id in udlog.keys():
         udlog[id]["total"] += 1
-        if racer in udlog[id]["by-channel"].keys():
-            udlog[id]["by-channel"][racer] += 1
+        if racer in udlog[id]["by-racer"].keys():
+            udlog[id]["by-racer"][racer] += 1
         else:
-            udlog[id]["by-channel"][racer] = 1
+            udlog[id]["by-racer"][racer] = 1
     else:
         # construct user object
-        udlog[id] = {"user":user, "total":1, "by-channel":{racer:1}}
+        udlog[id] = {"user":user, "total":1, "by-racer":{racer:1}}
     
     with open(os.path.join(settings.baseDir,'update-log.json'),'r+') as f:
         f.seek(0)

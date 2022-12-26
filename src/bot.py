@@ -204,7 +204,7 @@ def process_line(line, currentChat, playerLookup):
             response = playerLookup[racer].update(number, playerLookup)
         
         # Log score update in external file
-        users.log(userId, user, racer)
+        users.log(userId, userCS, playerLookup[racer].nameCaseSensitive)
 
         if response != "":
             currentChat.message(channel, response)
