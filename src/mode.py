@@ -53,45 +53,24 @@ def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.drawTimer(screen)
     
-    if page == 2:
-        slot = 0
-        for i, r in enumerate(sortedRacers):
-            if 3 <= i <= 52:
-                playerLookup[r].corner = slots[len(slots)-1]
-                continue
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
-    elif page == 1:
-        slot = 0
-        for i, r in enumerate(sortedRacers):
-            if 3 <= i <= 27:
-                playerLookup[r].corner = slots[len(slots)-1]
-                continue
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
-    else:
-        slot = 0
-        for r in sortedRacers:
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
+    x,y = -1,-1
+    if page != 0:
+        x = 3
+        y = 2 + page * 25
+
+    slot = 0
+    for i, r in enumerate(sortedRacers):
+        if x <= i <= y:
+            playerLookup[r].corner = slots[len(slots)-1]
+            continue
+        if slot >= len(slots):
+            playerLookup[r].corner = slots[len(slots)-1]
+        else:
+            playerLookup[r].corner = slots[slot]
+        if slot == 2:
+            slot += 3
+        else:
+            slot += 1
 
     #-----------scorecard drawing------------
     for key in playerLookup:
