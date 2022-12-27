@@ -96,7 +96,11 @@ def draw(screen, playerLookup, sortedRacers, page):
                 elif score <= g['count']:
                     bg = g['background']
                     if score == g['count']:
-                        bg = games[i+1]['background']
+                        if i+1 <= len(games)-1:
+                            bg = games[i+1]['background']
+                        else:
+                            print(f"Tried to access background for game after last game. fix? player: {currentPlayer.nameCaseSensitive} score: {score}")
+                            bg = games[i]['background']
                     gameCounts[-1] = score
                     done = True
                     score -= g['count']
