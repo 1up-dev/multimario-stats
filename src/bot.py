@@ -118,7 +118,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if command[0][0] != '!':
         return
-    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers"]:
+    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin"]:
         print("[In chat "+channel+"] "+user+":"+str(command))
 
     # global commands
@@ -156,6 +156,42 @@ def process_line(line, currentChat, playerLookup):
                 currentChat.message(channel, command[1] + " is no longer an updater.")
             else:
                 currentChat.message(channel, command[1] + " is already not an updater.")
+    
+    if command[0] == "!mmleave":
+        l_channel = ""
+        if len(command) == 1:
+            if user != channel[1:]:
+                return
+            l_channel = channel[1:]
+        elif len(command) == 2:
+            if user not in users.admins:
+                return
+            l_channel = command[1].lower()
+        else:
+            return
+        if l_channel not in currentChat.channels:
+            currentChat.message(channel,f"Already not active in channel #{l_channel}.")
+            return
+        currentChat.message(channel,f"{user}: Leaving #{l_channel} now.")
+        currentChat.part(l_channel)
+    
+    if command[0] == "!mmjoin":
+        j_channel = ""
+        if len(command) == 1:
+            if user not in playerLookup.keys():
+                return
+            j_channel = user
+        elif len(command) == 2:
+            if user not in users.admins:
+                return
+            j_channel = command[1].lower()
+        else:
+            return
+        if j_channel in currentChat.channels:
+            currentChat.message(channel,f"Already active in channel #{j_channel}.")
+            return
+        currentChat.message(channel,f"{user}: Joining #{j_channel} now.")
+        currentChat.join(j_channel)
 
     # racer commands
     if user in playerLookup.keys():
@@ -331,18 +367,17 @@ def process_line(line, currentChat, playerLookup):
                 if r.lower() not in playerLookup.keys():
                     currentChat.message(channel, "Adding new racer {0} found on the Google spreadsheet.".format(r))
                     playerLookup[r.lower()] = player.Player(r, {})
-                    currentChat.channels.append(r.lower())
+                    currentChat.join(r.lower())
                     time.sleep(0.5)
             
             #delete racers that have been removed from the sheet
             p_keys = list(playerLookup.keys())
-            for p in p_keys:
-                if p not in new_racers_lower:
-                    currentChat.message(channel, "Removing racer {0} not found on the Google spreadsheet.".format(playerLookup[p].nameCaseSensitive))
-                    playerLookup.pop(p)
+            for r in p_keys:
+                if r not in new_racers_lower:
+                    currentChat.message(channel, "Removing racer {0} not found on the Google spreadsheet.".format(playerLookup[r].nameCaseSensitive))
+                    playerLookup.pop(r)
+                    currentChat.part(r)
                     time.sleep(0.5)
 
-            # tell the loop to reconnect to chat with new channel(s)
-            recon = True
             # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
