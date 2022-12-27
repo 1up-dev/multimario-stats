@@ -14,8 +14,19 @@ class ChatRoom:
         self.PASSWORD = settings.twitch_pw
         self.channels = channels
         self.currentSocket = socket.socket()
+        self.msgCount = 0
+        self.msgPeriod = datetime.datetime.now()
     def message(self, channel, msg):
+        timer = (datetime.datetime.now() - self.msgPeriod).total_seconds()
+        if timer > 30:
+            self.msgPeriod = datetime.datetime.now()
+            self.msgCount = 0
+        elif self.msgCount >= 20:
+            time.sleep(30-timer)
+            self.msgPeriod = datetime.datetime.now()
+            self.msgCount = 0
         try:
+            self.msgCount += 1
             self.currentSocket.send(bytes("PRIVMSG "+channel+" :"+msg+"\n", "UTF-8"))
         except socket.error:
             print("[Twitch IRC] Socket error.")
@@ -44,8 +55,8 @@ class ChatRoom:
         while True:
             channel_list = "#"+",#".join(self.channels[j:j+20])
             if j != 0:
-                print("Sleeping 11 seconds before joining next batch of channels...")
-                time.sleep(11)
+                print("Sleeping 10 seconds before joining next batch of channels...")
+                time.sleep(10.1)
             try:
                 # Errors produced by this line:
                 # ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
