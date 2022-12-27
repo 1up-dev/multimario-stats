@@ -198,6 +198,8 @@ def process_line(line, currentChat, playerLookup):
         if command[0] in ["!rejoin", "!unquit"]:
             if playerLookup[user].status == "quit":
                 playerLookup[user].status = "live"
+                if playerLookup[user].score == settings.max_score:
+                    playerLookup[user].status = "done"
                 currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
             elif playerLookup[user].status == "done":
                 playerLookup[user].score -= 1
