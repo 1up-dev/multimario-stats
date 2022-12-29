@@ -5,27 +5,25 @@ import os
 import settings
 
 # Uses the Twitch API to fetch profile pictures of racers
-def fetchProfiles(users):
-    for user in users:
-        user =  user.lower()
-        path = os.path.join(settings.baseDir,"profiles/"+user+".png")
-        if not os.path.isfile(path):
-            url = "https://api.twitch.tv/helix/users?login="+user
-            headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
-            response = requests.get(url, headers=headers)
-            if response.status_code in range(200,300):
-                responseData = json.loads(response.content.decode("UTF-8"))['data']
-                if len(responseData)==0:
-                    print("[API] Twitch user "+user+" does not exist. Using default image.")
-                    #playerLookup[user].validTwitchAccount = False
-                else:
-                    data = responseData[0]
-                    profileLocation = data['profile_image_url']
-                    urllib.request.urlretrieve(profileLocation, "."+"/profiles/"+user+".png")
-                    print("[API] Fetched profile of Twitch user "+user+".")
-            else:
-                print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-    return
+def fetchProfile(user):
+    user =  user.lower()
+    path = os.path.join(settings.baseDir,"profiles/"+user+".png")
+    if os.path.isfile(path):
+        return
+    url = "https://api.twitch.tv/helix/users?login="+user
+    headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
+    response = requests.get(url, headers=headers)
+    if response.status_code not in range(200,300):
+        print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
+        return
+    responseData = json.loads(response.content.decode("UTF-8"))['data']
+    if len(responseData)==0:
+        print("[API] Twitch user "+user+" does not exist. Using default image.")
+        return
+    data = responseData[0]
+    profileLocation = data['profile_image_url']
+    urllib.request.urlretrieve(profileLocation, "."+"/profiles/"+user+".png")
+    print("[API] Fetched profile of Twitch user "+user+".")
 
 def getTwitchId(user):
     url = "https://api.twitch.tv/helix/users?login="+user

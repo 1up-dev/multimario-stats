@@ -113,7 +113,6 @@ def init_users():
             racers = list(j['test-racers'].keys())
     if not settings.debug:
         racers = gsheets.getRacers()
-    twitch.fetchProfiles(racers)
 
     # update usernames by ID if it hasn't been done in the last day
     if (datetime.datetime.now() - settings.last_id_update).total_seconds() > 86400:

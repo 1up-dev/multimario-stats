@@ -7,6 +7,7 @@ import json
 import mode
 import settings
 import sort
+import twitch
 
 class Player:
     def __init__(self, name, state_data):
@@ -27,7 +28,7 @@ class Player:
             if state_data['finishtime'] != None:
                 self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
             self.calculateDuration()
-        
+        twitch.fetchProfile(self.name)
         try:
             self.profile = pygame.image.load(os.path.join(settings.baseDir,f"profiles/{self.name}.png"))
         except pygame.error:
