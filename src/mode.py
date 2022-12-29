@@ -99,7 +99,7 @@ def draw(screen, playerLookup, sortedRacers, page):
                         if i+1 <= len(games)-1:
                             bg = games[i+1]['background']
                         else:
-                            print(f"Tried to access background for game after last game. fix? player: {currentPlayer.nameCaseSensitive} score: {score}")
+                            print(f"Error: {currentPlayer.nameCaseSensitive} has {currentPlayer.score} (max score) while live.")
                             bg = games[i]['background']
                     gameCounts[-1] = score
                     done = True
