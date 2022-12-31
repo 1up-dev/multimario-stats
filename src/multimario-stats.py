@@ -45,6 +45,8 @@ while True:
         break
 
     if settings.redraw == True:
+        for key in playerLookup:
+            playerLookup[key].backup()
         sortedRacers = sort.sort(playerLookup)
     
     # redraw every 10 seconds or if redraw is requested

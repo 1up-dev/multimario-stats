@@ -37,6 +37,9 @@ class Player:
     def update(self, count, playerLookup):
         if self.status not in ["live","done"]:
             return self.nameCaseSensitive + " is not live, so their score cannot be updated."
+        if count < 0 or count > settings.max_score:
+            return "The requested score is less than 0 or greater than the maximum possible score."
+        
         if 0 <= count < settings.max_score:
             if self.status == "done":
                 #if updating a done racer, set them to live
@@ -50,8 +53,6 @@ class Player:
             self.finish("done")
             sort.sort(playerLookup)
             return f"{self.nameCaseSensitive} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
-        else:
-            return "The requested score is less than 0 or greater than the maximum score."
 
     def calculateDuration(self):
         # calculate duration in seconds from finishTime - startTime

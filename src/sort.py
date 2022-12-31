@@ -1,9 +1,6 @@
 import settings
 
 def sort(playerLookup):
-    for key in playerLookup:
-        playerLookup[key].backup()
-
     # sorting runners for display
     sortedRacers = []
     all_racers_done = True
