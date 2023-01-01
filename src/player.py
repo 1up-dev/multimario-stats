@@ -47,7 +47,19 @@ class Player:
             self.score = count
             # sort() reassigns place numbers so the command output will be accurate
             sort.sort(playerLookup)
-            return self.nameCaseSensitive + mode.hasCollected(self.score) + " (Place: #" + str(self.place) + ")"
+            # construct "has collected" message
+            games = settings.modeInfo['games']
+            game, collectible = "", ""
+            score = self.score
+            for g in games:
+                if score <= g['count']:
+                    game = g['name']
+                    collectible = g['collectible']
+                    break
+                score -= g['count']
+            if score != 1:
+                collectible += "s"
+            return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place: #{str(self.place)})"
         elif count == settings.max_score:
             self.score = count
             self.finish("done")

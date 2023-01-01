@@ -19,21 +19,6 @@ background = pygame.image.load(os.path.join(settings.baseDir,'resources/backgrou
 def getFont(size):
     return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
 
-def hasCollected(score):
-    game=""
-    noun=""
-    suffix=""
-    for g in games:
-        if score <= g['count']:
-            game = g['name']
-            noun = g['collectible']
-            break
-        score -= g['count']
-    
-    if score != 1:
-        suffix = "s"
-    return " now has " + str(score) + " "+ noun+suffix + " in " + game + "."
-
 slots = [
     (7,12), (325,12), (643,12), (961,12), (1279,12),
     (7,169),(325,169),(643,169),(961,169),(1279,169),
