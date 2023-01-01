@@ -96,9 +96,18 @@ class Player:
         else:
             p['finishtime'] = self.finishTimeAbsolute.isoformat()
         
+        delete_backup = False
         with open(os.path.join(settings.baseDir,'backup.json'), 'r+') as f:
-            j = json.load(f)
-            j[self.name] = p
-            f.seek(0)
-            json.dump(j, f, indent=4)
-            f.truncate()
+            try:
+                j = json.load(f)
+                j[self.name] = p
+                f.seek(0)
+                json.dump(j, f, indent=4)
+                f.truncate()
+            except json.decoder.JSONDecodeError:
+                print("Error: Backup failed to load. Clearing it")
+                delete_backup = True
+        if delete_backup:
+            with open(os.path.join(settings.baseDir,'backup.json'), 'w+') as f:
+                json.dump({}, f, indent=4)
+
