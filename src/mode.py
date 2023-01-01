@@ -42,27 +42,26 @@ def draw(screen, playerLookup, sortedRacers, page):
     if page != 0:
         x = 3
         y = 2 + page * 25
-
     slot = 0
     for i, r in enumerate(sortedRacers):
         if x <= i <= y:
-            playerLookup[r].corner = slots[len(slots)-1]
+            playerLookup[r].corner = None
             continue
         if slot >= len(slots):
-            playerLookup[r].corner = slots[len(slots)-1]
+            playerLookup[r].corner = None
         else:
             playerLookup[r].corner = slots[slot]
         if slot == 2:
             slot += 3
-        else:
-            slot += 1
+            continue
+        slot += 1
 
     #-----------scorecard drawing------------
     for key in playerLookup:
         currentPlayer = playerLookup[key]
         corner = currentPlayer.corner
 
-        if corner == slots[len(slots)-1]:
+        if corner == None:
             continue
         
         pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
