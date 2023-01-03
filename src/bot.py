@@ -387,3 +387,9 @@ def process_line(line, currentChat, playerLookup):
 
             # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
+        elif command[0] == "!clearstats":
+            for p in playerLookup.keys():
+                playerLookup[p].score = 0
+                playerLookup[p].status = "live"
+            currentChat.message(channel, f"{userCS}: Cleared all racer stats.")
+            settings.redraw = True
