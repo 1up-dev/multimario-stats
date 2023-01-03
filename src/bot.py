@@ -119,7 +119,7 @@ def process_line(line, currentChat, playerLookup):
     if command[0][0] != '!':
         return
     if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin"]:
-        print("[In chat "+channel+"] "+user+":"+str(command))
+        print(f"[In chat {channel}] {user}:{str(command)}")
 
     # global commands
     if command[0] == "!ping":
@@ -141,21 +141,21 @@ def process_line(line, currentChat, playerLookup):
         if command[0] == "!whitelist" and len(command) == 2:
             subject = command[1].lower()
             if subject in users.blacklist:
-                currentChat.message(channel, "Sorry, {0} is on the blacklist.".format(command[1]))
+                currentChat.message(channel, f"Sorry, {command[1]} is on the blacklist.")
             elif subject not in users.updaters:
                 if users.add(subject,users.Role.UPDATER):
-                    currentChat.message(channel, command[1] + " is now an updater.")
+                    currentChat.message(channel, f"{command[1]} is now an updater.")
                 else:
-                    currentChat.message(channel, "Twitch username {0} not found.".format(command[1]))
+                    currentChat.message(channel, f"Twitch username {command[1]} not found.")
             else:
-                currentChat.message(channel, command[1] + " is already an updater.")
+                currentChat.message(channel, f"{command[1]} is already an updater.")
         if command[0] == "!unwhitelist" and len(command) == 2:
             subject = command[1].lower()
             if subject in users.updaters:
                 users.remove(subject,users.Role.UPDATER)
-                currentChat.message(channel, command[1] + " is no longer an updater.")
+                currentChat.message(channel, f"{command[1]} is no longer an updater.")
             else:
-                currentChat.message(channel, command[1] + " is already not an updater.")
+                currentChat.message(channel, f"{command[1]} is already not an updater.")
     
     if command[0] == "!mmleave":
         l_channel = ""
@@ -172,7 +172,7 @@ def process_line(line, currentChat, playerLookup):
         if l_channel not in currentChat.channels:
             currentChat.message(channel,f"Already not active in channel #{l_channel}.")
             return
-        currentChat.message(channel,f"{user}: Leaving #{l_channel} now.")
+        currentChat.message(channel,f"{userCS}: Leaving #{l_channel} now.")
         currentChat.part(l_channel)
     
     if command[0] == "!mmjoin":
@@ -190,7 +190,7 @@ def process_line(line, currentChat, playerLookup):
         if j_channel in currentChat.channels:
             currentChat.message(channel,f"Already active in channel #{j_channel}.")
             return
-        currentChat.message(channel,f"{user}: Joining #{j_channel} now.")
+        currentChat.message(channel,f"{userCS}: Joining #{j_channel} now.")
         currentChat.join(j_channel)
 
     # racer commands
@@ -215,7 +215,7 @@ def process_line(line, currentChat, playerLookup):
     #!add/!set
     if command[0] in ["!add","!set"]:
         if ((user not in users.updaters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user in users.blacklist):
-            currentChat.message(channel, user+": You do not have permission to update score counts.")
+            currentChat.message(channel, f"{userCS}: You do not have permission to update score counts.")
             return
 
         if len(command) == 3:
@@ -227,14 +227,15 @@ def process_line(line, currentChat, playerLookup):
         else:
             return
 
+        if racer not in playerLookup.keys():
+            currentChat.message(channel, f"{userCS}: Racer {racer} not found.")
+            return
         try:
             number = int(number)
         except ValueError:
-            currentChat.message(channel, user+": Not a number.")
+            currentChat.message(channel, f"{userCS}: Not a number.")
             return
-        if racer not in playerLookup.keys():
-            currentChat.message(channel, user+": Racer not found.")
-            return
+        
         response = ""
         if command[0] == "!add":
             response = playerLookup[racer].update(playerLookup[racer].score + number, playerLookup)
@@ -308,26 +309,27 @@ def process_line(line, currentChat, playerLookup):
                 currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been revived.")
         elif command[0] == "!settime" and len(command) == 3:
             subject = command[1].lower()
-            if subject in playerLookup.keys():
-                racer = playerLookup[subject]
-                newTime = command[2].split(":")
-                if len(newTime) != 3:
-                    currentChat.message(channel, "Invalid time string.")
-                    return
-                try:
-                    duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
-                except ValueError:
-                    currentChat.message(channel, "Invalid time string.")
-                    return
-                if int(newTime[1]) >= 60 or int(newTime[2]) >= 60:
-                    currentChat.message(channel, "Invalid time string.")
-                    return
-                
-                racer.finishTimeAbsolute = settings.startTime + datetime.timedelta(seconds=duration)
-                racer.calculateDuration()
+            if subject not in playerLookup.keys():
+                currentChat.message(channel, f"Racer {subject} not found.")
+            racer = playerLookup[subject]
+            newTime = command[2].split(":")
+            if len(newTime) != 3:
+                currentChat.message(channel, "Invalid time string.")
+                return
+            try:
+                duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
+            except ValueError:
+                currentChat.message(channel, "Invalid time string.")
+                return
+            if int(newTime[1]) >= 60 or int(newTime[2]) >= 60:
+                currentChat.message(channel, "Invalid time string.")
+                return
+            
+            racer.finishTimeAbsolute = settings.startTime + datetime.timedelta(seconds=duration)
+            racer.calculateDuration()
 
-                settings.redraw = True
-                currentChat.message(channel, racer.nameCaseSensitive+"'s time has been updated.")
+            settings.redraw = True
+            currentChat.message(channel, racer.nameCaseSensitive+"'s time has been updated.")
         elif command[0] == "!blacklist" and len(command) == 2:
             subject = command[1].lower()
             if subject not in users.blacklist:
@@ -367,16 +369,16 @@ def process_line(line, currentChat, playerLookup):
             for r in newRacers:
                 new_racers_lower.append(r.lower())
                 if r.lower() not in playerLookup.keys():
-                    currentChat.message(channel, "Adding new racer {0} found on the Google spreadsheet.".format(r))
+                    currentChat.message(channel, f"Adding new racer {r} found on the Google spreadsheet.")
                     playerLookup[r.lower()] = player.Player(r, {})
                     currentChat.join(r.lower())
                     time.sleep(0.5)
-            
+
             #delete racers that have been removed from the sheet
             p_keys = list(playerLookup.keys())
             for r in p_keys:
                 if r not in new_racers_lower:
-                    currentChat.message(channel, "Removing racer {0} not found on the Google spreadsheet.".format(playerLookup[r].nameCaseSensitive))
+                    currentChat.message(channel, f"Removing racer {playerLookup[r].nameCaseSensitive} not found on the Google spreadsheet.")
                     playerLookup.pop(r)
                     currentChat.part(r)
                     time.sleep(0.5)
