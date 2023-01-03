@@ -170,7 +170,7 @@ def process_line(line, currentChat, playerLookup):
         else:
             return
         if l_channel not in currentChat.channels:
-            currentChat.message(channel,f"Already not active in channel #{l_channel}.")
+            currentChat.message(channel,f"{userCS}: Already not active in channel #{l_channel}.")
             return
         currentChat.message(channel,f"{userCS}: Leaving #{l_channel} now.")
         currentChat.part(l_channel)
@@ -188,7 +188,9 @@ def process_line(line, currentChat, playerLookup):
         else:
             return
         if j_channel in currentChat.channels:
-            currentChat.message(channel,f"Already active in channel #{j_channel}.")
+            currentChat.message(channel,f"{userCS}: Rejoining #{j_channel} now.")
+            currentChat.part(j_channel)
+            currentChat.join(j_channel)
             return
         currentChat.message(channel,f"{userCS}: Joining #{j_channel} now.")
         currentChat.join(j_channel)

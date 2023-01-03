@@ -32,13 +32,19 @@ class ChatRoom:
             print("[Twitch IRC] Socket error.")
     def part(self, channel):
         try:
+            self.message(f"#{channel}", f"Now leaving #{channel}.")
+            time.sleep(0.5)
             self.currentSocket.send(bytes(f"PART #{channel}\n", "UTF-8"))
+            time.sleep(0.5)
             self.channels.remove(channel)
         except socket.error:
             print("[Twitch IRC] Socket error.")
     def join(self, channel):
         try:
             self.currentSocket.send(bytes(f"JOIN #{channel}\n", "UTF-8"))
+            time.sleep(0.5)
+            self.message(f"#{channel}", f"Now joined #{channel}.")
+            time.sleep(0.5)
             self.channels.append(channel)
         except socket.error:
             print("[Twitch IRC] Socket error.")
