@@ -8,11 +8,8 @@ import timer
 
 games = copy.deepcopy(settings.modeInfo['games'])
 for g in games:
-    bg = pygame.image.load(os.path.join(settings.baseDir,g['background']))
-    icon = pygame.image.load(os.path.join(settings.baseDir,g['icon']))
-    g['background'] = bg
-    g['icon'] = icon
-
+    g['background']= pygame.image.load(os.path.join(settings.baseDir,g['background']))
+    g['icon']= pygame.image.load(os.path.join(settings.baseDir,g['icon']))
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
 background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
 
@@ -20,7 +17,7 @@ def getFont(size):
     return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
 
 slots = [
-    (7,12), (325,12), (643,12), (961,12), (1279,12),
+    (7,12), (325,12), (643,12), #(961,12), (1279,12),
     (7,169),(325,169),(643,169),(961,169),(1279,169),
     (7,315),(325,315),(643,315),(961,315),(1279,315),
     (7,461),(325,461),(643,461),(961,461),(1279,461),
@@ -32,6 +29,8 @@ length = 314
 height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
+    if settings.playersLock:
+        return screen
     if settings.mode == "540":
         return mode_540.draw(screen, playerLookup, sortedRacers, page)
     
@@ -44,23 +43,16 @@ def draw(screen, playerLookup, sortedRacers, page):
         y = 2 + page * 25
     slot = 0
     for i, r in enumerate(sortedRacers):
-        if x <= i <= y:
+        if x <= i <= y or slot >= len(slots):
             playerLookup[r].corner = None
             continue
-        if slot >= len(slots):
-            playerLookup[r].corner = None
-        else:
-            playerLookup[r].corner = slots[slot]
-        if slot == 2:
-            slot += 3
-            continue
+        playerLookup[r].corner = slots[slot]
         slot += 1
 
     #-----------scorecard drawing------------
     for key in playerLookup:
         currentPlayer = playerLookup[key]
         corner = currentPlayer.corner
-
         if corner == None:
             continue
         

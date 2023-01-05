@@ -118,7 +118,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if command[0][0] != '!':
         return
-    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin"]:
+    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
         print(f"[In chat {channel}] {user}:{str(command)}")
 
     # global commands
@@ -364,6 +364,7 @@ def process_line(line, currentChat, playerLookup):
                 kb.tap("5")
             currentChat.message(channel, "Toggled stream.")
         elif command[0] == "!fetchracers":
+            settings.playersLock = True
             newRacers = gsheets.getRacers()
             new_racers_lower = []
 
@@ -373,8 +374,8 @@ def process_line(line, currentChat, playerLookup):
                 if r.lower() not in playerLookup.keys():
                     currentChat.message(channel, f"Adding new racer {r} found on the Google spreadsheet.")
                     playerLookup[r.lower()] = player.Player(r, {})
-                    currentChat.join(r.lower())
                     time.sleep(0.5)
+                    currentChat.join(r.lower())
 
             #delete racers that have been removed from the sheet
             p_keys = list(playerLookup.keys())
@@ -382,9 +383,10 @@ def process_line(line, currentChat, playerLookup):
                 if r not in new_racers_lower:
                     currentChat.message(channel, f"Removing racer {playerLookup[r].nameCaseSensitive} not found on the Google spreadsheet.")
                     playerLookup.pop(r)
-                    currentChat.part(r)
                     time.sleep(0.5)
+                    currentChat.part(r)
 
+            settings.playersLock = False
             # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
         elif command[0] == "!clearstats":
