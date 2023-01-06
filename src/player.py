@@ -33,12 +33,27 @@ class Player:
             self.profile = pygame.image.load(os.path.join(settings.baseDir,f"profiles/{self.name}.png"))
         except pygame.error:
             self.profile = pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
+    
+    def collected(self):
+        # construct "has collected" message
+        games = settings.modeInfo['games']
+        game, collectible = "", ""
+        score = self.score
+        for g in games:
+            if score <= g['count']:
+                game = g['name']
+                collectible = g['collectible']
+                break
+            score -= g['count']
+        if score != 1:
+            collectible += "s"
+        return (score, collectible, game)
 
     def update(self, count, playerLookup):
         if self.status not in ["live","done"]:
-            return self.nameCaseSensitive + " is not live, so their score cannot be updated."
+            return
         if count < 0 or count > settings.max_score:
-            return "The requested score is less than 0 or greater than the maximum possible score."
+            return
         
         if 0 <= count < settings.max_score:
             if self.status == "done":
@@ -47,18 +62,7 @@ class Player:
             self.score = count
             # sort() reassigns place numbers so the command output will be accurate
             sort.sort(playerLookup)
-            # construct "has collected" message
-            games = settings.modeInfo['games']
-            game, collectible = "", ""
-            score = self.score
-            for g in games:
-                if score <= g['count']:
-                    game = g['name']
-                    collectible = g['collectible']
-                    break
-                score -= g['count']
-            if score != 1:
-                collectible += "s"
+            score, collectible, game = self.collected()
             return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place: #{str(self.place)})"
         elif count == settings.max_score:
             self.score = count

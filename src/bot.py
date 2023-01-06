@@ -118,7 +118,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if command[0][0] != '!':
         return
-    if command[0] in ['!ping','!roles','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
+    if command[0] in ['!ping','!roles','!mmstatus','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
         print(f"[In chat {channel}] {user}:{str(command)}")
 
     # global commands
@@ -128,13 +128,12 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, "Hi. Bot is alive.")
     if command[0] == "!racecommands":
         currentChat.message(channel, "Multimario race bot command list: https://pastebin.com/d7mPZd13")
-    if command[0] == "!roles":
+    if command[0] in ["!roles","!mmstatus"]:
         if len(command) == 1:
             statusMsg = users.roles(user, playerLookup)
         else:
             statusMsg = users.roles(command[1], playerLookup)
-        if statusMsg is not None:
-            currentChat.message(channel, statusMsg)
+        currentChat.message(channel, statusMsg)
 
     # shared commands
     if (user in users.admins) or (user in playerLookup.keys()):
@@ -198,15 +197,12 @@ def process_line(line, currentChat, playerLookup):
     # racer commands
     if user in playerLookup.keys():
         if command[0] in ["!rejoin", "!unquit"]:
-            if playerLookup[user].status == "quit":
-                playerLookup[user].status = "live"
-                if playerLookup[user].score == settings.max_score:
-                    playerLookup[user].status = "done"
-                currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
-            elif playerLookup[user].status == "done":
-                playerLookup[user].score -= 1
-                playerLookup[user].status = "live"
-                currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
+            if playerLookup[user].status != "quit":
+                return
+            playerLookup[user].status = "live"
+            if playerLookup[user].score == settings.max_score:
+                playerLookup[user].status = "done"
+            currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
             settings.redraw = True
         
         if command[0] == "!quit" and playerLookup[user].status == "live":
@@ -232,23 +228,32 @@ def process_line(line, currentChat, playerLookup):
         if racer not in playerLookup.keys():
             currentChat.message(channel, f"{userCS}: Racer {racer} not found.")
             return
+        p = playerLookup[racer]
         try:
             number = int(number)
         except ValueError:
             currentChat.message(channel, f"{userCS}: Not a number.")
             return
         
+        if command[0] == "!add" and number == 0:
+            currentChat.message(channel, "Use !mmstatus [username] to check a racer's current status.")
+            return
+
         response = ""
         if command[0] == "!add":
-            response = playerLookup[racer].update(playerLookup[racer].score + number, playerLookup)
-        elif command[0] == "!set":
-            response = playerLookup[racer].update(number, playerLookup)
-        
-        # Log score update in external file
-        users.log(userId, userCS, playerLookup[racer].nameCaseSensitive)
+            number += p.score
 
-        if response != "":
-            currentChat.message(channel, response)
+        if p.status not in ["live","done"]:
+            currentChat.message(channel, f"{p.nameCaseSensitive} is not live, so their score cannot be updated.")
+            return
+        if number < 0 or number > settings.max_score:
+            currentChat.message(channel, "The requested score is less than 0 or greater than the maximum possible score.")
+            return
+        
+        response = p.update(number, playerLookup)
+        currentChat.message(channel, response)
+        # Log score update in external file
+        users.log(userId, userCS, p.nameCaseSensitive)
         settings.redraw = True
 
     # admin commands
@@ -300,11 +305,7 @@ def process_line(line, currentChat, playerLookup):
         elif command[0] == "!revive" and len(command) == 2:
             racer = command[1].lower()
             if racer in playerLookup.keys():
-                # only subtract 1 if the racer was done at time of issued command.
-                if playerLookup[racer].status == "done":
-                    playerLookup[racer].score -= 1
                 playerLookup[racer].status = "live"
-                # if the player had max_score while quit/dqed, set status to done.
                 if playerLookup[racer].score == settings.max_score:
                     playerLookup[racer].status = "done"
                 settings.redraw = True

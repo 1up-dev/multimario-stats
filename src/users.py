@@ -89,18 +89,24 @@ def remove(user, role: Role):
 
 def roles(user, playerLookup):
     user = user.lower()
-    returnString = user + ": "
-    if user in playerLookup.keys():
-        returnString += "Racer ("+"Place: #"+str(playerLookup[user].place)+", Status: "+playerLookup[user].status +", Score: "+ str(playerLookup[user].score) +"), "
+    out = ""
     if user in admins:
-        returnString += "Admin, "
+        out += "Admin, "
     if user in updaters:
-        returnString += "Updater, "
+        out += "Updater, "
     if user in blacklist:
-        returnString += "Blacklist, "
-    if returnString == (user + ": "):
-        returnString += "None, "
-    return returnString[0:-2]
+        out += "Blacklist, "
+    if user in playerLookup.keys():
+        p = playerLookup[user]
+        score, collectible, game = p.collected()
+        if out != "":
+            out = f"Roles: {out}"
+        out = f"{p.nameCaseSensitive} has {str(score)} {collectible} in {game} (Place #{p.place}, {p.status}, {p.score}). {out[0:-2]}"
+    else:
+        if out == "":
+            out =  "None, "
+        out = f"{user}: {out[0:-2]}"
+    return out
 
 def init_users():
     global admins, updaters, blacklist
