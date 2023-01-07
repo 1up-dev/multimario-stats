@@ -51,16 +51,16 @@ def draw(screen, playerLookup, sortedRacers, page):
 
     #-----------scorecard drawing------------
     for key in playerLookup:
-        currentPlayer = playerLookup[key]
-        corner = currentPlayer.corner
+        player = playerLookup[key]
+        corner = player.corner
         if corner == None:
             continue
         
         pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
         pygame.draw.rect(screen, (25, 25, 25), [corner[0]+2, corner[1]+2, 310, 138])
 
-        score = currentPlayer.score
-        if currentPlayer.status == "live":
+        score = player.score
+        if player.status == "live":
             bg = None
             gameCounts, barLengths, gameMaxes = [], [], []
             done = False
@@ -75,7 +75,8 @@ def draw(screen, playerLookup, sortedRacers, page):
                         if i+1 <= len(games)-1:
                             bg = games[i+1]['background']
                         else:
-                            print(f"Error: {currentPlayer.nameCaseSensitive} has {currentPlayer.score} (max score) while live.")
+                            print(f"Error: {player.nameCaseSensitive} has {player.score} (max score) while live.")
+                            player.status = "done"
                             bg = games[i]['background']
                     gameCounts[-1] = score
                     done = True
@@ -129,55 +130,55 @@ def draw(screen, playerLookup, sortedRacers, page):
                     x, y = 157, 108
                 screen.blit(g['icon'], (x+corner[0], y+corner[1]))
 
-        elif currentPlayer.status == "done":    #shows done tag
+        elif player.status == "done":
 
             bg = pygame.transform.scale(finishBG,(310,138))
             screen.blit(bg, (corner[0]+2, corner[1]+2))
 
             # screen.blit(finishBG, (playerLookup[key].corner[0], playerLookup[key].corner[1]))
             doneTag = getFont(60).render("Done!", 1, (220,220,220))
-            done_r = doneTag.get_rect(center=((currentPlayer.corner[0]+(length/2), 85+currentPlayer.corner[1])))
+            done_r = doneTag.get_rect(center=((player.corner[0]+(length/2), 85+player.corner[1])))
             screen.blit(doneTag, done_r)
 
-            label = getFont(24).render(str("Final Time: {0}".format(currentPlayer.duration_str)), 1, (220,220,220))
-            label_r = label.get_rect(center=((currentPlayer.corner[0]+(length/2), 125+currentPlayer.corner[1])))
+            label = getFont(24).render(str("Final Time: {0}".format(player.duration_str)), 1, (220,220,220))
+            label_r = label.get_rect(center=((player.corner[0]+(length/2), 125+player.corner[1])))
             screen.blit(label, label_r)
         
         else:
             text = ""
             offset = 0
-            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+currentPlayer.duration_str, 1, (220,220,220))
-            if currentPlayer.status == "quit":
+            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+player.duration_str, 1, (220,220,220))
+            if player.status == "quit":
                 text = "Quit"
-            elif currentPlayer.status == "disqualified":
+            elif player.status == "disqualified":
                 text = "Disqualified"
-            elif currentPlayer.status == "noshow":
+            elif player.status == "noshow":
                 label = getFont(20).render("", 1, (220,220,220))
                 text = "No-Show"
                 offset = 10
             
             textTag = getFont(48).render(text, 1, (255, 0, 0))
-            text_r = textTag.get_rect(center=(currentPlayer.corner[0]+(length/2), currentPlayer.corner[1]+80+offset))
+            text_r = textTag.get_rect(center=(player.corner[0]+(length/2), player.corner[1]+80+offset))
             screen.blit(textTag, text_r)
-            label_r = label.get_rect(center=(currentPlayer.corner[0]+(length/2), currentPlayer.corner[1]+123))
+            label_r = label.get_rect(center=(player.corner[0]+(length/2), player.corner[1]+123))
             screen.blit(label, label_r)
 
         
         #-------scorecard header-------
         #profile picture
-        prof = pygame.transform.scale(currentPlayer.profile, (50,50))
-        screen.blit(prof, (8+currentPlayer.corner[0], 8+currentPlayer.corner[1])) 
+        prof = pygame.transform.scale(player.profile, (50,50))
+        screen.blit(prof, (8+player.corner[0], 8+player.corner[1])) 
 
         #name & place
         color = (220,220,220)
-        if currentPlayer.place <=3:
+        if player.place <=3:
             color = (239,195,0)
-        nameRender = getFont(24).render(str(currentPlayer.nameCaseSensitive), 1, color)
-        placeRender = getFont(40).render(str(currentPlayer.place), 1, color)
+        nameRender = getFont(24).render(str(player.nameCaseSensitive), 1, color)
+        placeRender = getFont(40).render(str(player.place), 1, color)
 
-        screen.blit(nameRender, (65+currentPlayer.corner[0], 15+currentPlayer.corner[1]))
+        screen.blit(nameRender, (65+player.corner[0], 15+player.corner[1]))
         #topright justify the place text
-        place_r = placeRender.get_rect(topright=(currentPlayer.corner[0]+304,currentPlayer.corner[1]+5))
+        place_r = placeRender.get_rect(topright=(player.corner[0]+304,player.corner[1]+5))
         screen.blit(placeRender, place_r)
 
 

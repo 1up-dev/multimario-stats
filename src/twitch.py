@@ -2,28 +2,30 @@ import requests
 import json
 import urllib
 import os
+import pygame
 import settings
 
 # Uses the Twitch API to fetch profile pictures of racers
 def fetchProfile(user):
     user =  user.lower()
-    path = os.path.join(settings.baseDir,"profiles/"+user+".png")
+    path = os.path.join(settings.baseDir,f"profiles/{user}.png")
     if os.path.isfile(path):
-        return
+        return pygame.image.load(path)
     url = "https://api.twitch.tv/helix/users?login="+user
     headers = {"Client-ID":client_id, "Authorization":f'Bearer {token}'}
     response = requests.get(url, headers=headers)
     if response.status_code not in range(200,300):
         print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-        return
+        return pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
     responseData = json.loads(response.content.decode("UTF-8"))['data']
     if len(responseData)==0:
         print("[API] Twitch user "+user+" does not exist. Using default image.")
-        return
+        return pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
     data = responseData[0]
     profileLocation = data['profile_image_url']
-    urllib.request.urlretrieve(profileLocation, "."+"/profiles/"+user+".png")
+    urllib.request.urlretrieve(profileLocation, path)
     print("[API] Fetched profile of Twitch user "+user+".")
+    return pygame.image.load(path)
 
 def getTwitchId(user):
     url = "https://api.twitch.tv/helix/users?login="+user

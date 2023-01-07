@@ -1,10 +1,8 @@
 import random
 import os
-import pygame
 import datetime
 import math
 import json
-import mode
 import settings
 import sort
 import twitch
@@ -17,9 +15,10 @@ class Player:
         self.place = 1
         self.score = 0
         self.duration_str = ""
-        self.duration = -1
+        self.duration = 0
         self.finishTimeAbsolute = None
         self.status = "live"
+        self.profile = twitch.fetchProfile(self.name)
         if state_data == {} and settings.debug:
             self.score = random.choice(range(0, settings.max_score))
         if state_data != {}:
@@ -28,11 +27,6 @@ class Player:
             if state_data['finishtime'] != None:
                 self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
             self.calculateDuration()
-        twitch.fetchProfile(self.name)
-        try:
-            self.profile = pygame.image.load(os.path.join(settings.baseDir,f"profiles/{self.name}.png"))
-        except pygame.error:
-            self.profile = pygame.image.load(os.path.join(settings.baseDir,"resources/error.png"))
     
     def collected(self):
         # construct "has collected" message

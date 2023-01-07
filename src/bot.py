@@ -11,36 +11,24 @@ import player
 
 recon = False
 
-def fetchIRC(thisChat, playerLookup):
+def fetchIRC(chat, playerLookup):
     global recon
     while True:
         try:
             if recon:
                 recon = False
-                thisChat.reconnect()
+                chat.reconnect()
                 time.sleep(1)
-            readbuffer = thisChat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+            readbuffer = chat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if readbuffer == "": #reconnect on server disconnect
                 print(datetime.datetime.now().isoformat().split(".")[0], "Empty readbuffer")
                 recon = True
                 continue
             lines = readbuffer.split("\n")
             for line in lines:
-                process_line(line, thisChat, playerLookup)
-        except UnicodeEncodeError:
-            print(datetime.datetime.now().isoformat().split(".")[0], "UnicodeEncodeError (emoji or other non-ascii character encountered. fix?)")
-            recon = True
-        except ConnectionResetError:
-            print(datetime.datetime.now().isoformat().split(".")[0], "ConnectionResetError")
-            recon = True
-        except ConnectionAbortedError:
-            print(datetime.datetime.now().isoformat().split(".")[0], "ConnectionAbortedError")
-            recon = True
-        except TimeoutError:
-            print(datetime.datetime.now().isoformat().split(".")[0], "TimeoutError")
-            recon = True
+                process_line(line, chat, playerLookup)
         except Exception:
-            print(datetime.datetime.now().isoformat().split(".")[0], "Unexpected error")
+            print(datetime.datetime.now().isoformat().split(".")[0], "Error")
             print(traceback.format_exc())
             recon = True
 
