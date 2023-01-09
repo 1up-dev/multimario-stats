@@ -10,6 +10,7 @@ import settings
 import sort
 import timer
 import mode
+import player
 
 # load users and racers, construct player objects
 playerLookup = users.init_users()
@@ -45,8 +46,7 @@ while True:
         break
 
     if settings.redraw == True:
-        for key in playerLookup:
-            playerLookup[key].backup()
+        player.backup_all(playerLookup)
         sortedRacers = sort.sort(playerLookup)
     
     # redraw every 10 seconds or if redraw is requested

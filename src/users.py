@@ -164,7 +164,5 @@ def log(id, user, racer):
         # construct user object
         udlog[id] = {"user":user, "total":1, "by-racer":{racer:1}}
     
-    with open(os.path.join(settings.baseDir,'update-log.json'),'r+') as f:
-        f.seek(0)
+    with open(os.path.join(settings.baseDir,'update-log.json'),'w') as f:
         json.dump(udlog, f, indent=4)
-        f.truncate()

@@ -118,6 +118,19 @@ class Player:
                 print("Error: Backup failed to load. Clearing it")
                 delete_backup = True
         if delete_backup:
-            with open(os.path.join(settings.baseDir,'backup.json'), 'w+') as f:
+            with open(os.path.join(settings.baseDir,'backup.json'), 'w') as f:
                 json.dump({}, f, indent=4)
 
+def backup_all(players):
+    p = {}
+    for player in players:
+        pl = players[player]
+        p[pl.name] = {}
+        p[pl.name]['score'] = pl.score
+        p[pl.name]['status'] = pl.status
+        if pl.finishTimeAbsolute == None:
+            p[pl.name]['finishtime'] = None
+        else:
+            p[pl.name]['finishtime'] = pl.finishTimeAbsolute.isoformat()
+    with open(os.path.join(settings.baseDir,'backup.json'), 'w') as f:
+        json.dump(p, f, indent=4)
