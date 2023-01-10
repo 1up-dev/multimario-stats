@@ -22,7 +22,6 @@ def check_events(t, playerLookup):
             p = playerLookup[p]
             p.score = 0
             p.status = "live"
-            p.finishTimeAbsolute = None
         stats_cleared = True
         settings.redraw = True
 

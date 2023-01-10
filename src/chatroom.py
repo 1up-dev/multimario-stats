@@ -77,7 +77,6 @@ class ChatRoom:
             self.currentSocket.send(bytes("PONG :tmi.twitch.tv\r\n", "UTF-8"))
             with open(os.path.join(settings.baseDir,"irc/0-main.log"), 'a') as f:
                 f.write(datetime.datetime.now().isoformat().split(".")[0] + " Pong sent." + "\n")
-            # print(datetime.datetime.now().isoformat().split(".")[0], "Pong sent")
         except socket.error:
             print("[Twitch IRC] Socket error when attempting pong.")
 

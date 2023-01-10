@@ -28,8 +28,7 @@ def fetchIRC(chat, playerLookup):
             for line in lines:
                 process_line(line, chat, playerLookup)
         except Exception:
-            print(datetime.datetime.now().isoformat().split(".")[0], "Error")
-            print(traceback.format_exc())
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Error: {traceback.format_exc()}")
             recon = True
 
 def process_line(line, currentChat, playerLookup):
