@@ -59,19 +59,16 @@ class ChatRoom:
         j = 0
         while True:
             channel_list = "#"+",#".join(self.channels[j:j+20])
-            if j != 0:
-                print("Sleeping 10 seconds before joining next batch of channels...")
-                time.sleep(10.1)
             try:
                 self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
             except:
-                print("Exception while connecting:")
-                print(traceback.format_exc())
+                print(f"Exception while connecting. {traceback.format_exc()}")
                 return False
-            #print("Joined",channel_list)
             j += 20
             if self.channels[j:j+20] == []:
                 break
+            print("Sleeping 10 seconds before joining next batch of channels...")
+            time.sleep(10.1)
         print("Done joining Twitch channels.")
 
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))

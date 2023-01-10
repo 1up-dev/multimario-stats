@@ -66,18 +66,19 @@ def updateSet(data):
     return updated
 
 def check_token():
-    print("Validating Twitch API token...")
+    # print("Validating Twitch API token...")
     r = requests.get('https://id.twitch.tv/oauth2/validate', headers={'Client-ID': client_id, 'Authorization': f'Bearer {token}'})
-    #print(r.json())
+    # print(r.json())
     if r.status_code != 200:
-        print("Token invalid. Requesting a new one...")
+        print("Twitch API token is invalid. Requesting a new one...")
         new_token()
     elif r.json()['expires_in'] < 604800:
-        print("Old token. Requesting a new one...")
-        #token expires in < 1 week
+        print("Twitch API token is old. Requesting a new one...")
+        # token expires in < 1 week
         new_token()
     else:
-        print("Token is valid.")
+        pass
+        # print("Token is valid.")
 
 def new_token():
     r2 = requests.post('https://id.twitch.tv/oauth2/token', data={'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'})
@@ -90,7 +91,7 @@ def new_token():
         f.seek(0)
         json.dump(j, f, indent=4)
         f.truncate()
-    print("New token received.")
+    print("New Twitch API token received.")
 
 token = settings.twitch_token
 client_id = settings.twitch_clientid
