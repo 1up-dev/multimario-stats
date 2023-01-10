@@ -1,12 +1,9 @@
-.vscode/
 *.code-workspace
-__pycache__/
-profiles/*
-irc/*
-log/*
+__pycache__
+irc/
+log/
+profiles/
 backup.json
 users.json
 settings.json
 update-log.json
-cmd-log.txt
-*test*

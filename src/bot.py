@@ -106,7 +106,8 @@ def process_line(line, currentChat, playerLookup):
     if command[0][0] != '!':
         return
     if command[0] in ['!ping','!roles','!mmstatus','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
-        with open(os.path.join(settings.baseDir,"cmd-log.txt"), 'a+') as f:
+        st = settings.startTime.isoformat().split("T")[0]
+        with open(os.path.join(settings.baseDir,f"log/{st}.txt"), 'a+') as f:
             f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
 
     # global commands
