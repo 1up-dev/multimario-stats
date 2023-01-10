@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import math
+import pygame
 
 baseDir = os.path.join(os.path.dirname(__file__),'../')
 startTime = datetime.datetime.now()
@@ -67,3 +68,6 @@ def dur_to_str(dur):
     if negative:
         finishTime = "-"+finishTime
     return finishTime
+
+def getFont(size):
+    return pygame.font.Font(os.path.join(baseDir,"resources/Lobster 1.4.otf"), size)
