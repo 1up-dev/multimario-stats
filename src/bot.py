@@ -73,6 +73,7 @@ def process_line(line, currentChat, playerLookup):
                 return
             if len(line) < 4:
                 return
+            user = user.lower()[1:]
         if index == 2:
             # if line[1] == "WHISPER":
             #     whisper = True
@@ -90,24 +91,23 @@ def process_line(line, currentChat, playerLookup):
         channel = "00-main"
     if channel[0] != "#":
         channel = "00-main"
-    path = f"irc/{channel[1:]}.log"
     
     #filter out non-ascii text to prevent UnicodeEncodeError on write() call
+    path = f"irc/{channel[1:]}.log"
     full_line = " "
     for word in line:
         full_line += "".join(c if ord(c)<128 else "." for c in word) + " "
     full_line = full_line[0:-1]
-    with open(os.path.join(settings.baseDir,path), 'a') as f:
+    with open(os.path.join(settings.baseDir,path), 'a+') as f:
         f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line + "\n")
-    
-    user = user.lower()[1:]
 
     if len(command) < 1:
         return
     if command[0][0] != '!':
         return
     if command[0] in ['!ping','!roles','!mmstatus','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
-        print(f"[In chat {channel}] {user}:{str(command)}")
+        with open(os.path.join(settings.baseDir,"cmd-log.txt"), 'a+') as f:
+            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
 
     # global commands
     if command[0] == "!ping":

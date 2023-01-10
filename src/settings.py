@@ -12,6 +12,7 @@ mode = ""
 max_score = 0
 gsheet = ""
 modeInfo = {}
+test_racers = []
 stopTimer = False
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)
@@ -29,9 +30,9 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     twitch_pw = j['bot-twitch-auth']
     use_backups = j['use-player-backups']
     extra_chats = j['extra-chat-rooms']
+    test_racers = j['test-racers']
 
     twitch_token = j['twitch-api-token']
     twitch_clientid = j['twitch-api-clientid']
     twitch_secret = j['twitch-api-secret']
-
     google_api_key = j['google-api-key']

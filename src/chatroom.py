@@ -55,7 +55,7 @@ class ChatRoom:
         self.currentSocket.send(bytes("NICK "+self.NICK+"\n", "UTF-8"))
 
         # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
-        # https://dev.twitch.tv/docs/irc/guide#rate-limits
+        print("Joining Twitch channels...")
         j = 0
         while True:
             channel_list = "#"+",#".join(self.channels[j:j+20])
@@ -63,18 +63,16 @@ class ChatRoom:
                 print("Sleeping 10 seconds before joining next batch of channels...")
                 time.sleep(10.1)
             try:
-                # Errors produced by this line:
-                # ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
-                # BrokenPipeError: [Errno 32] Broken pipe
                 self.currentSocket.send(bytes("JOIN "+channel_list+"\n", "UTF-8"))
             except:
                 print("Exception while connecting:")
                 print(traceback.format_exc())
                 return False
-            print("Joined",channel_list)
+            #print("Joined",channel_list)
             j += 20
             if self.channels[j:j+20] == []:
                 break
+        print("Done joining Twitch channels.")
 
         self.currentSocket.send(bytes("CAP REQ :twitch.tv/tags twitch.tv/commands\n", "UTF-8"))
     def pong(self):

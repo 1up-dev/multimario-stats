@@ -131,6 +131,6 @@ def backup_all(players):
         if pl.finishTimeAbsolute == None:
             p[pl.name]['finishtime'] = None
         else:
-            p[pl.name]['finishtime'] = pl.finishTimeAbsolute.isoformat()
+            p[pl.name]['finishtime'] = pl.finishTimeAbsolute.isoformat().split(".")[0]
     with open(os.path.join(settings.baseDir,'backup.json'), 'w') as f:
         json.dump(p, f, indent=4)

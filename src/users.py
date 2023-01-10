@@ -21,7 +21,7 @@ def updateUsersByID():
 
     with open(os.path.join(settings.baseDir,'users.json'),'r') as f:
         j = json.load(f)
-        sets = [ j['admins'], j['updaters'], j['blacklist'], j['test-racers'] ]
+        sets = [ j['admins'], j['updaters'], j['blacklist'] ]
     
     for i, s in enumerate(sets):
         s_new = twitch.updateSet(s)
@@ -32,7 +32,6 @@ def updateUsersByID():
         j['admins'] = sets[0]
         j['updaters'] = sets[1]
         j['blacklist'] = sets[2]
-        j['test-racers'] = sets[3]
         json.dump(j, f, indent=4)
     
     global admins, updaters, blacklist
@@ -116,7 +115,7 @@ def init_users():
         blacklist = j['blacklist']
         updaters = j['updaters']
         if settings.debug:
-            racers = list(j['test-racers'].keys())
+            racers = settings.test_racers
     if not settings.debug:
         racers = gsheets.getRacers()
 
@@ -146,11 +145,12 @@ def init_users():
 def log(id, user, racer):
     if id == "":
         return
+    log_file = os.path.join(settings.baseDir,"update-log.json")
     # create file if it doesn't exist
-    if not os.path.isfile('update-log.json'):
-        with open('update-log.json', 'w+') as f:
+    if not os.path.isfile(log_file):
+        with open(log_file, 'w+') as f:
             json.dump({}, f, indent=4)
-    with open(os.path.join(settings.baseDir,'update-log.json'),'r') as f:
+    with open(log_file,'r') as f:
         udlog = json.load(f)
 
     if id in udlog.keys():
@@ -164,5 +164,5 @@ def log(id, user, racer):
         # construct user object
         udlog[id] = {"user":user, "total":1, "by-racer":{racer:1}}
     
-    with open(os.path.join(settings.baseDir,'update-log.json'),'w') as f:
+    with open(log_file,'w') as f:
         json.dump(udlog, f, indent=4)
