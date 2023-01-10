@@ -3,15 +3,36 @@ import datetime
 import pygame
 import settings
 
-stopped_time = ""
+stopped_time = None
+time_limit_reached = False
+stats_cleared = False
 
-def drawTimer(screen):
+def check_events(t, playerLookup):
+    global time_limit_reached, stats_cleared
+    if t == settings.modeInfo['time-limit'] and time_limit_reached == False:
+        for p in playerLookup:
+            p = playerLookup[p]
+            if p.status == "live":
+                p.finish("disqualified")
+        time_limit_reached == True
+        settings.redraw = True
+
+    if t == "-0:15:00" and stats_cleared == False:
+        for p in playerLookup:
+            p = playerLookup[p]
+            p.score = 0
+            p.status = "live"
+            p.finishTimeAbsolute = None
+        stats_cleared = True
+        settings.redraw = True
+
+def drawTimer(screen, playerLookup):
     global stopped_time
-    if settings.stopTimer and stopped_time == "":
+    if settings.stopTimer and stopped_time == None:
         stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()
     if settings.stopTimer == False:
         dur = (datetime.datetime.now() - settings.startTime).total_seconds()
-        stopped_time = ""
+        stopped_time = None
     else:
         dur = stopped_time
     dur = math.floor(dur)
@@ -28,4 +49,4 @@ def drawTimer(screen):
     screen.blit(timer, timer_r)
 
     pygame.display.update(r)
-    return time_str
+    check_events(time_str, playerLookup)

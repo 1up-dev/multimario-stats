@@ -33,7 +33,7 @@ def draw(screen, playerLookup, sortedRacers, page):
         return mode_540.draw(screen, playerLookup, sortedRacers, page)
     
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    timer.drawTimer(screen)
+    timer.drawTimer(screen, playerLookup)
     
     x,y = -1,-1
     if page != 0:
