@@ -8,4 +8,5 @@ backup.json
 users.json
 settings.json
 update-log.json
+cmd-log.txt
 *test*
