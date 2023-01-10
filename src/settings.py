@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import math
 
 baseDir = os.path.join(os.path.dirname(__file__),'../')
 startTime = datetime.datetime.now()
@@ -36,3 +37,33 @@ with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     twitch_clientid = j['twitch-api-clientid']
     twitch_secret = j['twitch-api-secret']
     google_api_key = j['google-api-key']
+
+def dur_to_str(dur):
+    # calculate readable duration string
+    negative = False
+    if dur < 0:
+        dur = dur * -1
+        negative = True
+
+    tmp1 = datetime.timedelta(seconds=math.floor(dur))
+    delta = str(tmp1).split(" day")
+
+    initialHours = 0
+    extraHours=""
+    if len(delta)==1:
+        extraHours = delta[0]
+    elif len(delta)==2:
+        days = delta[0]
+        days = int(days)
+        initialHours = days * 24
+        if delta[1][0]=="s":
+            extraHours = delta[1][3:]
+        elif delta[1][0]==",":
+            extraHours = delta[1][2:]
+
+    finalTime = extraHours.split(":")
+    finalHours = int(finalTime[0]) + initialHours
+    finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
+    if negative:
+        finishTime = "-"+finishTime
+    return finishTime

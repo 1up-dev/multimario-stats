@@ -69,28 +69,7 @@ class Player:
         if self.finishTimeAbsolute == None:
             return
         self.duration = (self.finishTimeAbsolute - settings.startTime).total_seconds()
-
-        # calculate readable duration string
-        tmp1 = datetime.timedelta(seconds=math.floor(self.duration))
-        delta = str(tmp1).split(" day")
-
-        initialHours = 0
-        extraHours=""
-        if len(delta)==1:
-            extraHours = delta[0]
-        elif len(delta)==2:
-            days = delta[0]
-            days = int(days)
-            initialHours = days * 24
-            if delta[1][0]=="s":
-                extraHours = delta[1][3:]
-            elif delta[1][0]==",":
-                extraHours = delta[1][2:]
-
-        finalTime = extraHours.split(":")
-        finalHours = int(finalTime[0]) + initialHours
-        finishTime = str(finalHours)+":"+finalTime[1]+":"+finalTime[2]
-        self.duration_str = finishTime
+        self.duration_str = settings.dur_to_str(self.duration)
 
     def finish(self, status):
         self.status = status
