@@ -28,6 +28,8 @@ height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
     if settings.playersLock:
+        # indicates !fetchracers is currently running. 
+        # playerLookup size could change during draw, causing error
         return screen
     if settings.mode == "540":
         return mode_540.draw(screen, playerLookup, sortedRacers, page)

@@ -57,7 +57,7 @@ class Player:
             # sort() reassigns place numbers so the command output will be accurate
             sort.sort(playerLookup)
             score, collectible, game = self.collected()
-            return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place: #{str(self.place)})"
+            return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
         elif count == settings.max_score:
             self.score = count
             self.finish("done")
