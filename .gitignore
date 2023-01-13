@@ -3,7 +3,9 @@ __pycache__
 irc/
 log/
 profiles/
+venv/
 backup.json
 users.json
 settings.json
 update-log.json
+*test*
