@@ -96,6 +96,8 @@ def draw(screen, playerLookup, sortedRacers, page):
             screen.blit(s, (40+corner[0], 110+corner[1]) )
             if len(games) == 4:
                 screen.blit(s, (190+corner[0], 110+corner[1]) )
+            
+            boxYs=[80+corner[1]+2, 110+corner[1]+2, 80+corner[1]+2, 110+corner[1]+2]
 
             # filled boxes
             gray = (150,150,150)
@@ -110,7 +112,11 @@ def draw(screen, playerLookup, sortedRacers, page):
             for i in range(len(gameCounts)):
                 if gameCounts[i] < gameMaxes[i]/2:
                     label = getFont(18).render(str(gameCounts[i]), 1, (220,220,220))
-                    label_r = label.get_rect(midleft=(rects[i].midright[0]+2, rects[i].midright[1]))
+                    y = rects[i].midright[1]
+                    # if the box is empty, manually center the y coordinate on the middle of the bar instead of the default top
+                    if y == boxYs[i]:
+                        y += 8
+                    label_r = label.get_rect(midleft=(rects[i].midright[0]+2, y))
                 else:
                     label = getFont(18).render(str(gameCounts[i]), 1, (60,60,60))
                     label_r = label.get_rect(midright=(rects[i].midright[0]-2, rects[i].midright[1]))
