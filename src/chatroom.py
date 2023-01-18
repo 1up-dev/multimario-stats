@@ -59,6 +59,7 @@ class ChatRoom:
     def reconnect(self):
         self.currentSocket.close()
         self.currentSocket = socket.socket()
+        self.readbuffer = ""
         self.currentSocket.connect((self.HOST,self.PORT))
         self.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
         self.send(f"PASS {self.PASS}")
