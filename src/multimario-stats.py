@@ -5,7 +5,7 @@ import time
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import users
-import chatroom
+import bot
 import settings
 import sort
 import timer
@@ -16,7 +16,7 @@ import player
 playerLookup = users.init_users()
 
 # start bot thread
-t = threading.Thread(target=chatroom.bot_init, args=(playerLookup,))
+t = threading.Thread(target=bot.init, args=(playerLookup,))
 t.daemon = True
 t.start()
 

@@ -8,35 +8,36 @@ import users
 import settings
 import gsheets
 import player
+import chatroom
 
-recon = False
+def init(playerLookup):
+    channels = []
+    for c in settings.extra_chats:
+        if c.lower() not in playerLookup.keys():
+            channels.append(c.lower())
+    for c in playerLookup.keys():
+        channels.append(c)
+    chat = chatroom.ChatRoom(channels)
 
-def fetchIRC(chat, playerLookup):
-    global recon
+    recon = True
     while True:
+        if recon:
+            recon = False
+            chat.reconnect()
+        readbuffer = chat.recv()
+        if readbuffer == "":
+            recon = True
+            continue
         try:
-            if recon:
-                recon = False
-                chat.reconnect()
-                time.sleep(1)
-            readbuffer = chat.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
-            if readbuffer == "": #reconnect on server disconnect
-                print(datetime.datetime.now().isoformat().split(".")[0], "Empty readbuffer")
-                recon = True
-                continue
-            lines = readbuffer.split("\n")
-            for line in lines:
+            for line in readbuffer:
                 process_line(line, chat, playerLookup)
         except Exception:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Error: {traceback.format_exc()}")
-            recon = True
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Error in bot: {traceback.format_exc()}")
 
 def process_line(line, currentChat, playerLookup):
-    global recon
-    if line == "":
-        return
-    line = line.rstrip().split()
-    # i don't know why line is sometimes (rarely) empty here
+    if "PING :tmi.twitch.tv" in line:
+        currentChat.pong(line.replace('PING', 'PONG'))
+    line = line.strip().split()
     if len(line) == 0:
         return
 
@@ -59,50 +60,33 @@ def process_line(line, currentChat, playerLookup):
         if len(tmp) > 1:
             userCS = tmp[1].split(";")[0]
 
-    user = ""
+    if len(line) < 4:
+        return
     command = []
-    channel = ""
     whisper = False
+    user = line[0].split('!')[0].lower()[1:]
+    channel = line[2]
+    command.append(line[3].lower()[1:])
     for index, word in enumerate(line):
-        if index == 0:
-            user = word.split('!')[0]
-            #user = user[0:24] # what's this for?
-            if user == "PING":
-                currentChat.pong()
-                return
-            if len(line) < 4:
-                return
-            user = user.lower()[1:]
-        if index == 2:
-            # if line[1] == "WHISPER":
-            #     whisper = True
-            #     channel = "#"+user
-            #     continue
-            channel = word
-        if index == 3:
-            if len(word) <= 1:
-                return
-            command.append(word.lower()[1:])
         if index >= 4:
             command.append(word)
-    
-    if len(channel) <= 1:
-        channel = "00-main"
-    if channel[0] != "#":
-        channel = "00-main"
-    
-    #filter out non-ascii text to prevent UnicodeEncodeError on write() call
+    # filters out messages with 3-number tags (e.g. not PRIVMSG)
+    if len(line[1]) == 3:
+        return
+
+    if len(channel) < 1 or channel[0] != "#":
+        channel = "#0-main"
     path = f"irc/{channel[1:]}.log"
     full_line = " "
+    #filter out non-ascii text to prevent UnicodeEncodeError on write() call
     for word in line:
         full_line += "".join(c if ord(c)<128 else "." for c in word) + " "
-    full_line = full_line[0:-1]
     with open(os.path.join(settings.baseDir,path), 'a+') as f:
-        f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line + "\n")
+        f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line[0:-1] + "\n")
 
-    if len(command) < 1:
+    if userId == "":
         return
-    if command[0][0] != '!':
+    if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
     if command[0] in ['!ping','!roles','!mmstatus','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
         st = settings.startTime.isoformat().split("T")[0]
