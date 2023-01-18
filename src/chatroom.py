@@ -17,6 +17,7 @@ class ChatRoom:
         self.msgCount = 0
         self.msgPeriod = datetime.datetime.now()
         self.readbuffer = ""
+        self.reconnect()
     def send(self, msg):
         try:
             self.currentSocket.send(bytes(f"{msg}\r\n", "UTF-8"))
@@ -27,9 +28,11 @@ class ChatRoom:
             self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
                 print(datetime.datetime.now().isoformat().split(".")[0], "Socket: empty readbuffer")
-                return ""
         except OSError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
+            self.readbuffer = ""
+        if self.readbuffer == "":
+            self.reconnect()
             return ""
         tmp = self.readbuffer.split('\n')
         self.readbuffer = tmp.pop()

@@ -18,16 +18,8 @@ def init(playerLookup):
     for c in playerLookup.keys():
         channels.append(c)
     chat = chatroom.ChatRoom(channels)
-
-    recon = True
     while True:
-        if recon:
-            recon = False
-            chat.reconnect()
         readbuffer = chat.recv()
-        if readbuffer == "":
-            recon = True
-            continue
         try:
             for line in readbuffer:
                 process_line(line, chat, playerLookup)
