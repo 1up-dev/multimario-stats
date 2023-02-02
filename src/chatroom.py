@@ -21,6 +21,8 @@ class ChatRoom:
     def send(self, msg):
         try:
             self.currentSocket.send(bytes(f"{msg}\r\n", "UTF-8"))
+        except ConnectionResetError:
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: ConnectionResetError")
         except OSError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
     def recv(self):
@@ -28,6 +30,9 @@ class ChatRoom:
             self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
                 print(datetime.datetime.now().isoformat().split(".")[0], "Socket: empty readbuffer")
+        except ConnectionResetError:
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: ConnectionResetError")
+            self.readbuffer = ""
         except OSError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
             self.readbuffer = ""
