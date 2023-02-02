@@ -87,5 +87,3 @@ class ChatRoom:
         time.sleep(1)
     def pong(self, msg):
         self.send(msg)
-        with open(os.path.join(settings.baseDir,"irc/0-main.log"), 'a') as f:
-            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} Pong sent.\n")
