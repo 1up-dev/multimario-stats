@@ -332,11 +332,13 @@ def process_line(line, currentChat, playerLookup):
             settings.playersLock = True
             newRacers = gsheets.getRacers()
             new_racers_lower = []
+            no_change = True
 
             # add new racers from the sheet
             for r in newRacers:
                 new_racers_lower.append(r.lower())
                 if r.lower() not in playerLookup.keys():
+                    no_change = False
                     currentChat.message(channel, f"Adding new racer {r} found on the Google spreadsheet.")
                     playerLookup[r.lower()] = player.Player(r, {})
                     time.sleep(0.5)
@@ -346,11 +348,15 @@ def process_line(line, currentChat, playerLookup):
             p_keys = list(playerLookup.keys())
             for r in p_keys:
                 if r not in new_racers_lower:
+                    no_change = False
                     currentChat.message(channel, f"Removing racer {playerLookup[r].nameCaseSensitive} not found on the Google spreadsheet.")
                     playerLookup.pop(r)
                     time.sleep(0.5)
                     currentChat.part(r)
 
+            if no_change:
+                currentChat.message(channel, f"No changes were found between the bot's player list and Google Sheets.")
+                
             settings.playersLock = False
             # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
