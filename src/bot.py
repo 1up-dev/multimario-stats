@@ -355,8 +355,8 @@ def process_line(line, currentChat, playerLookup):
                     currentChat.part(r)
 
             if no_change:
-                currentChat.message(channel, f"No changes were found between the bot's player list and Google Sheets.")
-                
+                currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
+
             settings.playersLock = False
             # and trigger a sort and redraw to remove old player cards
             settings.redraw = True
