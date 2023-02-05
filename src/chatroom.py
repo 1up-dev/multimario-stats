@@ -1,10 +1,8 @@
 import socket
-import os
 import datetime
 import time
 import traceback
 import settings
-import bot
 
 class ChatRoom:
     def __init__(self, channels):
@@ -17,6 +15,7 @@ class ChatRoom:
         self.msgCount = 0
         self.msgPeriod = datetime.datetime.now()
         self.readbuffer = ""
+        socket.setdefaulttimeout(600)
         self.reconnect()
     def send(self, msg):
         try:
