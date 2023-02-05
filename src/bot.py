@@ -19,8 +19,8 @@ def init(playerLookup):
         channels.append(c)
     chat = chatroom.ChatRoom(channels)
     while True:
-        readbuffer = chat.recv()
         try:
+            readbuffer = chat.recv()
             for line in readbuffer:
                 process_line(line, chat, playerLookup)
         except Exception:
