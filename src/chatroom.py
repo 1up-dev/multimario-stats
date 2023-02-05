@@ -15,7 +15,7 @@ class ChatRoom:
         self.msgCount = 0
         self.msgPeriod = datetime.datetime.now()
         self.readbuffer = ""
-        socket.setdefaulttimeout(600)
+        socket.setdefaulttimeout(480) # 8 minutes
         self.reconnect()
     def send(self, msg):
         try:
@@ -67,7 +67,13 @@ class ChatRoom:
         self.currentSocket.close()
         self.currentSocket = socket.socket()
         self.readbuffer = ""
-        self.currentSocket.connect((self.HOST,self.PORT))
+        while True:
+            try:
+                self.currentSocket.connect((self.HOST,self.PORT))
+            except Exception:
+                time.sleep(10)
+                continue
+            break
         self.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
         self.send(f"PASS {self.PASS}")
         self.send(f"NICK {self.NICK}")
