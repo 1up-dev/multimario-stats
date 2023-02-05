@@ -32,6 +32,9 @@ class ChatRoom:
         except ConnectionResetError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: ConnectionResetError")
             self.readbuffer = ""
+        except TimeoutError:
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: TimeoutError. Attempting to reconnect...")
+            self.readbuffer = ""
         except OSError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
             self.readbuffer = ""
