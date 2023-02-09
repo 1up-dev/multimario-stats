@@ -140,29 +140,3 @@ def init_users():
             state_data = j[racer.lower()]
         playerLookup[racer.lower()] = player.Player(racer, state_data)
     return playerLookup
-    
-# log 1 update by user id for racer
-def log(id, user, racer):
-    if id == "":
-        return
-    log_file = os.path.join(settings.baseDir,"update-log.json")
-    # create file if it doesn't exist
-    if not os.path.isfile(log_file):
-        with open(log_file, 'w+') as f:
-            json.dump({}, f, indent=4)
-    with open(log_file,'r') as f:
-        udlog = json.load(f)
-
-    if id in udlog.keys():
-        udlog[id]["user"] = user
-        udlog[id]["total"] += 1
-        if racer in udlog[id]["by-racer"].keys():
-            udlog[id]["by-racer"][racer] += 1
-        else:
-            udlog[id]["by-racer"][racer] = 1
-    else:
-        # construct user object
-        udlog[id] = {"user":user, "total":1, "by-racer":{racer:1}}
-    
-    with open(log_file,'w') as f:
-        json.dump(udlog, f, indent=4)

@@ -82,7 +82,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if command[0] in ['!ping','!roles','!mmstatus','!racecommands','!whitelist','!unwhitelist','!add','!set','!rejoin','!quit','!start','!forcequit','!dq','!noshow', '!revive', '!settime', '!blacklist', '!unblacklist', '!admin', '!debugquit', '!togglestream', '!restart', "!fetchracers", "!mmleave","!mmjoin","!clearstats"]:
         st = settings.startTime.isoformat().split("T")[0]
-        with open(os.path.join(settings.baseDir,f"log/{st}.txt"), 'a+') as f:
+        with open(os.path.join(settings.baseDir,f"log/{st}-cmd.log"), 'a+') as f:
             f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
 
     # global commands
@@ -216,8 +216,13 @@ def process_line(line, currentChat, playerLookup):
         
         response = p.update(number, playerLookup)
         currentChat.message(channel, response)
+
         # Log score update in external file
-        users.log(userId, userCS, p.nameCaseSensitive)
+        st = settings.startTime.isoformat().split("T")[0]
+        log_file = os.path.join(settings.baseDir,f"log/{st}-state.log")
+        with open(log_file,'a+') as f:
+            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {p.nameCaseSensitive} {p.score} {userId}\n")
+        
         settings.redraw = True
 
     # admin commands
