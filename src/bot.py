@@ -346,25 +346,26 @@ def process_line(line, currentChat, playerLookup):
                     no_change = False
                     currentChat.message(channel, f"Adding new racer {r} found on the Google spreadsheet.")
                     playerLookup[r.lower()] = player.Player(r, {})
-                    time.sleep(0.5)
                     currentChat.join(r.lower())
 
-            #delete racers that have been removed from the sheet
+            # delete racers that have been removed from the sheet
             p_keys = list(playerLookup.keys())
             for r in p_keys:
                 if r not in new_racers_lower:
                     no_change = False
                     currentChat.message(channel, f"Removing racer {playerLookup[r].nameCaseSensitive} not found on the Google spreadsheet.")
                     playerLookup.pop(r)
-                    time.sleep(0.5)
                     currentChat.part(r)
 
             if no_change:
                 currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
-
-            settings.playersLock = False
-            # and trigger a sort and redraw to remove old player cards
+            
+            # re-calculate the number of pages in case it changed
+            settings.set_max_count(len(playerLookup))
+            # trigger a redraw to remove old player cards
             settings.redraw = True
+            # release the lock on players dict
+            settings.playersLock = False
         elif command[0] == "!clearstats":
             for p in playerLookup.keys():
                 playerLookup[p].score = 0

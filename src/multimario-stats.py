@@ -26,17 +26,10 @@ screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats")
 
 # determine number of pages
-max_count = 99
-num_players = len(playerLookup.keys())
-i1 = 28
-while True:
-    if num_players <= i1:
-        break
-    max_count += 100
-    i1 += 25
-count = 0
+settings.set_max_count(len(playerLookup))
 
 # main display loop
+count = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -56,7 +49,7 @@ while True:
         settings.redraw = False
     count += 1
 
-    if count > max_count:
+    if count > settings.max_count:
         count = 0
     timer.drawTimer(screen, playerLookup)
     time.sleep(0.1)

@@ -16,6 +16,7 @@ gsheet = ""
 modeInfo = {}
 test_racers = []
 stopTimer = False
+max_count = 0
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)
     startTime = datetime.datetime.fromisoformat(j['start-time'])
@@ -71,3 +72,14 @@ def dur_to_str(dur):
 
 def getFont(size):
     return pygame.font.Font(os.path.join(baseDir,"resources/Lobster 1.4.otf"), size)
+
+def set_max_count(num_players):
+    global max_count
+    max = 99
+    i1 = 28
+    while True:
+        if num_players <= i1:
+            break
+        max += 100
+        i1 += 25
+    max_count = max
