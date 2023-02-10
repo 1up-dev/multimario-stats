@@ -2,7 +2,6 @@ import datetime
 import os
 import json
 import traceback
-import time
 from pynput.keyboard import Key, Controller
 import users
 import settings

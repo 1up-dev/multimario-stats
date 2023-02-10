@@ -1,6 +1,7 @@
 import math
 import datetime
 import pygame
+from pynput.keyboard import Key, Controller
 import settings
 
 stopped_time = None
@@ -16,6 +17,10 @@ def check_events(t, playerLookup):
                 p.finish("disqualified")
         time_limit_reached == True
         settings.redraw = True
+        # toggle stream (off)
+        kb = Controller()
+        with kb.pressed(Key.ctrl):
+            kb.tap("5")
 
     if t == "-0:15:00" and stats_cleared == False:
         for p in playerLookup:
@@ -24,6 +29,10 @@ def check_events(t, playerLookup):
             p.status = "live"
         stats_cleared = True
         settings.redraw = True
+        # toggle stream (on)
+        kb = Controller()
+        with kb.pressed(Key.ctrl):
+            kb.tap("5")
 
 def drawTimer(screen, playerLookup):
     global stopped_time
