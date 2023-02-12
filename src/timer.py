@@ -15,7 +15,7 @@ def check_events(t, playerLookup):
             p = playerLookup[p]
             if p.status == "live":
                 p.finish("disqualified")
-        time_limit_reached == True
+        time_limit_reached = True
         settings.redraw = True
         # toggle stream (off)
         kb = Controller()
