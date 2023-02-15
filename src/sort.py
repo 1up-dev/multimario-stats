@@ -29,10 +29,7 @@ def sort(playerLookup):
                 elif index == len(sortedRacers)-1:
                     sortedRacers.append(key)
                     break
-    if all_racers_done:
-        settings.stopTimer = True
-    else:
-        settings.stopTimer = False
+    settings.stopTimer = all_racers_done
 
     # place number assignments
     for index, racer in enumerate(sortedRacers):
