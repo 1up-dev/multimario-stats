@@ -5,6 +5,8 @@ def sort(playerLookup):
     sortedRacers = []
     all_racers_done = True
     for key in playerLookup:
+        if playerLookup[key].status == "live":
+            all_racers_done = False
         if len(sortedRacers) == 0:
             sortedRacers.append(key)
         elif playerLookup[key].status == 'done':
@@ -20,9 +22,6 @@ def sort(playerLookup):
                     break
         else:
             for index, racer in enumerate(sortedRacers):
-                #set all_racers_done flag to False if any racer is live
-                if playerLookup[key].status == "live":
-                    all_racers_done = False
                 if playerLookup[key].score > playerLookup[racer].score:
                     sortedRacers.insert(index, key)
                     break
