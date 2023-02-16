@@ -9,7 +9,6 @@ startTime = datetime.datetime.now()
 doQuit = False
 redraw = True
 debug = True
-playersLock = False
 mode = ""
 max_score = 0
 gsheet = ""

@@ -75,7 +75,7 @@ def draw(screen, playerLookup, sortedRacers, page):
                 slot += 1
 
     #-----------scorecard drawing------------
-    for key in playerLookup:
+    for key in list(playerLookup.keys()):
         currentPlayer = playerLookup[key]
         corner = currentPlayer.corner
 

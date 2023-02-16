@@ -27,10 +27,6 @@ length = 314
 height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
-    if settings.playersLock:
-        # indicates !fetchracers is currently running. 
-        # playerLookup size could change during draw, causing error
-        return screen
     if settings.mode == "540":
         return mode_540.draw(screen, playerLookup, sortedRacers, page)
     
@@ -50,7 +46,7 @@ def draw(screen, playerLookup, sortedRacers, page):
         slot += 1
 
     #-----------scorecard drawing------------
-    for key in playerLookup:
+    for key in list(playerLookup.keys()):
         player = playerLookup[key]
         corner = player.corner
         if corner == None:
@@ -186,7 +182,6 @@ def draw(screen, playerLookup, sortedRacers, page):
         #topright justify the place text
         place_r = placeRender.get_rect(topright=(player.corner[0]+304,player.corner[1]+5))
         screen.blit(placeRender, place_r)
-
 
     pygame.display.flip()
     return screen

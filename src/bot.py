@@ -14,7 +14,7 @@ def init(playerLookup):
     for c in settings.extra_chats:
         if c.lower() not in playerLookup.keys():
             channels.append(c.lower())
-    for c in playerLookup.keys():
+    for c in list(playerLookup.keys()):
         channels.append(c)
     chat = chatroom.ChatRoom(channels)
     while True:
@@ -247,7 +247,7 @@ def process_line(line, currentChat, playerLookup):
                     json.dump(j, f, indent=4)
                     f.truncate()
                 currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0])
-                for racer in playerLookup.keys():
+                for racer in list(playerLookup.keys()):
                     playerLookup[racer].calculateDuration()
                 settings.redraw = True
         elif command[0] == "!forcequit" and len(command) == 2:
@@ -333,7 +333,6 @@ def process_line(line, currentChat, playerLookup):
                 kb.tap("5")
             currentChat.message(channel, "Toggled stream.")
         elif command[0] == "!fetchracers":
-            settings.playersLock = True
             newRacers = gsheets.getRacers()
             new_racers_lower = []
             no_change = True
@@ -363,10 +362,8 @@ def process_line(line, currentChat, playerLookup):
             settings.set_max_count(len(playerLookup))
             # trigger a redraw to remove old player cards
             settings.redraw = True
-            # release the lock on players dict
-            settings.playersLock = False
         elif command[0] == "!clearstats":
-            for p in playerLookup.keys():
+            for p in list(playerLookup.keys()):
                 playerLookup[p].score = 0
                 playerLookup[p].status = "live"
             currentChat.message(channel, f"{userCS}: Cleared all racer stats.")

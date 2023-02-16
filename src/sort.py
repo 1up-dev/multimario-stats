@@ -4,7 +4,7 @@ def sort(playerLookup):
     # sorting runners for display
     sortedRacers = []
     all_racers_done = True
-    for key in playerLookup:
+    for key in list(playerLookup.keys()):
         if playerLookup[key].status == "live":
             all_racers_done = False
         if len(sortedRacers) == 0:

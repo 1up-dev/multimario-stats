@@ -11,7 +11,7 @@ stats_cleared = False
 def check_events(t, playerLookup):
     global time_limit_reached, stats_cleared
     if t == settings.modeInfo['time-limit'] and time_limit_reached == False:
-        for p in playerLookup:
+        for p in list(playerLookup.keys()):
             p = playerLookup[p]
             if p.status == "live":
                 p.finish("disqualified")
@@ -23,7 +23,7 @@ def check_events(t, playerLookup):
             kb.tap("5")
 
     if t == "-0:15:00" and stats_cleared == False:
-        for p in playerLookup:
+        for p in list(playerLookup.keys()):
             p = playerLookup[p]
             p.score = 0
             p.status = "live"
