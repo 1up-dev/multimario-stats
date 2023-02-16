@@ -75,15 +75,12 @@ def remove(user, role: Role):
     if role == Role.UPDATER:
         if user in updaters:
             del updaters[user]
-            print("Removed user "+user+".")
     elif role == Role.ADMIN:
         if user in admins:
             del admins[user]
-            print("Removed user "+user+".")
     elif role == Role.BLACKLIST:
         if user in blacklist:
             del blacklist[user]
-            print("Removed user "+user+".")
     push_all()
 
 def roles(user, playerLookup):
