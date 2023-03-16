@@ -3,23 +3,19 @@ import math
 import copy
 import pygame
 import settings
+import mode_540
 import timer
+from settings import getFont
 
 games = copy.deepcopy(settings.modeInfo['games'])
 for g in games:
-    bg = pygame.image.load(os.path.join(settings.baseDir,g['background']))
-    icon = pygame.image.load(os.path.join(settings.baseDir,g['icon']))
-    g['background'] = bg
-    g['icon'] = icon
-
+    g['background']= pygame.image.load(os.path.join(settings.baseDir,g['background']))
+    g['icon']= pygame.image.load(os.path.join(settings.baseDir,g['icon']))
 finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
 background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
 
-def getFont(size):
-    return pygame.font.Font(os.path.join(settings.baseDir,"resources/Lobster 1.4.otf"), size)
-
 slots = [
-    (7,12), (325,12), (643,12), (961,12), (1279,12),
+    (7,12), (325,12), (643,12), #(961,12), (1279,12),
     (7,169),(325,169),(643,169),(961,169),(1279,169),
     (7,315),(325,315),(643,315),(961,315),(1279,315),
     (7,461),(325,461),(643,461),(961,461),(1279,461),
@@ -32,61 +28,32 @@ height = 142
 
 def draw(screen, playerLookup, sortedRacers, page):
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    timer.drawTimer(screen)
+    timer.drawTimer(screen, playerLookup)
     
-    if page == 2:
-        slot = 0
-        for i, r in enumerate(sortedRacers):
-            if 3 <= i <= 52:
-                playerLookup[r].corner = slots[len(slots)-1]
-                continue
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
-    elif page == 1:
-        slot = 0
-        for i, r in enumerate(sortedRacers):
-            if 3 <= i <= 27:
-                playerLookup[r].corner = slots[len(slots)-1]
-                continue
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
-    else:
-        slot = 0
-        for r in sortedRacers:
-            if slot >= len(slots):
-                playerLookup[r].corner = slots[len(slots)-1]
-            else:
-                playerLookup[r].corner = slots[slot]
-            if slot == 2:
-                slot += 3
-            else:
-                slot += 1
+    x,y = -1,-1
+    if page != 0:
+        x = 3
+        y = 2 + page * 25
+    slot = 0
+    for i, r in enumerate(sortedRacers):
+        if x <= i <= y or slot >= len(slots):
+            playerLookup[r].corner = None
+            continue
+        playerLookup[r].corner = slots[slot]
+        slot += 1
 
     #-----------scorecard drawing------------
     for key in list(playerLookup.keys()):
-        currentPlayer = playerLookup[key]
-        corner = currentPlayer.corner
-
-        if corner == slots[len(slots)-1]:
+        player = playerLookup[key]
+        corner = player.corner
+        if corner == None:
             continue
         
         pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
         pygame.draw.rect(screen, (25, 25, 25), [corner[0]+2, corner[1]+2, 310, 138])
 
-        score = currentPlayer.score
-        if currentPlayer.status == "live":
+        score = player.score
+        if player.status == "live":
             bg = None
             gameCounts, barLengths, gameMaxes = [], [], []
             done = False
@@ -98,7 +65,12 @@ def draw(screen, playerLookup, sortedRacers, page):
                 elif score <= g['count']:
                     bg = g['background']
                     if score == g['count']:
-                        bg = games[i+1]['background']
+                        if i+1 <= len(games)-1:
+                            bg = games[i+1]['background']
+                        else:
+                            print(f"Error: {player.nameCaseSensitive} has {player.score} (max score) while live.")
+                            player.status = "done"
+                            bg = games[i]['background']
                     gameCounts[-1] = score
                     done = True
                     score -= g['count']
@@ -120,6 +92,8 @@ def draw(screen, playerLookup, sortedRacers, page):
             screen.blit(s, (190+corner[0], 65+corner[1]) )
             screen.blit(s, (190+corner[0], 90+corner[1]) )
             screen.blit(s, (190+corner[0], 115+corner[1]) )
+            
+            boxYs=[65+corner[1]+2, 90+corner[1]+2, 115+corner[1]+2, 65+corner[1]+2, 90+corner[1]+2, 115+corner[1]+2]
 
             # filled boxes
             gray = (150,150,150)
@@ -135,7 +109,11 @@ def draw(screen, playerLookup, sortedRacers, page):
             for i in range(len(gameCounts)):
                 if gameCounts[i] < gameMaxes[i]/2:
                     label = getFont(18).render(str(gameCounts[i]), 1, (220,220,220))
-                    label_r = label.get_rect(midleft=(rects[i].midright[0]+2, rects[i].midright[1]))
+                    y = rects[i].midright[1]
+                    # if the box is empty, manually center the y coordinate on the middle of the bar instead of the default top
+                    if y == boxYs[i]:
+                        y += 8
+                    label_r = label.get_rect(midleft=(rects[i].midright[0]+2, y))
                 else:
                     label = getFont(18).render(str(gameCounts[i]), 1, (60,60,60))
                     label_r = label.get_rect(midright=(rects[i].midright[0]-2, rects[i].midright[1]))
@@ -157,57 +135,56 @@ def draw(screen, playerLookup, sortedRacers, page):
                     x, y = 159, 115
                 screen.blit(g['icon'], (x+corner[0], y+corner[1]))
 
-        elif currentPlayer.status == "done":    #shows done tag
+        elif player.status == "done":
 
             bg = pygame.transform.scale(finishBG,(310,138))
             screen.blit(bg, (corner[0]+2, corner[1]+2))
 
             # screen.blit(finishBG, (playerLookup[key].corner[0], playerLookup[key].corner[1]))
             doneTag = getFont(60).render("Done!", 1, (220,220,220))
-            done_r = doneTag.get_rect(center=((currentPlayer.corner[0]+(length/2), 85+currentPlayer.corner[1])))
+            done_r = doneTag.get_rect(center=((player.corner[0]+(length/2), 85+player.corner[1])))
             screen.blit(doneTag, done_r)
 
-            label = getFont(24).render(str("Final Time: {0}".format(currentPlayer.duration_str)), 1, (220,220,220))
-            label_r = label.get_rect(center=((currentPlayer.corner[0]+(length/2), 125+currentPlayer.corner[1])))
+            label = getFont(24).render(str("Final Time: {0}".format(player.duration_str)), 1, (220,220,220))
+            label_r = label.get_rect(center=((player.corner[0]+(length/2), 125+player.corner[1])))
             screen.blit(label, label_r)
         
         else:
             text = ""
             offset = 0
-            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+currentPlayer.duration_str, 1, (220,220,220))
-            if currentPlayer.status == "quit":
+            label = getFont(23).render("Completion: "+str(score)+"/"+str(settings.max_score) +" in "+player.duration_str, 1, (220,220,220))
+            if player.status == "quit":
                 text = "Quit"
-            elif currentPlayer.status == "disqualified":
+            elif player.status == "disqualified":
                 text = "Disqualified"
-            elif currentPlayer.status == "noshow":
+            elif player.status == "noshow":
                 label = getFont(20).render("", 1, (220,220,220))
                 text = "No-Show"
                 offset = 10
             
             textTag = getFont(48).render(text, 1, (255, 0, 0))
-            text_r = textTag.get_rect(center=(currentPlayer.corner[0]+(length/2), currentPlayer.corner[1]+80+offset))
+            text_r = textTag.get_rect(center=(player.corner[0]+(length/2), player.corner[1]+80+offset))
             screen.blit(textTag, text_r)
-            label_r = label.get_rect(center=(currentPlayer.corner[0]+(length/2), currentPlayer.corner[1]+123))
+            label_r = label.get_rect(center=(player.corner[0]+(length/2), player.corner[1]+123))
             screen.blit(label, label_r)
 
         
         #-------scorecard header-------
         #profile picture
-        prof = pygame.transform.scale(currentPlayer.profile, (50,50))
-        screen.blit(prof, (8+currentPlayer.corner[0], 8+currentPlayer.corner[1])) 
+        prof = pygame.transform.scale(player.profile, (50,50))
+        screen.blit(prof, (8+player.corner[0], 8+player.corner[1])) 
 
         #name & place
         color = (220,220,220)
-        if currentPlayer.place <=3:
+        if player.place <=3:
             color = (239,195,0)
-        nameRender = getFont(24).render(str(currentPlayer.nameCaseSensitive), 1, color)
-        placeRender = getFont(40).render(str(currentPlayer.place), 1, color)
+        nameRender = getFont(24).render(str(player.nameCaseSensitive), 1, color)
+        placeRender = getFont(40).render(str(player.place), 1, color)
 
-        screen.blit(nameRender, (65+currentPlayer.corner[0], 15+currentPlayer.corner[1]))
+        screen.blit(nameRender, (65+player.corner[0], 15+player.corner[1]))
         #topright justify the place text
-        place_r = placeRender.get_rect(topright=(currentPlayer.corner[0]+304,currentPlayer.corner[1]+5))
+        place_r = placeRender.get_rect(topright=(player.corner[0]+304,player.corner[1]+5))
         screen.blit(placeRender, place_r)
-
 
     pygame.display.flip()
     return screen
