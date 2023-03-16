@@ -101,15 +101,16 @@ class Player:
                 json.dump({}, f, indent=4)
 
 def backup_all(players):
-    p = {}
-    for player in players:
-        pl = players[player]
-        p[pl.name] = {}
-        p[pl.name]['score'] = pl.score
-        p[pl.name]['status'] = pl.status
-        if pl.finishTimeAbsolute == None:
-            p[pl.name]['finishtime'] = None
-        else:
-            p[pl.name]['finishtime'] = pl.finishTimeAbsolute.isoformat().split(".")[0]
-    with open(os.path.join(settings.baseDir,'backup.json'), 'w') as f:
-        json.dump(p, f, indent=4)
+    with open(os.path.join(settings.baseDir,'backup.json'), 'r+') as f:
+        j = json.load(f)
+        for p in players:
+            player = players[p]
+            j[player.name] = {}
+            j[player.name]['score'] = player.score
+            j[player.name]['status'] = player.status
+            j[player.name]['finishtime'] = None
+            if player.finishTimeAbsolute != None:
+                j[player.name]['finishtime'] = player.finishTimeAbsolute.isoformat().split(".")[0]
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()
