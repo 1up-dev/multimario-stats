@@ -111,10 +111,7 @@ def init_users():
         admins = j['admins']
         blacklist = j['blacklist']
         updaters = j['updaters']
-        if settings.debug:
-            racers = settings.test_racers
-    if not settings.debug:
-        racers = gsheets.getRacers()
+    racers = gsheets.getRacers()
 
     # update usernames by ID if it hasn't been done in the last day
     if (datetime.datetime.now() - settings.last_id_update).total_seconds() > 86400:

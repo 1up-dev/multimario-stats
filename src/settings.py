@@ -13,30 +13,30 @@ mode = ""
 max_score = 0
 gsheet = ""
 modeInfo = {}
-test_racers = []
 stopTimer = False
 max_count = 0
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)
-    startTime = datetime.datetime.fromisoformat(j['start-time'])
-    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
     debug = j['debug']
-
     mode = j['mode']
     modeInfo = j['modes'][mode]
     gsheet = modeInfo['gsheet']
+    if debug:
+        gsheet = j['debug-gsheet']
     for g in modeInfo['games']:
         max_score += g['count']
-
+    
+    use_backups = j['use-player-backups']
+    startTime = datetime.datetime.fromisoformat(j['start-time'])
+    
     twitch_nick = j['bot-twitch-username']
     twitch_pw = j['bot-twitch-auth']
-    use_backups = j['use-player-backups']
     extra_chats = j['extra-chat-rooms']
-    test_racers = j['test-racers']
 
-    twitch_token = j['twitch-api-token']
     twitch_clientid = j['twitch-api-clientid']
     twitch_secret = j['twitch-api-secret']
+    twitch_token = j['twitch-api-token']
+    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
     google_api_key = j['google-api-key']
 
 def dur_to_str(dur):
