@@ -97,7 +97,7 @@ def roles(user, playerLookup):
         score, collectible, game = p.collected()
         if out != "":
             out = f"Roles: {out}"
-        out = f"{p.nameCaseSensitive} has {str(score)} {collectible} in {game} (Place #{p.place}, {p.status}, {p.score}). {out[0:-2]}"
+        out = f"{p.nameCaseSensitive} has {str(score)} {collectible} in {game}. (Place #{p.place}, Status: {p.status}, Score: {p.score}) {out[0:-2]}"
     else:
         if out == "":
             out =  "None, "
