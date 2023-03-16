@@ -90,8 +90,8 @@ def draw(screen, playerLookup, sortedRacers, page):
             s = pygame.Surface((smallBar+4, barHeight), pygame.SRCALPHA)
             s.fill((60,60,60,192))
             screen.blit(s, (40+corner[0], 80+corner[1]) )
-            screen.blit(s, (190+corner[0], 80+corner[1]) )
             screen.blit(s, (40+corner[0], 110+corner[1]) )
+            screen.blit(s, (190+corner[0], 80+corner[1]) )
             if len(games) == 4:
                 screen.blit(s, (190+corner[0], 110+corner[1]) )
             
