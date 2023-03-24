@@ -14,6 +14,7 @@ max_score = 0
 gsheet = ""
 modeInfo = {}
 stopTimer = False
+playersLock = False
 max_count = 0
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)

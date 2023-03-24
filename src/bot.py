@@ -354,6 +354,7 @@ def process_line(line, currentChat, playerLookup):
             kb.tap("5")
         currentChat.message(channel, "Toggled stream.")
     elif command[0] == "!fetchracers":
+        settings.playersLock = True
         newRacers = gsheets.getRacers()
         new_racers_lower = []
         no_change = True
@@ -383,6 +384,7 @@ def process_line(line, currentChat, playerLookup):
         settings.set_max_count(len(playerLookup))
         # trigger a redraw to remove old player cards
         settings.redraw = True
+        settings.playersLock = False
     elif command[0] == "!clearstats":
         for p in list(playerLookup.keys()):
             playerLookup[p].score = 0
