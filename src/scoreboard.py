@@ -29,7 +29,7 @@ def draw(screen, playerLookup, page):
     if settings.playersLock:
         # indicates !fetchracers is currently running. 
         # playerLookup members could be removed, causing keyerror
-        return screen
+        return
     
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.draw(screen, playerLookup)
@@ -206,4 +206,3 @@ def draw(screen, playerLookup, page):
         screen.blit(placeRender, place_r)
 
     pygame.display.flip()
-    return screen

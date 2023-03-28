@@ -45,7 +45,7 @@ while True:
     # redraw every 10 seconds or if redraw is requested
     # draw page 0 from 0-99, page 1 from 100-199, etc.
     if count%100 == 0 or settings.redraw == True:
-        screen = scoreboard.draw(screen, playerLookup, count//100)
+        scoreboard.draw(screen, playerLookup, count//100)
         settings.redraw = False
     count += 1
 
