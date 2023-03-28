@@ -1,5 +1,5 @@
 import settings
-from mode import slots
+from scoreboard import slots
 
 def sort(playerLookup):
     # sorting runners for display
