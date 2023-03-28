@@ -2,12 +2,12 @@ import datetime
 import os
 import json
 import traceback
-from pynput.keyboard import Key, Controller
 import users
 import settings
 import gsheets
 import player
 import chatroom
+import obs
 
 def init(playerLookup):
     channels = []
@@ -349,9 +349,7 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, "Permanently closing the bot now.")
         settings.doQuit = True
     elif command[0] == "!togglestream":
-        kb = Controller()
-        with kb.pressed(Key.ctrl):
-            kb.tap("5")
+        obs.request("ToggleStream")
         currentChat.message(channel, "Toggled stream.")
     elif command[0] == "!fetchracers":
         settings.playersLock = True
