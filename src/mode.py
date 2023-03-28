@@ -3,7 +3,6 @@ import math
 import copy
 import pygame
 import settings
-import mode_540
 import timer
 from settings import getFont
 
@@ -26,35 +25,21 @@ slots = [
 length = 314
 height = 142
 
-def draw(screen, playerLookup, sortedRacers, page):
+def draw(screen, playerLookup, page):
     if settings.playersLock:
         # indicates !fetchracers is currently running. 
         # playerLookup members could be removed, causing keyerror
         return screen
-    if settings.mode == "540":
-        return mode_540.draw(screen, playerLookup, sortedRacers, page)
     
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
     timer.drawTimer(screen, playerLookup)
-    
-    x,y = -1,-1
-    if page != 0:
-        x = 3
-        y = 2 + page * 25
-    slot = 0
-    for i, r in enumerate(sortedRacers):
-        if x <= i <= y or slot >= len(slots):
-            playerLookup[r].corner = None
-            continue
-        playerLookup[r].corner = slots[slot]
-        slot += 1
 
     #-----------scorecard drawing------------
     for key in list(playerLookup.keys()):
         player = playerLookup[key]
-        corner = player.corner
-        if corner == None:
+        if player.page not in [-1,page]:
             continue
+        corner = player.corner
         
         pygame.draw.rect(screen, (200, 200, 200), [corner[0], corner[1], 314, 142])
         pygame.draw.rect(screen, (25, 25, 25), [corner[0]+2, corner[1]+2, 310, 138])
@@ -93,22 +78,39 @@ def draw(screen, playerLookup, sortedRacers, page):
             # base boxes
             s = pygame.Surface((smallBar+4, barHeight), pygame.SRCALPHA)
             s.fill((60,60,60,192))
-            screen.blit(s, (40+corner[0], 80+corner[1]) )
-            screen.blit(s, (40+corner[0], 110+corner[1]) )
-            screen.blit(s, (190+corner[0], 80+corner[1]) )
-            if len(games) == 4:
-                screen.blit(s, (190+corner[0], 110+corner[1]) )
-            
-            boxYs=[80+corner[1]+2, 110+corner[1]+2, 80+corner[1]+2, 110+corner[1]+2]
+            boxYs = []
+            if len(games) == 6: # 6-game layout bodge. fix later :(
+                screen.blit(s, (40+corner[0], 65+corner[1]) )
+                screen.blit(s, (40+corner[0], 90+corner[1]) )
+                screen.blit(s, (40+corner[0], 115+corner[1]) )
+                screen.blit(s, (190+corner[0], 65+corner[1]) )
+                screen.blit(s, (190+corner[0], 90+corner[1]) )
+                screen.blit(s, (190+corner[0], 115+corner[1]) )
+                boxYs=[65+corner[1]+2, 90+corner[1]+2, 115+corner[1]+2, 65+corner[1]+2, 90+corner[1]+2, 115+corner[1]+2]
+            else:
+                screen.blit(s, (40+corner[0], 80+corner[1]) )
+                screen.blit(s, (40+corner[0], 110+corner[1]) )
+                screen.blit(s, (190+corner[0], 80+corner[1]) )
+                if len(games) == 4:
+                    screen.blit(s, (190+corner[0], 110+corner[1]) )
+                boxYs=[80+corner[1]+2, 110+corner[1]+2, 80+corner[1]+2, 110+corner[1]+2]
 
             # filled boxes
             gray = (150,150,150)
             rects = []
-            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 80+corner[1]+2, barLengths[0], barHeight-4]))
-            rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 110+corner[1]+2, barLengths[1], barHeight-4]))
-            rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 80+corner[1]+2, barLengths[2], barHeight-4]))
-            if len(games) == 4:
-                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 110+corner[1]+2, barLengths[3], barHeight-4]))
+            if len(games) == 6: # 6-game layout bodge. fix later :(
+                rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 65+corner[1]+2, barLengths[0], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 90+corner[1]+2, barLengths[1], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 115+corner[1]+2, barLengths[2], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 65+corner[1]+2, barLengths[3], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 90+corner[1]+2, barLengths[4], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 115+corner[1]+2, barLengths[5], barHeight-4]))
+            else:
+                rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 80+corner[1]+2, barLengths[0], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [40+corner[0]+2, 110+corner[1]+2, barLengths[1], barHeight-4]))
+                rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 80+corner[1]+2, barLengths[2], barHeight-4]))
+                if len(games) == 4:
+                    rects.append(pygame.draw.rect(screen, gray, [190+corner[0]+2, 110+corner[1]+2, barLengths[3], barHeight-4]))
 
             # individual game counts
             for i in range(len(gameCounts)):
@@ -125,16 +127,32 @@ def draw(screen, playerLookup, sortedRacers, page):
                 screen.blit(label, label_r)
 
             # game icons
-            for i, g in enumerate(games):
-                if i == 0:
-                    x, y = 6, 75
-                elif i == 1:
-                    x, y = 6, 103
-                elif i == 2:
-                    x, y = 157, 70
-                elif i == 3:
-                    x, y = 157, 108
-                screen.blit(g['icon'], (x+corner[0], y+corner[1]))
+            if len(games) == 6: # 6-game layout bodge. fix later :(
+                for i, g in enumerate(games):
+                    if i == 0:
+                        x, y = 6, 60
+                    elif i == 1:
+                        x, y = 6, 85
+                    elif i == 2:
+                        x, y = 6, 110
+                    elif i == 3:
+                        x, y = 157, 60
+                    elif i == 4:
+                        x, y = 157, 85
+                    elif i == 5:
+                        x, y = 159, 115
+                    screen.blit(g['icon'], (x+corner[0], y+corner[1]))
+            else:
+                for i, g in enumerate(games):
+                    if i == 0:
+                        x, y = 6, 75
+                    elif i == 1:
+                        x, y = 6, 103
+                    elif i == 2:
+                        x, y = 157, 70
+                    elif i == 3:
+                        x, y = 157, 108
+                    screen.blit(g['icon'], (x+corner[0], y+corner[1]))
 
         elif player.status == "done":
 

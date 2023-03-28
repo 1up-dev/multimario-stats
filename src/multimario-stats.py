@@ -40,12 +40,12 @@ while True:
 
     if settings.redraw == True:
         player.backup_all(playerLookup)
-        sortedRacers = sort.sort(playerLookup)
+        sort.sort(playerLookup)
     
     # redraw every 10 seconds or if redraw is requested
     # draw page 0 from 0-99, page 1 from 100-199, etc.
     if count%100 == 0 or settings.redraw == True:
-        screen = mode.draw(screen, playerLookup, sortedRacers, count//100)
+        screen = mode.draw(screen, playerLookup, count//100)
         settings.redraw = False
     count += 1
 

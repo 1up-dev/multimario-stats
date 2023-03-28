@@ -23,6 +23,8 @@ class Player:
             self.score = random.choice(range(0, settings.max_score))
         if state_data != {}:
             self.score = state_data['score']
+            if self.score > settings.max_score:
+                self.score = 0
             self.status = state_data['status']
             if state_data['finishtime'] != None:
                 self.finishTimeAbsolute = datetime.datetime.fromisoformat(state_data['finishtime'])
