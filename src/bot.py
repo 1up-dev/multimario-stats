@@ -195,7 +195,13 @@ def process_line(line, currentChat, playerLookup):
             return
         p = playerLookup[racer]
         try:
-            number = int(number)
+            if '+' in number:
+                nums = number.split('+')
+                number = 0
+                for n in nums:
+                    number += int(n)
+            else:
+                number = int(number)
         except ValueError:
             currentChat.message(channel, f"{userCS}: Not a number.")
             return
