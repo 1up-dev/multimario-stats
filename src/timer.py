@@ -28,7 +28,7 @@ def check_events(t, playerLookup):
         settings.redraw = True
         obs.request("StartStream")
 
-def drawTimer(screen, playerLookup):
+def draw(screen, playerLookup):
     global stopped_time
     if settings.stopTimer and stopped_time == None:
         stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()

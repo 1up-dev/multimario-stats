@@ -51,5 +51,5 @@ while True:
 
     if count > settings.max_count:
         count = 0
-    timer.drawTimer(screen, playerLookup)
+    timer.draw(screen, playerLookup)
     time.sleep(0.1)
