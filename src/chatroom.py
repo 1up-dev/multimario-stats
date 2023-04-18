@@ -69,6 +69,7 @@ class ChatRoom:
     def reconnect(self):
         self.currentSocket.close()
         self.currentSocket = socket.socket()
+        self.currentSocket.settimeout(480) # 8 minutes
         self.readbuffer = ""
         while True:
             try:

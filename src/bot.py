@@ -79,6 +79,9 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
+    for i, word in enumerate(command):
+        command[i] = "".join(c if ord(c)<128 else "" for c in word)
+    
     st = settings.startTime.isoformat().split("T")[0]
     with open(os.path.join(settings.baseDir,f"log/{st}-cmd.log"), 'a+') as f:
         f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
@@ -207,7 +210,7 @@ def process_line(line, currentChat, playerLookup):
             return
         
         if command[0] == "!add" and number == 0:
-            currentChat.message(channel, "Use !mmstatus [username] to check a racer's current status. If you are a racer, just type !mmstatus.")
+            currentChat.message(channel, "Use !mmstatus [username] to check a racer's current status. To check your own status, just type !mmstatus.")
             return
 
         response = ""
