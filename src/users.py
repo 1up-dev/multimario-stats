@@ -111,6 +111,10 @@ def init_users():
         admins = j['admins']
         blacklist = j['blacklist']
         updaters = j['updaters']
+    if 'race-num' in settings.modeInfo:
+        race_num = settings.modeInfo['race-num']
+        column = chr(ord('A') + race_num)
+        settings.gsheet = settings.gsheet.replace('A6:A?', f'A6:{column}?')
     racers = gsheets.getRacers()
 
     # update usernames by ID if it hasn't been done in the last day
