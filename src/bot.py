@@ -81,6 +81,8 @@ def process_line(line, currentChat, playerLookup):
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
+        if command[i] == "":
+            del(command[i])
     
     st = settings.startTime.isoformat().split("T")[0]
     with open(os.path.join(settings.baseDir,f"log/{st}-cmd.log"), 'a+') as f:
