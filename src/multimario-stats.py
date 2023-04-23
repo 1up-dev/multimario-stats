@@ -12,6 +12,12 @@ import timer
 import scoreboard
 import player
 
+# pygame setup
+pygame.init()
+screen = pygame.display.set_mode([1600,900])
+pygame.display.set_caption("Multi-Mario Stats")
+scoreboard.draw(screen, {}, 0)
+
 # load users and racers, construct player objects
 playerLookup = users.init_users()
 
@@ -19,11 +25,6 @@ playerLookup = users.init_users()
 t = threading.Thread(target=bot.init, args=(playerLookup,))
 t.daemon = True
 t.start()
-
-# pygame setup
-pygame.init()
-screen = pygame.display.set_mode([1600,900])
-pygame.display.set_caption("Multi-Mario Stats")
 
 # determine number of pages
 settings.set_max_count(len(playerLookup))

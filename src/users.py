@@ -136,5 +136,8 @@ def init_users():
         state_data = {}
         if settings.use_backups and j != {} and racer.lower() in j.keys():
             state_data = j[racer.lower()]
-        playerLookup[racer.lower()] = player.Player(racer, state_data)
+        playerLookup[racer.lower()] = player.Player(racer, state_data, defer_profile_fetch=True)
+    t = threading.Thread(target=twitch.fetch_profiles_async, args=(playerLookup,))
+    t.daemon = True
+    t.start()
     return playerLookup

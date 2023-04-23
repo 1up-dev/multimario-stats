@@ -1,14 +1,13 @@
 import random
 import os
 import datetime
-import math
 import json
 import settings
 import sort
 import twitch
 
 class Player:
-    def __init__(self, name, state_data):
+    def __init__(self, name, state_data, defer_profile_fetch=False):
         self.name = name.lower()
         self.nameCaseSensitive = name
         self.corner = (0,0)
@@ -18,7 +17,10 @@ class Player:
         self.duration = 0
         self.finishTimeAbsolute = None
         self.status = "live"
-        self.profile = twitch.fetchProfile(self.name)
+        if defer_profile_fetch:
+            self.profile = twitch.blank_profile()
+        else:
+            self.profile = twitch.fetchProfile(self.name)
         if state_data == {} and settings.debug:
             self.score = random.choice(range(0, settings.max_score))
         if state_data != {}:

@@ -5,6 +5,14 @@ import os
 import pygame
 import settings
 
+def fetch_profiles_async(players):
+    for player in players.values():
+        player.profile = fetchProfile(player.name)
+        settings.redraw = True
+
+def blank_profile():
+    return pygame.image.load(os.path.join(settings.baseDir,"resources/empty.png"))
+
 # Uses the Twitch API to fetch profile pictures of racers
 def fetchProfile(user):
     user =  user.lower()
