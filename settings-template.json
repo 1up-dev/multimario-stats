@@ -1,16 +1,15 @@
 {
     "debug": true,
+    "debug-gsheet": "",
     "mode":"602",
     "use-player-backups": true,
     "start-time": "2021-01-16T09:17:42",
-    "bot-twitch-username": "602race",
+    "bot-twitch-username": "multimarioevents",
     "bot-twitch-auth": "oauth:",
     "extra-chat-rooms": [
         "602race",
         "Odme_"
     ],
-    "srl-username": "",
-    "srl-auth": "",
     "twitch-api-clientid": "",
     "twitch-api-secret": "",
     "twitch-api-token": "",
@@ -18,6 +17,7 @@
     "google-api-key": "",
     "modes":{
         "602":{
+            "time-limit": "60:00:00",
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -52,6 +52,8 @@
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/values/A6:A?key="
         },
         "246": {
+            "race-num": 1,
+            "time-limit": "30:00:00",
             "games":[
                 {
                     "name": "Super Mario 64",
@@ -85,7 +87,8 @@
             "finish-bg":"resources/finish-smg2-242.png",
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1ZVY3-EabTrI1b0XItUCt-lJnk0OtH93yJPfaKJepJzA/values/A6:A?key="
         },
-        "1120": {
+        "sandbox-100%": {
+            "time-limit": "50:00:00",
             "games":[
                 {
                     "name": "Super Mario Odyssey",
@@ -112,7 +115,8 @@
             "finish-bg":"resources/finish-sm64.png",
             "gsheet": "https://sheets.googleapis.com/v4/spreadsheets/1NcNeCpKScarA7BdJCIDf4O7cPf5_7ECN5-IQTIqJsbI/values/A6:A?key="
         },
-        "sandbox": {
+        "sandbox-any%": {
+            "time-limit": "16:00:00",
             "games":[
                 {
                     "name": "Super Mario Odyssey",
