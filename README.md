@@ -9,10 +9,10 @@ See **[this video archive](https://www.twitch.tv/videos/857024553)** from Decemb
 
 ## Technical info
 - Rename `settings-template.json` to `settings.json` and fill out the fields before running.
-- Running the program will make the bot active in the Twitch chats of all the racers & the extra chat rooms specified in `settings.json`.
-- The Twitch username and password (authentication token) for the bot are pulled from `settings.json`. Get the authentication token here: http://twitchapps.com/tmi/.  
-- The Twitch developer app Client-ID is for API requests, get it here: https://dev.twitch.tv/dashboard/apps.  
-- The Google API Key is to get the list of racers from the race spreadsheet. Get it here: https://console.developers.google.com/apis/dashboard
+- Running the program will make the bot active in the Twitch chats of all the racers and the extra chat rooms specified in `settings.json`.
+- The Twitch username and authentication token (password) for the bot are pulled from `settings.json`. Get the authentication token here: http://twitchapps.com/tmi/.  
+- The Twitch developer app Client-ID is for API requests. Get it here: https://dev.twitch.tv/dashboard/apps.  
+- The Google API Key is used to get the list of racers from the race spreadsheet. Get it here: https://console.developers.google.com/apis/dashboard
 - Setting `"debug": true` in `settings.json` will have a few effects:
-    - The test racers list from `users.json` will be used instead of the actual racers list from Google Sheets.
-    - Each racer will be given a random score when the program starts.
+    - The test racers list (`debug-gsheet` in `settings.json`) will be used instead of the actual list from the official race sheet.
+    - Each racer will be given pseudorandom stats for testing.
