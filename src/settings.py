@@ -2,9 +2,16 @@ import datetime
 import json
 import os
 import math
+import traceback
 import pygame
 
-baseDir = os.path.join(os.path.dirname(__file__),'../')
+def make_dir(path):
+    try:
+        os.makedirs(os.path.join(baseDir,path))
+    except OSError as e:
+        pass
+
+baseDir = os.path.join(os.path.dirname(__file__),'..')
 startTime = datetime.datetime.now()
 doQuit = False
 redraw = True
@@ -16,6 +23,9 @@ modeInfo = {}
 stopTimer = False
 playersLock = False
 max_count = 0
+make_dir('irc')
+make_dir('log')
+make_dir('profiles')
 with open(os.path.join(baseDir,'settings.json'), 'r') as f:
     j = json.load(f)
     debug = j['debug']
