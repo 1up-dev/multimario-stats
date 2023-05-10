@@ -14,5 +14,5 @@ See **[this video archive](https://www.twitch.tv/videos/857024553)** from Decemb
 - The Twitch developer app Client-ID is for API requests. Get it here: https://dev.twitch.tv/dashboard/apps.  
 - The Google API Key is used to get the list of racers from the race spreadsheet. Get it here: https://console.developers.google.com/apis/dashboard
 - Setting `"debug": true` in `settings.json` will have a few effects:
-    - The test racers list (`"debug-gsheet"` in `settings.json`) will be used instead of the actual list from the official race sheet.
+    - The debug Google Sheets page (`"debug-gsheet"` in `settings.json`) will be used to get the list of racers instead of the official race sheet.
     - Each racer will be given pseudorandom stats for testing.
