@@ -7,8 +7,8 @@ See **[this video archive](https://www.twitch.tv/videos/857024553)** from Decemb
 >The 602 Race is an endurance race to 100% completion of four 3D Super Mario games, with a total of 602 Stars to be collected.  
 >The four games in order are: Super Mario 64: 120 Stars, Super Mario Galaxy: 120 Stars, Super Mario Sunshine: 120 Shines, and Super Mario Galaxy 2: 242 Stars.
 
-## Technical info
-- Rename `settings-template.json` to `settings.json` and fill out the fields before running.
+## Running
+- Rename `settings-template.json` to `settings.json` and fill out the fields.
 - Running the program will make the bot active in the Twitch chats of all the racers and the extra chat rooms specified in `settings.json`.
 - The Twitch username and authentication token (password) for the bot are pulled from `settings.json`. Get the authentication token here: http://twitchapps.com/tmi/.  
 - The Twitch developer app Client-ID is for API requests. Get it here: https://dev.twitch.tv/dashboard/apps.  
