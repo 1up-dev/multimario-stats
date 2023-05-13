@@ -5,7 +5,7 @@
 + If `[twitch_username]` is not specificed, list the roles of the user that sent the command.
 + If the user is a racer, also show their status in the race.
 #### !mmcommands
-+ Post the link to this command list: https://bit.ly/3Y1ggCu
++ Post the link to this command list: https://bit.ly/44P3Y46
 
 ## Commands for Counters  
 *To get permission to count, ask a racer or an admin to whitelist you.*  
