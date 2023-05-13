@@ -90,7 +90,7 @@ def process_line(line, currentChat, playerLookup):
 
     # global commands
     if command[0] == "!mmcommands":
-        currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/3Y1ggCu")
+        currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46")
     elif command[0] in ["!roles","!mmstatus"]:
         if len(command) == 1:
             statusMsg = users.roles(user, playerLookup)
