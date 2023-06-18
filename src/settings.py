@@ -2,53 +2,16 @@ import datetime
 import json
 import os
 import math
-import traceback
 import pygame
 
-def make_dir(path):
+def make_dir(dir_path):
     try:
-        os.makedirs(os.path.join(baseDir,path))
+        os.makedirs(path(dir_path))
     except OSError as e:
         pass
 
-baseDir = os.path.join(os.path.dirname(__file__),'..')
-startTime = datetime.datetime.now()
-doQuit = False
-redraw = True
-debug = True
-mode = ""
-max_score = 0
-gsheet = ""
-modeInfo = {}
-stopTimer = False
-playersLock = False
-max_count = 0
-make_dir('irc')
-make_dir('log')
-make_dir('profiles')
-with open(os.path.join(baseDir,'settings.json'), 'r') as f:
-    j = json.load(f)
-    debug = j['debug']
-    mode = j['mode']
-    modeInfo = j['modes'][mode]
-    gsheet = modeInfo['gsheet']
-    if debug:
-        gsheet = j['debug-gsheet']
-    for g in modeInfo['games']:
-        max_score += g['count']
-    
-    use_backups = j['use-player-backups']
-    startTime = datetime.datetime.fromisoformat(j['start-time'])
-    
-    twitch_nick = j['bot-twitch-username']
-    twitch_pw = j['bot-twitch-auth']
-    extra_chats = j['extra-chat-rooms']
-
-    twitch_clientid = j['twitch-api-clientid']
-    twitch_secret = j['twitch-api-secret']
-    twitch_token = j['twitch-api-token']
-    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
-    google_api_key = j['google-api-key']
+def path(file):
+    return os.path.join(baseDir, file)
 
 def dur_to_str(dur):
     # calculate readable duration string
@@ -81,7 +44,7 @@ def dur_to_str(dur):
     return finishTime
 
 def getFont(size):
-    return pygame.font.Font(os.path.join(baseDir,"resources/Lobster 1.4.otf"), size)
+    return pygame.font.Font(path("resources/Lobster 1.4.otf"), size)
 
 def set_max_count(num_players):
     global max_count
@@ -93,3 +56,51 @@ def set_max_count(num_players):
         max += 100
         i1 += 25
     max_count = max
+
+def save_api_tokens_to_file():
+    with open(path('settings.json'), 'r+') as f:
+        j = json.load(f)
+        j['twitch-api-token'] = twitch_token
+        j['twitch-refresh-token'] = twitch_refresh_token
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()
+
+baseDir = os.path.join(os.path.dirname(__file__),'..')
+startTime = datetime.datetime.now()
+doQuit = False
+redraw = True
+debug = True
+mode = ""
+max_score = 0
+gsheet = ""
+modeInfo = {}
+stopTimer = False
+playersLock = False
+max_count = 0
+blank_profile = pygame.image.load(path("resources/empty.png"))
+twitch_pw = ""
+twitch_nick = ""
+make_dir('irc')
+make_dir('log')
+make_dir('profiles')
+with open(path('settings.json'), 'r') as f:
+    j = json.load(f)
+    debug = j['debug']
+    mode = j['mode']
+    modeInfo = j['modes'][mode]
+    gsheet = modeInfo['gsheet']
+    if debug:
+        gsheet = j['debug-gsheet']
+    for g in modeInfo['games']:
+        max_score += g['count']
+    
+    startTime = datetime.datetime.fromisoformat(j['start-time'])
+    extra_chats = j['extra-chat-rooms']
+
+    twitch_clientid = j['twitch-api-clientid']
+    twitch_secret = j['twitch-api-secret']
+    twitch_token = j['twitch-api-token']
+    twitch_refresh_token = j['twitch-refresh-token']
+    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
+    google_api_key = j['google-api-key']

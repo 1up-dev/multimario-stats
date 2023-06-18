@@ -9,7 +9,7 @@ class ChatRoom:
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
         self.NICK = settings.twitch_nick
-        self.PASS = settings.twitch_pw
+        self.PASS = f"oauth:{settings.twitch_token}" # settings.twitch_pw
         self.channels = channels
         self.currentSocket = socket.socket()
         self.msgCount = 0
@@ -28,15 +28,18 @@ class ChatRoom:
         try:
             self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
-                print(datetime.datetime.now().isoformat().split(".")[0], "Socket: empty readbuffer")
+                print(datetime.datetime.now().isoformat().split(".")[0], "Socket recv: empty readbuffer")
+        except ConnectionAbortedError:
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: ConnectionAbortedError")
+            self.readbuffer = ""
         except ConnectionResetError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: ConnectionResetError")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: ConnectionResetError")
             self.readbuffer = ""
         except TimeoutError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: TimeoutError. Attempting to reconnect...")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: TimeoutError")
             self.readbuffer = ""
         except OSError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv error: {traceback.format_exc()}")
             self.readbuffer = ""
         if self.readbuffer == "":
             self.reconnect()

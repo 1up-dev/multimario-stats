@@ -8,6 +8,7 @@ import gsheets
 import player
 import chatroom
 import obs
+import twitch
 
 def init(playerLookup):
     channels = []
@@ -72,7 +73,7 @@ def process_line(line, currentChat, playerLookup):
     #filter out non-ascii text to prevent UnicodeEncodeError on write() call
     for word in line:
         full_line += "".join(c if ord(c)<128 else "." for c in word) + " "
-    with open(os.path.join(settings.baseDir,path), 'a+') as f:
+    with open(settings.path(path), 'a+') as f:
         f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line[0:-1] + "\n")
 
     if userId == "":
@@ -85,7 +86,7 @@ def process_line(line, currentChat, playerLookup):
             del(command[i])
     
     st = settings.startTime.isoformat().split("T")[0]
-    with open(os.path.join(settings.baseDir,f"log/{st}-cmd.log"), 'a+') as f:
+    with open(settings.path(f"log/{st}-cmd.log"), 'a+') as f:
         f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
 
     # global commands
@@ -231,7 +232,7 @@ def process_line(line, currentChat, playerLookup):
 
         # Log score update in external file
         st = settings.startTime.isoformat().split("T")[0]
-        log_file = os.path.join(settings.baseDir,f"log/{st}-state.log")
+        log_file = settings.path(f"log/{st}-state.log")
         with open(log_file,'a+') as f:
             f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {p.nameCaseSensitive} {p.score} {userId}\n")
         
@@ -254,7 +255,7 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29@09:00")
         if type(newTime) == datetime.datetime:
             settings.startTime = newTime
-            with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
+            with open(settings.path('settings.json'), 'r+') as f:
                 j = json.load(f)
                 j['start-time'] = settings.startTime.isoformat().split(".")[0]
                 f.seek(0)
@@ -357,6 +358,7 @@ def process_line(line, currentChat, playerLookup):
         users.add(subject,users.Role.ADMIN)
         currentChat.message(channel, command[1] + " is now an admin.")
     elif command[0] == "!mmkill":
+        obs.request("StopStream")
         currentChat.message(channel, "Permanently closing the bot now.")
         settings.doQuit = True
     elif command[0] == "!togglestream":
@@ -400,3 +402,5 @@ def process_line(line, currentChat, playerLookup):
             playerLookup[p].status = "live"
         currentChat.message(channel, f"{userCS}: Cleared all racer stats.")
         settings.redraw = True
+    elif command[0] == "!clip":
+        twitch.create_clip_async("42834061")

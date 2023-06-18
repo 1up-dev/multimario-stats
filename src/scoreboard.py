@@ -8,10 +8,10 @@ from settings import getFont
 
 games = copy.deepcopy(settings.modeInfo['games'])
 for g in games:
-    g['background']= pygame.image.load(os.path.join(settings.baseDir,g['background']))
-    g['icon']= pygame.image.load(os.path.join(settings.baseDir,g['icon']))
-finishBG = pygame.image.load(os.path.join(settings.baseDir,settings.modeInfo['finish-bg']))
-background = pygame.image.load(os.path.join(settings.baseDir,'resources/background.png'))
+    g['background']= pygame.image.load(settings.path(g['background']))
+    g['icon']= pygame.image.load(settings.path(g['icon']))
+finishBG = pygame.image.load(settings.path(settings.modeInfo['finish-bg']))
+background = pygame.image.load(settings.path('resources/background.png'))
 
 slots = [
     (7,12), (325,12), (643,12), #(961,12), (1279,12),

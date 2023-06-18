@@ -7,9 +7,10 @@ import sort
 import twitch
 
 class Player:
-    def __init__(self, name, state_data, defer_profile_fetch=False):
+    def __init__(self, name, state_data, defer_info_fetch=False):
         self.name = name.lower()
         self.nameCaseSensitive = name
+        self.twitch_id = ""
         self.corner = (0,0)
         self.place = 1
         self.score = 0
@@ -17,10 +18,9 @@ class Player:
         self.duration = 0
         self.finishTimeAbsolute = None
         self.status = "live"
-        if defer_profile_fetch:
-            self.profile = twitch.blank_profile()
-        else:
-            self.profile = twitch.fetchProfile(self.name)
+        self.profile = settings.blank_profile
+        if not defer_info_fetch:
+            twitch.get_player_info(self)
         if state_data == {} and settings.debug:
             self.score = random.choice(range(0, settings.max_score))
         if state_data != {}:
@@ -53,19 +53,18 @@ class Player:
         if count < 0 or count > settings.max_score:
             return
         
+        self.score = count
+        # sort() reassigns place numbers so the command output will be accurate
+        sort.sort(playerLookup)
+
         if 0 <= count < settings.max_score:
             if self.status == "done":
-                #if updating a done racer, set them to live
                 self.status = "live"
-            self.score = count
-            # sort() reassigns place numbers so the command output will be accurate
-            sort.sort(playerLookup)
             score, collectible, game = self.collected()
             return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
         elif count == settings.max_score:
-            self.score = count
             self.finish("done")
-            sort.sort(playerLookup)
+            twitch.create_clip_async(self.twitch_id)
             return f"{self.nameCaseSensitive} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
 
     def calculateDuration(self):
@@ -90,7 +89,7 @@ class Player:
             p['finishtime'] = self.finishTimeAbsolute.isoformat()
         
         delete_backup = False
-        with open(os.path.join(settings.baseDir,'backup.json'), 'r+') as f:
+        with open(settings.path('backup.json'), 'r+') as f:
             try:
                 j = json.load(f)
                 j[self.name] = p
@@ -101,11 +100,11 @@ class Player:
                 print("Error: Backup failed to load. Clearing it")
                 delete_backup = True
         if delete_backup:
-            with open(os.path.join(settings.baseDir,'backup.json'), 'w') as f:
+            with open(settings.path('backup.json'), 'w') as f:
                 json.dump({}, f, indent=4)
 
 def backup_all(players):
-    with open(os.path.join(settings.baseDir,'backup.json'), 'r+') as f:
+    with open(settings.path('backup.json'), 'r+') as f:
         j = json.load(f)
         for p in players:
             player = players[p]

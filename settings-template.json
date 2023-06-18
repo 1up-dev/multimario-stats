@@ -2,7 +2,6 @@
     "debug": true,
     "debug-gsheet": "",
     "mode":"602",
-    "use-player-backups": true,
     "start-time": "2021-01-16T09:17:42",
     "bot-twitch-username": "multimarioevents",
     "bot-twitch-auth": "oauth:",
@@ -13,6 +12,7 @@
     "twitch-api-clientid": "",
     "twitch-api-secret": "",
     "twitch-api-token": "",
+    "twitch-refresh-token": "",
     "last-id-update": "2021-05-06T16:56:38",
     "google-api-key": "",
     "modes":{

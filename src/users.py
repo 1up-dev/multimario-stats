@@ -19,7 +19,7 @@ admins, updaters, blacklist = [], [], []
 def updateUsersByID():
     print("Updating usernames by id using the Twitch API...")
 
-    with open(os.path.join(settings.baseDir,'users.json'),'r') as f:
+    with open(settings.path('users.json'),'r') as f:
         j = json.load(f)
         sets = [ j['admins'], j['updaters'], j['blacklist'] ]
     
@@ -28,7 +28,7 @@ def updateUsersByID():
         if s_new != None:
             sets[i] = s_new
 
-    with open(os.path.join(settings.baseDir,'users.json'),'w') as f:
+    with open(settings.path('users.json'),'w') as f:
         j['admins'] = sets[0]
         j['updaters'] = sets[1]
         j['blacklist'] = sets[2]
@@ -39,7 +39,7 @@ def updateUsersByID():
     updaters = sets[1]
     blacklist = sets[2]
 
-    with open(os.path.join(settings.baseDir,'settings.json'), 'r+') as f:
+    with open(settings.path('settings.json'), 'r+') as f:
         j = json.load(f)
         j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
         f.seek(0)
@@ -49,7 +49,7 @@ def updateUsersByID():
     print("Done updating Twitch usernames.")
 
 def push_all():
-    with open(os.path.join(settings.baseDir,'users.json'),'r+') as f:
+    with open(settings.path('users.json'),'r+') as f:
         j = json.load(f)
         j['admins'] = admins
         j['blacklist'] = blacklist
@@ -59,9 +59,10 @@ def push_all():
         f.truncate()
 
 def add(user, role: Role):
-    id = twitch.getTwitchId(user)
-    if id == None:
+    info = twitch.get_user_info(user)
+    if info == None:
         return False
+    id = info['id']
     if role == Role.UPDATER:
         updaters[user] = id
     elif role == Role.ADMIN:
@@ -106,7 +107,7 @@ def roles(user, playerLookup):
 
 def init_users():
     global admins, updaters, blacklist
-    with open(os.path.join(settings.baseDir,'users.json'),'r') as f:
+    with open(settings.path('users.json'),'r') as f:
         j = json.load(f)
         admins = j['admins']
         blacklist = j['blacklist']
@@ -125,19 +126,19 @@ def init_users():
     
     # player object instantiation
     playerLookup = {}
-    backupFile = os.path.join(settings.baseDir,"backup.json")
+    backupFile = settings.path("backup.json")
+    # create backup file if it doesn't exist
     if not os.path.isfile(backupFile):
-        # create backup file if it doesn't exist
         with open(backupFile, 'w+') as f:
             json.dump({}, f, indent=4)
     with open(backupFile, 'r') as f:
         j = json.load(f)
     for racer in racers:
         state_data = {}
-        if settings.use_backups and j != {} and racer.lower() in j.keys():
+        if j != {} and racer.lower() in j.keys():
             state_data = j[racer.lower()]
-        playerLookup[racer.lower()] = player.Player(racer, state_data, defer_profile_fetch=True)
-    t = threading.Thread(target=twitch.fetch_profiles_async, args=(playerLookup,))
+        playerLookup[racer.lower()] = player.Player(racer, state_data, defer_info_fetch=True)
+    t = threading.Thread(target=twitch.get_player_infos, args=(playerLookup,))
     t.daemon = True
     t.start()
     return playerLookup
