@@ -63,5 +63,7 @@
 + Add `[twitch_username]` as a new admin.  
 #### !mmleave/!mmjoin [twitch_username]  
 + Ask the bot to leave or join the chat of `[twitch_username]`.  
+#### !clearstats
++ Set the score of all racers to 0 and the status of all racers to "live".  
 #### !mmkill  
-+ Close the stats program and bot. Warning: it will not turn back on automatically. 
++ Close the stats program and bot. Warning: it will not turn back on automatically.  
