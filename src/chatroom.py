@@ -9,7 +9,6 @@ class ChatRoom:
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
         self.NICK = settings.twitch_nick
-        self.PASS = f"oauth:{settings.twitch_token}" # settings.twitch_pw
         self.channels = channels
         self.currentSocket = socket.socket()
         self.msgCount = 0
@@ -82,7 +81,7 @@ class ChatRoom:
                 continue
             break
         self.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
-        self.send(f"PASS {self.PASS}")
+        self.send(f"PASS oauth:{settings.twitch_token}")
         self.send(f"NICK {self.NICK}")
         # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
         print("Joining Twitch channels...")

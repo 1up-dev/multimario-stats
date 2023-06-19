@@ -117,9 +117,13 @@ def validate_token():
     data = response.json()
     if response.status_code in range(200,300):
         if data != None:
+            print(data)
             settings.twitch_token = data['access_token']
             settings.twitch_refresh_token = data['refresh_token']
             settings.save_api_tokens_to_file()
+            if not validate_token():
+                print("[API] Refreshed token is invalid. Giving up.")
+                return False
             print("[API] Token refreshed.")
             return True
     print("[API] Token refresh failed. Requesting authorization from user.", response.status_code, data)
@@ -153,14 +157,7 @@ def validate_token():
     print("[API] New token received. Validating...")
     
     # Validate token
-    url = 'https://id.twitch.tv/oauth2/validate'
-    headers = {'Authorization': f'OAuth {settings.twitch_token}'}
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    if response.status_code in range(200,300):
-        if data != None:
-            settings.twitch_nick = data['login']
-            print("[API] Token is valid.")
-            return True
+    if validate_token():
+        return True
     print("[API] New token is invalid. Giving up.")
     return False
