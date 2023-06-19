@@ -117,7 +117,6 @@ def validate_token():
     data = response.json()
     if response.status_code in range(200,300):
         if data != None:
-            print(data)
             settings.twitch_token = data['access_token']
             settings.twitch_refresh_token = data['refresh_token']
             settings.save_api_tokens_to_file()
