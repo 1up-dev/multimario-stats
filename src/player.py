@@ -64,7 +64,7 @@ class Player:
             return f"{self.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
         elif count == settings.max_score:
             self.finish("done")
-            twitch.create_clip_async(self.twitch_id)
+            twitch.create_clip_async(self.twitch_id, self.name)
             return f"{self.display_name} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
 
     def calculateDuration(self):
