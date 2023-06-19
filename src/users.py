@@ -2,7 +2,6 @@ from enum import Enum
 import json
 import os
 import threading
-import datetime
 import twitch
 import gsheets
 import settings
@@ -14,39 +13,7 @@ class Role(Enum):
     BLACKLIST = 3
     UPDATER = 4
 
-admins, updaters, blacklist = [], [], []
-
-def updateUsersByID():
-    print("Updating usernames by id using the Twitch API...")
-
-    with open(settings.path('users.json'),'r') as f:
-        j = json.load(f)
-        sets = [ j['admins'], j['updaters'], j['blacklist'] ]
-    
-    for i, s in enumerate(sets):
-        s_new = twitch.updateSet(s)
-        if s_new != None:
-            sets[i] = s_new
-
-    with open(settings.path('users.json'),'w') as f:
-        j['admins'] = sets[0]
-        j['updaters'] = sets[1]
-        j['blacklist'] = sets[2]
-        json.dump(j, f, indent=4)
-    
-    global admins, updaters, blacklist
-    admins = sets[0]
-    updaters = sets[1]
-    blacklist = sets[2]
-
-    with open(settings.path('settings.json'), 'r+') as f:
-        j = json.load(f)
-        j['last-id-update'] = datetime.datetime.now().isoformat().split(".")[0]
-        f.seek(0)
-        json.dump(j, f, indent=4)
-        f.truncate()
-
-    print("Done updating Twitch usernames.")
+admins, updaters, blacklist = {}, {}, {}
 
 def push_all():
     with open(settings.path('users.json'),'r+') as f:
@@ -58,52 +25,58 @@ def push_all():
         json.dump(j, f, indent=4)
         f.truncate()
 
-def add(user, role: Role):
-    info = twitch.get_user_info(user)
-    if info == None:
-        return False
-    id = info['id']
+def add(user, user_id, role: Role):
     if role == Role.UPDATER:
-        updaters[user] = id
+        updaters[user_id] = user
     elif role == Role.ADMIN:
-        admins[user] = id
+        admins[user_id] = user
     elif role == Role.BLACKLIST:
-        blacklist[user] = id
-    push_all()
-    return True
-
-def remove(user, role: Role):
-    if role == Role.UPDATER:
-        if user in updaters:
-            del updaters[user]
-    elif role == Role.ADMIN:
-        if user in admins:
-            del admins[user]
-    elif role == Role.BLACKLIST:
-        if user in blacklist:
-            del blacklist[user]
+        blacklist[user_id] = user
     push_all()
 
-def roles(user, playerLookup):
-    user = user.lower()
+def remove(user_id, role: Role):
+    if role == Role.UPDATER:
+        if user_id in updaters:
+            del updaters[user_id]
+    elif role == Role.ADMIN:
+        if user_id in admins:
+            del admins[user_id]
+    elif role == Role.BLACKLIST:
+        if user_id in blacklist:
+            del blacklist[user_id]
+    push_all()
+
+def roles(user_name, user_id, display_name, playerLookup):
     out = ""
-    if user in admins:
+    if user_id in admins:
         out += "Admin, "
-    if user in updaters:
+    if user_id in updaters:
         out += "Updater, "
-    if user in blacklist:
+    if user_id in blacklist:
         out += "Blacklist, "
-    if user in playerLookup.keys():
-        p = playerLookup[user]
+    if user_name.lower() in playerLookup.keys():
+        p = playerLookup[user_name.lower()]
         score, collectible, game = p.collected()
         if out != "":
             out = f"Roles: {out}"
-        out = f"{p.nameCaseSensitive} has {str(score)} {collectible} in {game}. (Place #{p.place}, Status: {p.status}, Score: {p.score}) {out[0:-2]}"
+        out = f"{p.display_name} has {str(score)} {collectible} in {game}. (Place #{p.place}, Status: {p.status}, Score: {p.score}) {out[0:-2]}"
     else:
         if out == "":
             out =  "None, "
-        out = f"{user}: {out[0:-2]}"
+        out = f"{display_name}: {out[0:-2]}"
     return out
+
+def update_usernames():
+    global admins, updaters, blacklist
+    # TODO: Pass all IDs into Twitch 'get users' API, 100 at a time
+    # twitch.get_user_info()
+
+    with open(settings.path('users.json'),'w+') as f:
+        j = json.load(f)
+        j['admins'] = admins
+        j['updaters'] = updaters
+        j['blacklist'] = blacklist
+        json.dump(j, f, indent=4)
 
 def init_users():
     global admins, updaters, blacklist
@@ -117,12 +90,6 @@ def init_users():
         column = chr(ord('A') + race_num)
         settings.gsheet = settings.gsheet.replace('A6:A?', f'A6:{column}?')
     racers = gsheets.getRacers()
-
-    # update usernames by ID if it hasn't been done in the last day
-    if (datetime.datetime.now() - settings.last_id_update).total_seconds() > 86400:
-        t = threading.Thread(target=updateUsersByID, args=())
-        t.daemon = True
-        t.start()
     
     # player object instantiation
     playerLookup = {}

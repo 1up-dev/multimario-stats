@@ -102,5 +102,4 @@ with open(path('settings.json'), 'r') as f:
     twitch_secret = j['twitch-api-secret']
     twitch_token = j['twitch-api-token']
     twitch_refresh_token = j['twitch-refresh-token']
-    last_id_update = datetime.datetime.fromisoformat(j['last-id-update'])
     google_api_key = j['google-api-key']

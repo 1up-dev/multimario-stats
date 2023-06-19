@@ -53,10 +53,10 @@ def get_player_info(player):
         urllib.request.urlretrieve(response['profile_url'], path)
     player.profile = pygame.image.load(path)
     player.twitch_id = response['id']
-    player.nameCaseSensitive = response['display_name']
+    player.display_name = response['display_name']
     settings.redraw = True
 
-def create_clip(broadcaster_id):
+def create_clip(broadcaster_id, username):
     time.sleep(20)
     headers = {"Client-Id":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
     params = {"broadcaster_id": broadcaster_id}
@@ -68,10 +68,13 @@ def create_clip(broadcaster_id):
     if len(responseData) == 0 or 'edit_url' not in responseData[0]:
         print(f"Clip request failed. {response}")
         return
-    print(responseData[0]['edit_url'])
+    link = responseData[0]['edit_url']
+    print(f"Clip created of {username}: {link}")
+    with open(settings.path(f"clip-links.txt"), 'a+') as f:
+        f.write(f"{username}: {link}\n")
 
-def create_clip_async(broadcaster_id):
-    t = threading.Thread(target=create_clip, args=(broadcaster_id,))
+def create_clip_async(broadcaster_id, username):
+    t = threading.Thread(target=create_clip, args=(broadcaster_id, username,))
     t.daemon = True
     t.start()
 
@@ -91,27 +94,6 @@ def get_user_info(user):
                  'id': data['id'],
                  'display_name': data['display_name']}
     return user_info
-
-def updateSet(data):
-    updated = {}
-    for user in data:
-        id = data[user]
-        url = "https://api.twitch.tv/helix/users?id="+id
-        headers = {"Client-ID":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
-        response = requests.get(url, headers=headers)
-        if response.status_code in range(200,300):
-            responseData = json.loads(response.content.decode("UTF-8"))['data']
-            if len(responseData)==0:
-                print("[API] Twitch id "+id+" does not exist.")
-            else:
-                newUsername = responseData[0]['login']
-                updated[newUsername] = id
-                if user != newUsername:
-                    print("[API] Updated username of Twitch id "+id+": "+user+" -> "+newUsername)
-        else:
-            print('[API] Twitch API Request Failed: ' + response.content.decode("UTF-8"))
-            return None
-    return updated
 
 def validate_token():
     print("[API] Validating token...")

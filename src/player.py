@@ -9,7 +9,7 @@ import twitch
 class Player:
     def __init__(self, name, state_data, defer_info_fetch=False):
         self.name = name.lower()
-        self.nameCaseSensitive = name
+        self.display_name = name
         self.twitch_id = ""
         self.corner = (0,0)
         self.place = 1
@@ -61,11 +61,11 @@ class Player:
             if self.status == "done":
                 self.status = "live"
             score, collectible, game = self.collected()
-            return f"{self.nameCaseSensitive} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
+            return f"{self.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
         elif count == settings.max_score:
             self.finish("done")
             twitch.create_clip_async(self.twitch_id)
-            return f"{self.nameCaseSensitive} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
+            return f"{self.display_name} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
 
     def calculateDuration(self):
         # calculate duration in seconds from finishTime - startTime

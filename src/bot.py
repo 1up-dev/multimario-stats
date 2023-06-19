@@ -1,5 +1,4 @@
 import datetime
-import os
 import json
 import traceback
 import users
@@ -29,13 +28,14 @@ def init(playerLookup):
 def process_line(line, currentChat, playerLookup):
     if "PING :tmi.twitch.tv" in line:
         currentChat.pong(line.replace('PING', 'PONG'))
+        return
     line = line.strip().split()
     if len(line) == 0:
         return
 
     # Twitch message tag processing
     ismod_orvip = False
-    userId = ""
+    user_id = ""
     userCS = ""
     if line[0][0] == "@":
         tags = line.pop(0)
@@ -47,7 +47,7 @@ def process_line(line, currentChat, playerLookup):
             ismod_orvip = True
         tmp = tags.split("user-id=")
         if len(tmp) > 1:
-            userId = tmp[1].split(";")[0]
+            user_id = tmp[1].split(";")[0]
         tmp = tags.split("display-name=")
         if len(tmp) > 1:
             userCS = tmp[1].split(";")[0]
@@ -76,7 +76,7 @@ def process_line(line, currentChat, playerLookup):
     with open(settings.path(path), 'a+') as f:
         f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line[0:-1] + "\n")
 
-    if userId == "":
+    if user_id == "":
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
@@ -94,38 +94,55 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46")
     elif command[0] in ["!roles","!mmstatus"]:
         if len(command) == 1:
-            statusMsg = users.roles(user, playerLookup)
+            statusMsg = users.roles(user, user_id, userCS, playerLookup)
         else:
-            statusMsg = users.roles(command[1], playerLookup)
+            subject = command[1].lower()
+            info = twitch.get_user_info(subject)
+            if info == None:
+                currentChat.message(channel, f"Twitch username {subject} not found.")
+                return
+            subject_id = info['id']
+            subject_displayname = info['display_name']
+            statusMsg = users.roles(subject, subject_id, subject_displayname, playerLookup)
         currentChat.message(channel, statusMsg)
 
     # shared commands
     elif command[0] == "!whitelist":
         if len(command) != 2:
             return
-        if (user not in users.admins) and (user not in playerLookup.keys()):
+        if (user_id not in users.admins) and (user not in playerLookup.keys()):
             return
         subject = command[1].lower()
-        if subject in users.blacklist:
-            currentChat.message(channel, f"Sorry, {command[1]} is on the blacklist.")
-        elif subject not in users.updaters:
-            if users.add(subject,users.Role.UPDATER):
-                currentChat.message(channel, f"Whitelisted {command[1]}.")
-            else:
-                currentChat.message(channel, f"Twitch username {command[1]} not found.")
+        info = twitch.get_user_info(subject)
+        if info == None:
+            currentChat.message(channel, f"Twitch username {subject} not found.")
+            return
+        subject_id = info['id']
+        subject_displayname = info['display_name']
+        if subject_id in users.blacklist:
+            currentChat.message(channel, f"Sorry, {subject_displayname} is on the blacklist.")
+        elif subject_id not in users.updaters:
+            users.add(subject, subject_id, users.Role.UPDATER)
+            currentChat.message(channel, f"Whitelisted {subject_displayname}.")
         else:
-            currentChat.message(channel, f"{command[1]} is already whitelisted.")
+            currentChat.message(channel, f"{subject_displayname} is already whitelisted.")
     elif command[0] == "!unwhitelist":
         if len(command) != 2:
             return
-        if (user not in users.admins) and (user not in playerLookup.keys()):
+        if (user_id not in users.admins) and (user not in playerLookup.keys()):
             return
         subject = command[1].lower()
-        if subject in users.updaters:
-            users.remove(subject,users.Role.UPDATER)
-            currentChat.message(channel, f"{command[1]} is no longer whitelisted.")
+        info = twitch.get_user_info(subject)
+        if info == None:
+            currentChat.message(channel, f"Twitch username {subject} not found.")
+            return
+        subject_id = info['id']
+        subject_displayname = info['display_name']
+        if subject_id in users.updaters:
+            users.remove(subject_id, users.Role.UPDATER)
+            currentChat.message(channel, f"{subject_displayname} is no longer whitelisted.")
         else:
-            currentChat.message(channel, f"{command[1]} is already not whitelisted.")
+            currentChat.message(channel, f"{subject_displayname} is already not whitelisted.")
     elif command[0] == "!mmleave":
         l_channel = ""
         if len(command) == 1:
@@ -133,15 +150,15 @@ def process_line(line, currentChat, playerLookup):
                 return
             l_channel = channel[1:]
         elif len(command) == 2:
-            if user not in users.admins:
+            if user_id not in users.admins:
                 return
             l_channel = command[1].lower()
         else:
             return
         if l_channel not in currentChat.channels:
-            currentChat.message(channel,f"{userCS}: Already not active in channel #{l_channel}.")
+            currentChat.message(channel,f"Already not active in channel #{l_channel}.")
             return
-        currentChat.message(channel,f"{userCS}: Leaving #{l_channel} now.")
+        currentChat.message(channel,f"Leaving #{l_channel} now.")
         currentChat.part(l_channel)
     elif command[0] == "!mmjoin":
         j_channel = ""
@@ -150,40 +167,42 @@ def process_line(line, currentChat, playerLookup):
                 return
             j_channel = user
         elif len(command) == 2:
-            if user not in users.admins:
+            if user_id not in users.admins:
                 return
             j_channel = command[1].lower()
         else:
             return
         if j_channel in currentChat.channels:
-            currentChat.message(channel,f"{userCS}: Rejoining #{j_channel} now.")
+            currentChat.message(channel,f"Rejoining #{j_channel} now.")
             currentChat.part(j_channel)
             currentChat.join(j_channel)
             return
-        currentChat.message(channel,f"{userCS}: Joining #{j_channel} now.")
+        currentChat.message(channel,f"Joining #{j_channel} now.")
         currentChat.join(j_channel)
 
     # racer commands
     elif command[0] in ["!rejoin", "!unquit"]:
         if user not in playerLookup.keys():
             return
-        if playerLookup[user].status != "quit":
+        racer = playerLookup[user]
+        if racer.status != "quit":
             return
-        playerLookup[user].status = "live"
-        if playerLookup[user].score == settings.max_score:
-            playerLookup[user].status = "done"
-        currentChat.message(channel, playerLookup[user].nameCaseSensitive +" has rejoined the race.")
+        racer.status = "live"
+        if racer.score == settings.max_score:
+            racer.status = "done"
+        currentChat.message(channel, racer.display_name +" has rejoined the race.")
         settings.redraw = True
     elif command[0] == "!quit":
         if user not in playerLookup.keys():
             return
-        if playerLookup[user].status != "live":
+        racer = playerLookup[user]
+        if racer.status != "live":
             return
-        playerLookup[user].finish("quit")
+        racer.finish("quit")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[user].nameCaseSensitive + " has quit.")
+        currentChat.message(channel, racer.display_name + " has quit.")
     elif command[0] in ["!add","!set"]:
-        if ((user not in users.updaters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user in users.blacklist):
+        if ((user_id not in users.updaters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blacklist):
             currentChat.message(channel, f"{userCS}: You do not have permission to update score counts.")
             return
 
@@ -191,13 +210,13 @@ def process_line(line, currentChat, playerLookup):
             racer = command[1].lower()
             number = command[2]
         elif len(command) == 2 and user in playerLookup.keys():
-            racer = user.lower()
+            racer = user
             number = command[1]
         else:
             return
 
         if racer not in playerLookup.keys():
-            currentChat.message(channel, f"{userCS}: Racer {racer} not found.")
+            currentChat.message(channel, f"Racer {racer} not found.")
             return
         p = playerLookup[racer]
         try:
@@ -209,7 +228,7 @@ def process_line(line, currentChat, playerLookup):
             else:
                 number = int(number)
         except ValueError:
-            currentChat.message(channel, f"{userCS}: Not a number.")
+            currentChat.message(channel, f"Not a number.")
             return
         
         if command[0] == "!add" and number == 0:
@@ -221,7 +240,7 @@ def process_line(line, currentChat, playerLookup):
             number += p.score
 
         if p.status not in ["live","done"]:
-            currentChat.message(channel, f"{p.nameCaseSensitive} is not live, so their score cannot be updated.")
+            currentChat.message(channel, f"{p.display_name} is not live, so their score cannot be updated.")
             return
         if number < 0 or number > settings.max_score:
             currentChat.message(channel, "The requested score is less than 0 or greater than the maximum possible score.")
@@ -234,12 +253,12 @@ def process_line(line, currentChat, playerLookup):
         st = settings.startTime.isoformat().split("T")[0]
         log_file = settings.path(f"log/{st}-state.log")
         with open(log_file,'a+') as f:
-            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {p.nameCaseSensitive} {p.score} {userId}\n")
+            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {p.name} {p.score} {user_id}\n")
         
         settings.redraw = True
 
     # admin commands
-    elif user not in users.admins:
+    elif user_id not in users.admins:
         return
     elif command[0] == "!start":
         newTime = -1
@@ -273,7 +292,7 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("quit")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been forcequit.")
+        currentChat.message(channel, playerLookup[racer].display_name + " has been forcequit.")
     elif command[0] == "!noshow":
         if len(command) != 2:
             return
@@ -282,7 +301,7 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("noshow")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " set to No-show.")
+        currentChat.message(channel, playerLookup[racer].display_name + " set to No-show.")
     elif command[0] == "!dq":
         if len(command) != 2:
             return
@@ -291,7 +310,7 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("disqualified")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been disqualified.")
+        currentChat.message(channel, playerLookup[racer].display_name + " has been disqualified.")
     elif command[0] == "!revive":
         if len(command) != 2:
             return
@@ -302,13 +321,14 @@ def process_line(line, currentChat, playerLookup):
         if playerLookup[racer].score == settings.max_score:
             playerLookup[racer].status = "done"
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].nameCaseSensitive + " has been revived.")
+        currentChat.message(channel, playerLookup[racer].display_name + " has been revived.")
     elif command[0] == "!settime":
         if len(command) != 3:
             return
         subject = command[1].lower()
         if subject not in playerLookup.keys():
             currentChat.message(channel, f"Racer {subject} not found.")
+            return
         racer = playerLookup[subject]
         newTime = command[2].split(":")
         if len(newTime) != 3:
@@ -327,36 +347,54 @@ def process_line(line, currentChat, playerLookup):
         racer.calculateDuration()
 
         settings.redraw = True
-        currentChat.message(channel, racer.nameCaseSensitive+"'s time has been updated.")
+        currentChat.message(channel, racer.display_name+"'s time has been updated.")
     elif command[0] == "!blacklist":
         if len(command) != 2:
             return
         subject = command[1].lower()
-        if subject in users.blacklist:
-            currentChat.message(channel, command[1] + " is already blacklisted.")
+        info = twitch.get_user_info(subject)
+        if info == None:
+            currentChat.message(channel, f"Twitch username {subject} not found.")
             return
-        users.add(subject,users.Role.BLACKLIST)
-        if subject in users.updaters:
-            users.remove(subject,users.Role.UPDATER)
-        currentChat.message(channel, command[1] + " has been blacklisted.")
+        subject_id = info['id']
+        subject_displayname = info['display_name']
+        if subject_id in users.blacklist:
+            currentChat.message(channel, f"{subject_displayname} is already blacklisted.")
+            return
+        users.add(subject, subject_id, users.Role.BLACKLIST)
+        if subject_id in users.updaters:
+            users.remove(subject_id, users.Role.UPDATER)
+        currentChat.message(channel, f"{subject_displayname} has been blacklisted.")
     elif command[0] == "!unblacklist":
         if len(command) != 2:
             return
         subject = command[1].lower()
-        if subject not in users.blacklist:
-            currentChat.message(channel, command[1] + " is already not blacklisted.")
+        info = twitch.get_user_info(subject)
+        if info == None:
+            currentChat.message(channel, f"Twitch username {subject} not found.")
             return
-        users.remove(subject,users.Role.BLACKLIST)
-        currentChat.message(channel, command[1] + " is no longer blacklisted.")
+        subject_id = info['id']
+        subject_displayname = info['display_name']
+        if subject_id not in users.blacklist:
+            currentChat.message(channel, f"{subject_displayname} is already not blacklisted.")
+            return
+        users.remove(subject_id, users.Role.BLACKLIST)
+        currentChat.message(channel, f"{subject_displayname} is no longer blacklisted.")
     elif command[0] == "!admin":
         if len(command) != 2:
             return
         subject = command[1].lower()
-        if subject in users.admins:
-            currentChat.message(channel, command[1] + " is already an admin.")
+        info = twitch.get_user_info(subject)
+        if info == None:
+            currentChat.message(channel, f"Twitch username {subject} not found.")
             return
-        users.add(subject,users.Role.ADMIN)
-        currentChat.message(channel, command[1] + " is now an admin.")
+        subject_id = info['id']
+        subject_displayname = info['display_name']
+        if subject_id in users.admins:
+            currentChat.message(channel, f"{subject_displayname} is already an admin.")
+            return
+        users.add(subject, subject_id, users.Role.ADMIN)
+        currentChat.message(channel, f"{subject_displayname} is now an admin.")
     elif command[0] == "!mmkill":
         obs.request("StopStream")
         currentChat.message(channel, "Permanently closing the bot now.")
@@ -384,7 +422,7 @@ def process_line(line, currentChat, playerLookup):
         for r in p_keys:
             if r not in new_racers_lower:
                 no_change = False
-                currentChat.message(channel, f"Removing racer {playerLookup[r].nameCaseSensitive} not found on the Google spreadsheet.")
+                currentChat.message(channel, f"Removing racer {playerLookup[r].display_name} not found on the Google spreadsheet.")
                 playerLookup.pop(r)
                 currentChat.part(r)
 
@@ -403,4 +441,11 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, f"{userCS}: Cleared all racer stats.")
         settings.redraw = True
     elif command[0] == "!clip":
-        twitch.create_clip_async("42834061")
+        if len(command) > 1:
+            subject = command[1].lower()
+            info = twitch.get_user_info(subject)
+            if info == None:
+                currentChat.message(channel, f"Twitch username {subject} not found.")
+                return
+            subject_id = info['id']
+            twitch.create_clip_async(subject_id, subject)

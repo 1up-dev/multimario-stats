@@ -60,7 +60,7 @@ def draw(screen, playerLookup, page):
                         if i+1 <= len(games)-1:
                             bg = games[i+1]['background']
                         else:
-                            print(f"Error: {player.nameCaseSensitive} has {player.score} (max score) while live.")
+                            print(f"Error: {player.display_name} has {player.score} (max score) while live.")
                             player.status = "done"
                             bg = games[i]['background']
                     gameCounts[-1] = score
@@ -197,7 +197,7 @@ def draw(screen, playerLookup, page):
         color = (220,220,220)
         if player.place <=3:
             color = (239,195,0)
-        nameRender = getFont(24).render(str(player.nameCaseSensitive), 1, color)
+        nameRender = getFont(24).render(str(player.display_name), 1, color)
         placeRender = getFont(40).render(str(player.place), 1, color)
 
         screen.blit(nameRender, (65+player.corner[0], 15+player.corner[1]))
