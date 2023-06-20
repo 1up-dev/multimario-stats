@@ -37,20 +37,25 @@ def process_line(line, currentChat, playerLookup):
     ismod_orvip = False
     user_id = ""
     userCS = ""
+    message_id = None
     if line[0][0] == "@":
-        tags = line.pop(0)
-        tmp = tags.split("mod=")
-        if len(tmp) > 1 and len(tmp[1])> 0 and tmp[1][0] == "1":
-            ismod_orvip = True
-        tmp = tags.split("vip=")
-        if len(tmp) > 1 and len(tmp[1])> 0 and tmp[1][0] == "1":
-            ismod_orvip = True
-        tmp = tags.split("user-id=")
-        if len(tmp) > 1:
-            user_id = tmp[1].split(";")[0]
-        tmp = tags.split("display-name=")
-        if len(tmp) > 1:
-            userCS = tmp[1].split(";")[0]
+        tags = line.pop(0)[1:].split(";")
+        for tag in tags:
+            tag = tag.split("=")
+            if len(tag) < 2:
+                continue
+            tag_name = tag[0]
+            tag_value = tag[1]
+            if tag_name == "mod" and tag_value == "1":
+                ismod_orvip = True
+            elif tag_name == "vip" and tag_value == "1":
+                ismod_orvip = True
+            elif tag_name == "user-id":
+                user_id = tag_value
+            elif tag_name == "display-name":
+                userCS = tag_value
+            elif tag_name == "id":
+                message_id = tag_value
 
     if len(line) < 4:
         return
@@ -101,7 +106,7 @@ def process_line(line, currentChat, playerLookup):
             subject = command[1].lower()
             info = twitch.get_user_info(subject)
             if info == None:
-                currentChat.message(channel, f"Twitch username {subject} not found.")
+                currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
                 return
             subject_id = info['id']
             subject_displayname = info['display_name']
@@ -113,7 +118,7 @@ def process_line(line, currentChat, playerLookup):
         try:
             target = int(command[1])
         except ValueError:
-            currentChat.message(channel, "Not a number.")
+            currentChat.message(channel, "Not a number.", message_id)
             return
         racers_in_target = []
         score, collectible, game = "", "", ""
@@ -125,8 +130,7 @@ def process_line(line, currentChat, playerLookup):
         if racers_in_target != []:
             currentChat.message(channel, f"#{target}: {', '.join(racers_in_target)} ({str(score)} {collectible} in {game})")
             return
-        currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).")
-        return
+        currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).", message_id)
 
     # shared commands
     elif command[0] == "!whitelist":

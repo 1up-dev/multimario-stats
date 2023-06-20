@@ -46,7 +46,7 @@ class ChatRoom:
         tmp = self.readbuffer.split('\n')
         self.readbuffer = tmp.pop()
         return tmp
-    def message(self, channel, msg):
+    def message(self, channel, msg, reply_id=None):
         timer = (datetime.datetime.now() - self.msgPeriod).total_seconds()
         if timer > 30:
             self.msgPeriod = datetime.datetime.now()
@@ -56,7 +56,10 @@ class ChatRoom:
             self.msgPeriod = datetime.datetime.now()
             self.msgCount = 0
         self.msgCount += 1
-        self.send(f"PRIVMSG {channel} :{msg}")
+        if reply_id == None:
+            self.send(f"PRIVMSG {channel} :{msg}")
+        else:
+            self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
         time.sleep(0.5)
     def part(self, channel):
         self.message(f"#{channel}", f"Now leaving #{channel}.")
