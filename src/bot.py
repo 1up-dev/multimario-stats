@@ -115,12 +115,16 @@ def process_line(line, currentChat, playerLookup):
         except ValueError:
             currentChat.message(channel, "Not a number.")
             return
+        racers_in_target = []
+        score, collectible, game = "", "", ""
         for p in list(playerLookup.keys()):
             racer = playerLookup[p]
             if racer.place == target:
+                racers_in_target.append(racer.display_name)
                 score, collectible, game = racer.collected()
-                currentChat.message(channel, f"#{target}: {racer.display_name} ({str(score)} {collectible} in {game})")
-                return
+        if racers_in_target != []:
+            currentChat.message(channel, f"#{target}: {', '.join(racers_in_target)} ({str(score)} {collectible} in {game})")
+            return
         currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).")
         return
 
