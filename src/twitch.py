@@ -21,7 +21,7 @@ class HTTPHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(b"multimario-stats: Received Twitch authorization.<br>You may close this page.")
         return
 
-def req(method, url, headers={}, params={}):
+def req(method, url, headers={}, params={}, retry=False):
     if method == "GET":
         response = requests.get(url, params=params, headers=headers)
     elif method == "POST":
@@ -30,9 +30,13 @@ def req(method, url, headers={}, params={}):
         return
     data = response.json()
     if response.status_code == 401:
+        if retry:
+            print(f"[API] 401 Invalid token after retrying. Giving up.")
+            return
         print(f"[API] 401 Invalid token. Attempting to refresh token. {data}")
         if validate_token():
-            return req(method, url, headers, params)
+            headers["Authorization"] = f'Bearer {settings.twitch_token}'
+            return req(method, url, headers, params, True)
         print("[API] Token refresh failed. Giving up on request.")
         return
     if response.status_code not in range(200,300):
