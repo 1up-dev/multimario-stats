@@ -471,7 +471,7 @@ def process_line(line, currentChat, playerLookup):
         for p in list(playerLookup.keys()):
             playerLookup[p].score = 0
             playerLookup[p].status = "live"
-        currentChat.message(channel, f"{userCS}: Cleared all racer stats.")
+        currentChat.message(channel, f"Cleared all racer stats.")
         settings.redraw = True
     elif command[0] == "!clip":
         if len(command) > 1:
