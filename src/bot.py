@@ -80,7 +80,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!whitelist", "!unwhitelist", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!blacklist", "!unblacklist", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
+    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!place", "!whitelist", "!unwhitelist", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!blacklist", "!unblacklist", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -107,6 +107,22 @@ def process_line(line, currentChat, playerLookup):
             subject_displayname = info['display_name']
             statusMsg = users.roles(subject, subject_id, subject_displayname, playerLookup)
         currentChat.message(channel, statusMsg)
+    elif command[0] == "!place":
+        if len(command) < 2:
+            return
+        try:
+            target = int(command[1])
+        except ValueError:
+            currentChat.message(channel, "Not a number.")
+            return
+        for p in list(playerLookup.keys()):
+            racer = playerLookup[p]
+            if racer.place == target:
+                score, collectible, game = racer.collected()
+                currentChat.message(channel, f"#{target}: {racer.display_name} ({str(score)} {collectible} in {game})")
+                return
+        currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).")
+        return
 
     # shared commands
     elif command[0] == "!whitelist":
