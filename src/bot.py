@@ -121,14 +121,18 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel, "Not a number.", message_id)
             return
         racers_in_target = []
-        score, collectible, game = "", "", ""
+        extra_info = ""
         for p in list(playerLookup.keys()):
             racer = playerLookup[p]
             if racer.place == target:
-                racers_in_target.append(racer.display_name)
+                racers_in_target.append(f"{racer.display_name} ({racer.status})")
+                if racer.score == settings.max_score:
+                    extra_info = racer.duration_str
+                    break
                 score, collectible, game = racer.collected()
+                extra_info = f"{str(score)} {collectible} in {game}"
         if racers_in_target != []:
-            currentChat.message(channel, f"#{target}: {', '.join(racers_in_target)} ({str(score)} {collectible} in {game})")
+            currentChat.message(channel, f"#{target}: {', '.join(racers_in_target)} ({extra_info})")
             return
         currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).", message_id)
 
