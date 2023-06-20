@@ -47,6 +47,8 @@ class ChatRoom:
         self.readbuffer = tmp.pop()
         return tmp
     def message(self, channel, msg, reply_id=None):
+        if len(msg) > 300:
+            msg = msg[:300] + "... (Message cut due to length)"
         timer = (datetime.datetime.now() - self.msgPeriod).total_seconds()
         if timer > 30:
             self.msgPeriod = datetime.datetime.now()
