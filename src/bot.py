@@ -80,6 +80,8 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
+    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!whitelist", "!unwhitelist", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!blacklist", "!unblacklist", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
+        return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
         if command[i] == "":
