@@ -4,6 +4,8 @@
 + List the roles of `[twitch_username]`. (Both commands are identical)
 + If `[twitch_username]` is not specificed, list the roles of the user that sent the command.
 + If the user is a racer, also show their status in the race.
+#### !place [number]
++ Show who is in place #`[number]` in the race, what game they're up to, and how many collectibles they have in that game.
 #### !mmcommands
 + Post the link to this command list: https://bit.ly/44P3Y46
 
