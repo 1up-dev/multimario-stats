@@ -408,30 +408,37 @@ def process_line(line, currentChat, playerLookup):
         settings.playersLock = True
         newRacers = gsheets.getRacers()
         new_racers_lower = []
-        no_change = True
 
         # add new racers from the sheet
+        racers_added = []
         for r in newRacers:
             new_racers_lower.append(r.lower())
             if r.lower() not in playerLookup.keys():
-                no_change = False
-                currentChat.message(channel, f"Adding new racer {r} found on the Google spreadsheet.")
                 playerLookup[r.lower()] = player.Player(r, {})
-                currentChat.join(r.lower())
+                racers_added.append(playerLookup[r.lower()].display_name)
+        if racers_added != []:
+            currentChat.message(channel, f"Adding new racer(s) found on the Google spreadsheet: {', '.join(racers_added)}")
 
         # delete racers that have been removed from the sheet
-        p_keys = list(playerLookup.keys())
-        for r in p_keys:
+        racers_removed = []
+        for r in list(playerLookup.keys()):
             if r not in new_racers_lower:
-                no_change = False
-                currentChat.message(channel, f"Removing racer {playerLookup[r].display_name} not found on the Google spreadsheet.")
+                racers_removed.append(playerLookup[r].display_name)
                 playerLookup.pop(r)
-                currentChat.part(r)
+        if racers_removed != []:
+            currentChat.message(channel, f"Removing racers not found on the Google spreadsheet: {', '.join(racers_removed)}")
 
-        if no_change:
+        # Join/part channels (async in future?)
+        for r in racers_added:
+            currentChat.join(r.lower())
+        for r in racers_removed:
+            currentChat.part(r.lower())
+
+        if racers_added == [] and racers_removed == []:
             currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
+            return
         
-        # re-calculate the number of pages in case it changed
+        # re-calculate the number of pages if it changed
         settings.set_max_count(len(playerLookup))
         # trigger a redraw to remove old player cards
         settings.redraw = True
