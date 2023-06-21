@@ -75,6 +75,8 @@ class ChatRoom:
         t.daemon = True
         t.start()
     def reconnect(self):
+        if settings.twitch_nick != "" and settings.twitch_nick not in self.channels:
+            self.channels = [settings.twitch_nick] + self.channels
         self.currentSocket.close()
         self.currentSocket = socket.socket()
         self.currentSocket.settimeout(480) # 8 minutes
