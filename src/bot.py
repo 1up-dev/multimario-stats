@@ -104,10 +104,11 @@ def process_line(line, currentChat, playerLookup):
             statusMsg = users.roles(user, user_id, userCS, playerLookup)
         else:
             subject = command[1].lower()
-            info = twitch.get_user_info(subject)
-            if info == None:
+            info = twitch.get_user_infos([subject])
+            if info == None or len(info) == 0:
                 currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
                 return
+            info = info[0]
             subject_id = info['id']
             subject_displayname = info['display_name']
             statusMsg = users.roles(subject, subject_id, subject_displayname, playerLookup)
@@ -143,10 +144,11 @@ def process_line(line, currentChat, playerLookup):
         if (user_id not in users.admins) and (user not in playerLookup.keys()):
             return
         subject = command[1].lower()
-        info = twitch.get_user_info(subject)
-        if info == None:
-            currentChat.message(channel, f"Twitch username {subject} not found.")
+        info = twitch.get_user_infos([subject])
+        if info == None or len(info) == 0:
+            currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
+        info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.blacklist:
@@ -162,10 +164,11 @@ def process_line(line, currentChat, playerLookup):
         if (user_id not in users.admins) and (user not in playerLookup.keys()):
             return
         subject = command[1].lower()
-        info = twitch.get_user_info(subject)
-        if info == None:
-            currentChat.message(channel, f"Twitch username {subject} not found.")
+        info = twitch.get_user_infos([subject])
+        if info == None or len(info) == 0:
+            currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
+        info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.updaters:
@@ -382,10 +385,11 @@ def process_line(line, currentChat, playerLookup):
         if len(command) != 2:
             return
         subject = command[1].lower()
-        info = twitch.get_user_info(subject)
-        if info == None:
-            currentChat.message(channel, f"Twitch username {subject} not found.")
+        info = twitch.get_user_infos([subject])
+        if info == None or len(info) == 0:
+            currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
+        info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.blacklist:
@@ -399,10 +403,11 @@ def process_line(line, currentChat, playerLookup):
         if len(command) != 2:
             return
         subject = command[1].lower()
-        info = twitch.get_user_info(subject)
-        if info == None:
-            currentChat.message(channel, f"Twitch username {subject} not found.")
+        info = twitch.get_user_infos([subject])
+        if info == None or len(info) == 0:
+            currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
+        info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id not in users.blacklist:
@@ -414,10 +419,11 @@ def process_line(line, currentChat, playerLookup):
         if len(command) != 2:
             return
         subject = command[1].lower()
-        info = twitch.get_user_info(subject)
-        if info == None:
-            currentChat.message(channel, f"Twitch username {subject} not found.")
+        info = twitch.get_user_infos([subject])
+        if info == None or len(info) == 0:
+            currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
+        info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.admins:
@@ -448,6 +454,7 @@ def process_line(line, currentChat, playerLookup):
                 channels_to_join.append(r.lower())
         if racers_added != []:
             currentChat.message(channel, f"Adding new racer(s) found on the Google spreadsheet: {', '.join(racers_added)}")
+            twitch.get_player_infos_async(channels_to_join, playerLookup)
             currentChat.join(channels_to_join)
         
         # delete racers that have been removed from the sheet
@@ -479,9 +486,10 @@ def process_line(line, currentChat, playerLookup):
     elif command[0] == "!clip":
         if len(command) > 1:
             subject = command[1].lower()
-            info = twitch.get_user_info(subject)
-            if info == None:
-                currentChat.message(channel, f"Twitch username {subject} not found.")
+            info = twitch.get_user_infos([subject])
+            if info == None or len(info) == 0:
+                currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
                 return
+            info = info[0]
             subject_id = info['id']
             twitch.create_clip_async(subject_id, subject)

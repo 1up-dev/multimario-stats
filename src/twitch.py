@@ -44,21 +44,25 @@ def req(method, url, headers={}, params={}, retry=False):
         return
     return data
 
-def get_player_infos(players):
-    for player in players.values():
-        get_player_info(player)
-
-def get_player_info(player):
-    response = get_user_info(player.name)
-    if response == None:
+def get_player_infos(logins, playerLookup):
+    user_infos = get_user_infos(logins)
+    if user_infos == None:
         return
-    path = settings.path(f"profiles/{player.name}.png")
-    if not os.path.isfile(path):
-        urllib.request.urlretrieve(response['profile_url'], path)
-    player.profile = pygame.image.load(path)
-    player.twitch_id = response['id']
-    player.display_name = response['display_name']
-    settings.redraw = True
+    for info in user_infos:
+        login = info['login']
+        racer = playerLookup[login]
+        path = settings.path(f"profiles/{racer.name}.png")
+        if not os.path.isfile(path):
+            urllib.request.urlretrieve(info['profile_image_url'], path)
+        racer.profile = pygame.image.load(path)
+        racer.twitch_id = info['id']
+        racer.display_name = info['display_name']
+        settings.redraw = True
+
+def get_player_infos_async(logins, playerLookup):
+    t = threading.Thread(target=get_player_infos, args=(logins, playerLookup,))
+    t.daemon = True
+    t.start()
 
 def create_clip(broadcaster_id, username):
     time.sleep(20)
@@ -82,22 +86,14 @@ def create_clip_async(broadcaster_id, username):
     t.daemon = True
     t.start()
 
-def get_user_info(user):
-    url = "https://api.twitch.tv/helix/users"
+def get_user_infos(users):
+    # TODO: only 100 at a time
+    url = "https://api.twitch.tv/helix/users" + "?login=" + "&login=".join(users)
     headers = {"Client-ID":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
-    params = {"login":user}
-    response = req("GET", url, headers, params)
+    response = req("GET", url, headers)
     if response == None:
         return
-    responseData = response['data']
-    if len(responseData)==0:
-        print(f"[API] Twitch user {user} does not exist.")
-        return
-    data = responseData[0]
-    user_info = {'profile_url': data['profile_image_url'], 
-                 'id': data['id'],
-                 'display_name': data['display_name']}
-    return user_info
+    return response['data']
 
 def validate_token():
     print("[API] Validating token...")

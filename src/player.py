@@ -7,7 +7,7 @@ import sort
 import twitch
 
 class Player:
-    def __init__(self, name, state_data, defer_info_fetch=False):
+    def __init__(self, name, state_data):
         self.name = name.lower()
         self.display_name = name
         self.twitch_id = ""
@@ -19,8 +19,6 @@ class Player:
         self.finishTimeAbsolute = None
         self.status = "live"
         self.profile = settings.blank_profile
-        if not defer_info_fetch:
-            twitch.get_player_info(self)
         if state_data == {} and settings.debug:
             self.score = random.choice(range(0, settings.max_score))
         if state_data != {}:

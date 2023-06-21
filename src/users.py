@@ -104,8 +104,6 @@ def init_users():
         state_data = {}
         if j != {} and racer.lower() in j.keys():
             state_data = j[racer.lower()]
-        playerLookup[racer.lower()] = player.Player(racer, state_data, defer_info_fetch=True)
-    t = threading.Thread(target=twitch.get_player_infos, args=(playerLookup,))
-    t.daemon = True
-    t.start()
+        playerLookup[racer.lower()] = player.Player(racer, state_data)
+    twitch.get_player_infos_async(playerLookup.keys(), playerLookup)
     return playerLookup

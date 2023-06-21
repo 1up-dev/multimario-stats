@@ -102,7 +102,7 @@ class ChatRoom:
             print("[IRC] Invalid join/part arguments")
             return
         # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
-        print(f"{direction}ing Twitch channels...")
+        print(f"{direction}ing Twitch channels: {channels}")
         j = 0
         while True:
             channel_list = "#"+",#".join(channels[j:j+20])
@@ -110,6 +110,4 @@ class ChatRoom:
             j += 20
             if channels[j:j+20] == []:
                 break
-            print("Sleeping 10 seconds for next batch of channels...")
             time.sleep(10.1)
-        print(f"Done {direction}ing Twitch channels.")
