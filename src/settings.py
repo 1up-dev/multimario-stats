@@ -81,6 +81,7 @@ max_count = 0
 blank_profile = pygame.image.load(path("resources/empty.png"))
 twitch_pw = ""
 twitch_nick = ""
+chat_ref = None
 make_dir('irc')
 make_dir('log')
 make_dir('profiles')

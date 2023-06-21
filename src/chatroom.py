@@ -38,11 +38,13 @@ class ChatRoom:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: TimeoutError")
             self.readbuffer = ""
         except OSError:
+            if settings.doQuit:
+                return []
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: {traceback.format_exc()}")
             self.readbuffer = ""
         if self.readbuffer == "":
             self.reconnect()
-            return ""
+            return []
         tmp = self.readbuffer.split('\n')
         self.readbuffer = tmp.pop()
         return tmp

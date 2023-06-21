@@ -17,7 +17,10 @@ def init(playerLookup):
     for c in list(playerLookup.keys()):
         channels.append(c)
     chat = chatroom.ChatRoom(channels)
+    settings.chat_ref = chat
     while True:
+        if settings.doQuit:
+            break
         try:
             readbuffer = chat.recv()
             for line in readbuffer:
