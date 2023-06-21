@@ -10,7 +10,7 @@ See **[this video archive](https://www.twitch.tv/videos/857024553)** from Decemb
 ## Running
 - Rename `settings-template.json` to `settings.json` and fill out the fields.
 - Running the program will make the bot active in the Twitch chats of all the racers and the extra chat rooms specified in `settings.json`.
-- The bot gets its login info and makes API requests using a Twitch developer application. Register an application here: https://dev.twitch.tv/dashboard/apps. Add `http://localhost:3000` as an OAuth Redirect URL, then copy the `Client ID` and `Client Secret` into `settings.json`. After you start the program, it will open a browser window and prompt you to grant access using your desired account for the bot. The `token` and `refresh-token` fields will then be filled out automatically.
+- The bot gets its login info and makes API requests using a Twitch developer application. Register an application here: https://dev.twitch.tv/console. Add `http://localhost:3000` as an OAuth Redirect URL, then copy the `Client ID` and `Client Secret` into `settings.json`. After you start the program, it will open a browser window and prompt you to grant access using your desired account for the bot. The `token` and `refresh-token` fields will then be filled out automatically.
 - The Google API Key is used to get the list of racers from the race spreadsheet. You will need to create a new project that has access to the Google Sheets API. https://console.developers.google.com/apis/dashboard
 - Setting `"debug": true` in `settings.json` will have a few effects:
     - The debug Google Sheets page (`"debug-gsheet"` in `settings.json`) will be used to get the list of racers instead of the official race sheet.
