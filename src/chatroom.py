@@ -2,13 +2,13 @@ import socket
 import datetime
 import time
 import traceback
+import threading
 import settings
 
 class ChatRoom:
     def __init__(self, channels):
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
-        self.NICK = settings.twitch_nick
         self.channels = channels
         self.currentSocket = socket.socket()
         self.msgCount = 0
@@ -20,9 +20,9 @@ class ChatRoom:
         try:
             self.currentSocket.send(bytes(f"{msg}\r\n", "UTF-8"))
         except ConnectionResetError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket: ConnectionResetError")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket send: ConnectionResetError")
         except OSError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket error: {traceback.format_exc()}")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket send: {traceback.format_exc()}")
     def recv(self):
         try:
             self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
@@ -38,7 +38,7 @@ class ChatRoom:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: TimeoutError")
             self.readbuffer = ""
         except OSError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv error: {traceback.format_exc()}")
+            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: {traceback.format_exc()}")
             self.readbuffer = ""
         if self.readbuffer == "":
             self.reconnect()
@@ -63,16 +63,17 @@ class ChatRoom:
         else:
             self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
         time.sleep(0.5)
-    def part(self, channel):
-        self.message(f"#{channel}", f"Now leaving #{channel}.")
-        self.send(f"PART #{channel}")
-        time.sleep(0.5)
-        self.channels.remove(channel)
-    def join(self, channel):
-        self.send(f"JOIN #{channel}")
-        time.sleep(0.5)
-        self.message(f"#{channel}", f"Now joined #{channel}.")
-        self.channels.append(channel)
+    def part(self, channels):
+        for channel in channels:
+            self.channels.remove(channel)
+        t = threading.Thread(target=self.join_part_channels, args=("PART", channels,))
+        t.daemon = True
+        t.start()
+    def join(self, channels):
+        self.channels += channels
+        t = threading.Thread(target=self.join_part_channels, args=("JOIN", channels,))
+        t.daemon = True
+        t.start()
     def reconnect(self):
         self.currentSocket.close()
         self.currentSocket = socket.socket()
@@ -87,19 +88,26 @@ class ChatRoom:
             break
         self.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
         self.send(f"PASS oauth:{settings.twitch_token}")
-        self.send(f"NICK {self.NICK}")
-        # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
-        print("Joining Twitch channels...")
-        j = 0
-        while True:
-            channel_list = "#"+",#".join(self.channels[j:j+20])
-            self.send(f"JOIN {channel_list}")
-            j += 20
-            if self.channels[j:j+20] == []:
-                break
-            print("Sleeping 10 seconds before joining next batch of channels...")
-            time.sleep(10.1)
-        print("Done joining Twitch channels.")
+        self.send(f"NICK {settings.twitch_nick}")
+        t = threading.Thread(target=self.join_part_channels, args=("JOIN", self.channels,))
+        t.daemon = True
+        t.start()
         time.sleep(1)
     def pong(self, msg):
         self.send(msg)
+    def join_part_channels(self, direction, channels):
+        if direction not in ["JOIN", "PART"]:
+            print("[IRC] Invalid join/part arguments")
+            return
+        # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
+        print(f"{direction}ing Twitch channels...")
+        j = 0
+        while True:
+            channel_list = "#"+",#".join(channels[j:j+20])
+            self.send(f"{direction} {channel_list}")
+            j += 20
+            if channels[j:j+20] == []:
+                break
+            print("Sleeping 10 seconds for next batch of channels...")
+            time.sleep(10.1)
+        print(f"Done {direction}ing Twitch channels.")

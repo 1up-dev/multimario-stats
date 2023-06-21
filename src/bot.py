@@ -189,7 +189,7 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel,f"Already not active in channel #{l_channel}.")
             return
         currentChat.message(channel,f"Leaving #{l_channel} now.")
-        currentChat.part(l_channel)
+        currentChat.part([l_channel])
     elif command[0] == "!mmjoin":
         j_channel = ""
         if len(command) == 1:
@@ -204,11 +204,11 @@ def process_line(line, currentChat, playerLookup):
             return
         if j_channel in currentChat.channels:
             currentChat.message(channel,f"Rejoining #{j_channel} now.")
-            currentChat.part(j_channel)
-            currentChat.join(j_channel)
+            currentChat.part([j_channel])
+            currentChat.join([j_channel])
             return
         currentChat.message(channel,f"Joining #{j_channel} now.")
-        currentChat.join(j_channel)
+        currentChat.join([j_channel])
 
     # racer commands
     elif command[0] in ["!rejoin", "!unquit"]:
@@ -435,40 +435,39 @@ def process_line(line, currentChat, playerLookup):
     elif command[0] == "!fetchracers":
         settings.playersLock = True
         newRacers = gsheets.getRacers()
-        new_racers_lower = []
+        sheet_racers_lower = []
 
         # add new racers from the sheet
         racers_added = []
+        channels_to_join = []
         for r in newRacers:
-            new_racers_lower.append(r.lower())
+            sheet_racers_lower.append(r.lower())
             if r.lower() not in playerLookup.keys():
                 playerLookup[r.lower()] = player.Player(r, {})
                 racers_added.append(playerLookup[r.lower()].display_name)
+                channels_to_join.append(r.lower())
         if racers_added != []:
             currentChat.message(channel, f"Adding new racer(s) found on the Google spreadsheet: {', '.join(racers_added)}")
-
+            currentChat.join(channels_to_join)
+        
         # delete racers that have been removed from the sheet
         racers_removed = []
+        channels_to_part = []
         for r in list(playerLookup.keys()):
-            if r not in new_racers_lower:
+            if r not in sheet_racers_lower:
                 racers_removed.append(playerLookup[r].display_name)
                 playerLookup.pop(r)
+                channels_to_part.append(r)
         if racers_removed != []:
             currentChat.message(channel, f"Removing racers not found on the Google spreadsheet: {', '.join(racers_removed)}")
-
-        # Join/part channels (async in future?)
-        for r in racers_added:
-            currentChat.join(r.lower())
-        for r in racers_removed:
-            currentChat.part(r.lower())
+            currentChat.part(channels_to_part)
 
         if racers_added == [] and racers_removed == []:
             currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
             return
         
-        # re-calculate the number of pages if it changed
+        # re-calculate the number of pages, redraw to remove old player cards
         settings.set_max_count(len(playerLookup))
-        # trigger a redraw to remove old player cards
         settings.redraw = True
         settings.playersLock = False
     elif command[0] == "!clearstats":
