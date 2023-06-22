@@ -87,13 +87,20 @@ def create_clip_async(broadcaster_id, username):
     t.start()
 
 def get_user_infos(users):
-    # TODO: only 100 at a time
-    url = "https://api.twitch.tv/helix/users" + "?login=" + "&login=".join(users)
-    headers = {"Client-ID":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
-    response = req("GET", url, headers)
-    if response == None:
-        return
-    return response['data']
+    all_infos = []
+    j = 0
+    while True:
+        url = "https://api.twitch.tv/helix/users" + "?login=" + "&login=".join(users[j:j+100])
+        print(f"API request url:{url}")
+        headers = {"Client-ID":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
+        response = req("GET", url, headers)
+        if response == None:
+            return
+        all_infos = all_infos + response['data']
+        j += 100
+        if users[j:j+100] == []:
+            break
+    return all_infos
 
 def validate_token():
     print("[API] Validating token...")

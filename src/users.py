@@ -105,5 +105,5 @@ def init_users():
         if j != {} and racer.lower() in j.keys():
             state_data = j[racer.lower()]
         playerLookup[racer.lower()] = player.Player(racer, state_data)
-    twitch.get_player_infos_async(playerLookup.keys(), playerLookup)
+    twitch.get_player_infos_async(list(playerLookup.keys()), playerLookup)
     return playerLookup
