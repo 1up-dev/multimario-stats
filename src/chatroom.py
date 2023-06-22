@@ -65,6 +65,10 @@ class ChatRoom:
             self.send(f"PRIVMSG {channel} :{msg}")
         else:
             self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
+        # Log the outgoing message to the log file for readability
+        path = f"irc/{channel[1:]}.log"
+        with open(settings.path(path), 'a+') as f:
+            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} (Bot outgoing) {settings.twitch_nick}: {msg} \n")
         time.sleep(0.5)
     def part(self, channels):
         for channel in channels:
