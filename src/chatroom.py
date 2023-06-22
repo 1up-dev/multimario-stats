@@ -52,23 +52,30 @@ class ChatRoom:
     def message(self, channel, msg, reply_id=None):
         if len(msg) > 300:
             msg = msg[:300] + "... (Message cut due to length)"
+
+        # Using 32-sec and 19-msg thresholds for wiggle room to avoid persistent rate limit punishment
         timer = (datetime.datetime.now() - self.msgPeriod).total_seconds()
-        if timer > 30:
+        if timer > 32:
             self.msgPeriod = datetime.datetime.now()
             self.msgCount = 0
-        elif self.msgCount >= 20:
-            time.sleep(30-timer)
+        elif self.msgCount >= 19:
+            time.sleep(32-timer)
             self.msgPeriod = datetime.datetime.now()
             self.msgCount = 0
         self.msgCount += 1
+
+        # Send message
         if reply_id == None:
             self.send(f"PRIVMSG {channel} :{msg}")
         else:
             self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
+        
         # Log the outgoing message to the log file for readability
         path = f"irc/{channel[1:]}.log"
         with open(settings.path(path), 'a+') as f:
             f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} (Bot outgoing) {settings.twitch_nick}: {msg} \n")
+        
+        # Avoid "You are sending messages too quickly"
         time.sleep(0.5)
     def part(self, channels):
         for channel in channels:
