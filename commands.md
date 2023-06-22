@@ -10,8 +10,8 @@
 + Post the link to this command list: https://bit.ly/44P3Y46
 
 ## Commands for Counters  
-*To get permission to count, ask a racer or an admin to whitelist you.*  
-*Note: VIPs and Mods can count without being whitelisted.*  
+*To get permission to count, ask a racer or an admin.*  
+*Note: VIPs and Mods can count without being explicitly given permission.*  
 #### !add [twitch_username] [number]  
 + Add `[number]` to the total amount of collectibles for `[twitch_username]`.  
 + Positive and negative numbers are accepted.  
@@ -31,7 +31,7 @@
 #### !rejoin/!unquit   
 + Re-enter the race after quitting. (Both commands are identical)  
 + To rejoin after finishing, just use `!set` or `!add` to your desired score.  
-#### !whitelist/!unwhitelist [twitch_username]  
+#### !addcounter/!removecounter [twitch_username]  
 + Add or remove `[twitch_username]` as a counter.  
 #### !mmjoin  
 + Ask the bot to join your channel if it is not already active there.   
@@ -57,10 +57,10 @@
 + When specifying the date & time, it must be in this format: `2018-12-29T14:59:59` `(YYYY-MM-DDTHH:MM:SS)`  
 #### !togglestream  
 + Turn the Twitch stream on or off.  
-#### !whitelist/!unwhitelist [twitch_username]  
+#### !addcounter/!removecounter [twitch_username]  
 + Add or remove `[twitch_username]` as a counter.  
-#### !blacklist/!unblacklist [twitch_username]  
-+ Add or remove `[twitch_username]` to the blacklist, preventing them from counting.  
+#### !block/!unblock [twitch_username]  
++ Add or remove `[twitch_username]` to the blocklist, preventing them from counting.  
 #### !admin [twitch_username]  
 + Add `[twitch_username]` as a new admin.  
 #### !mmleave/!mmjoin [twitch_username]  

@@ -10,50 +10,50 @@ import player
 class Role(Enum):
     ADMIN = 1
     RACER = 2
-    BLACKLIST = 3
-    UPDATER = 4
+    BLOCKLIST = 3
+    COUNTER = 4
 
-admins, updaters, blacklist = {}, {}, {}
+admins, counters, blocklist = {}, {}, {}
 
 def push_all():
     with open(settings.path('users.json'),'r+') as f:
         j = json.load(f)
         j['admins'] = admins
-        j['blacklist'] = blacklist
-        j['updaters'] = updaters
+        j['blocklist'] = blocklist
+        j['counters'] = counters
         f.seek(0)
         json.dump(j, f, indent=4)
         f.truncate()
 
 def add(user, user_id, role: Role):
-    if role == Role.UPDATER:
-        updaters[user_id] = user
+    if role == Role.COUNTER:
+        counters[user_id] = user
     elif role == Role.ADMIN:
         admins[user_id] = user
-    elif role == Role.BLACKLIST:
-        blacklist[user_id] = user
+    elif role == Role.BLOCKLIST:
+        blocklist[user_id] = user
     push_all()
 
 def remove(user_id, role: Role):
-    if role == Role.UPDATER:
-        if user_id in updaters:
-            del updaters[user_id]
+    if role == Role.COUNTER:
+        if user_id in counters:
+            del counters[user_id]
     elif role == Role.ADMIN:
         if user_id in admins:
             del admins[user_id]
-    elif role == Role.BLACKLIST:
-        if user_id in blacklist:
-            del blacklist[user_id]
+    elif role == Role.BLOCKLIST:
+        if user_id in blocklist:
+            del blocklist[user_id]
     push_all()
 
 def roles(user_name, user_id, display_name, playerLookup):
     out = ""
     if user_id in admins:
         out += "Admin, "
-    if user_id in updaters:
-        out += "Updater, "
-    if user_id in blacklist:
-        out += "Blacklist, "
+    if user_id in counters:
+        out += "Counter, "
+    if user_id in blocklist:
+        out += "Blocked, "
     if user_name.lower() in playerLookup.keys():
         p = playerLookup[user_name.lower()]
         score, collectible, game = p.collected()
@@ -67,24 +67,24 @@ def roles(user_name, user_id, display_name, playerLookup):
     return out
 
 def update_usernames():
-    global admins, updaters, blacklist
-    # TODO: Pass all IDs into Twitch 'get users' API, 100 at a time
+    global admins, counters, blocklist
+    # TODO: Pass all IDs into Twitch 'get users' API
     # twitch.get_user_info()
 
     with open(settings.path('users.json'),'w+') as f:
         j = json.load(f)
         j['admins'] = admins
-        j['updaters'] = updaters
-        j['blacklist'] = blacklist
+        j['counters'] = counters
+        j['blocklist'] = blocklist
         json.dump(j, f, indent=4)
 
 def init_users():
-    global admins, updaters, blacklist
+    global admins, counters, blocklist
     with open(settings.path('users.json'),'r') as f:
         j = json.load(f)
         admins = j['admins']
-        blacklist = j['blacklist']
-        updaters = j['updaters']
+        blocklist = j['blocklist']
+        counters = j['counters']
     if 'race-num' in settings.modeInfo:
         race_num = settings.modeInfo['race-num']
         column = chr(ord('A') + race_num)

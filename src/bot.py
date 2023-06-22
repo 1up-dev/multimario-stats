@@ -88,7 +88,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!place", "!whitelist", "!unwhitelist", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!blacklist", "!unblacklist", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
+    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -141,7 +141,7 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).", message_id)
 
     # shared commands
-    elif command[0] == "!whitelist":
+    elif command[0] == "!addcounter":
         if len(command) != 2:
             return
         if (user_id not in users.admins) and (user not in playerLookup.keys()):
@@ -154,14 +154,14 @@ def process_line(line, currentChat, playerLookup):
         info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
-        if subject_id in users.blacklist:
-            currentChat.message(channel, f"Sorry, {subject_displayname} is on the blacklist.")
-        elif subject_id not in users.updaters:
-            users.add(subject, subject_id, users.Role.UPDATER)
-            currentChat.message(channel, f"Whitelisted {subject_displayname}.")
+        if subject_id in users.blocklist:
+            currentChat.message(channel, f"Sorry, {subject_displayname} is blocked.")
+        elif subject_id not in users.counters:
+            users.add(subject, subject_id, users.Role.COUNTER)
+            currentChat.message(channel, f"{subject_displayname} is now a counter.")
         else:
-            currentChat.message(channel, f"{subject_displayname} is already whitelisted.")
-    elif command[0] == "!unwhitelist":
+            currentChat.message(channel, f"{subject_displayname} is already a counter.")
+    elif command[0] == "!removecounter":
         if len(command) != 2:
             return
         if (user_id not in users.admins) and (user not in playerLookup.keys()):
@@ -174,11 +174,11 @@ def process_line(line, currentChat, playerLookup):
         info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
-        if subject_id in users.updaters:
-            users.remove(subject_id, users.Role.UPDATER)
-            currentChat.message(channel, f"{subject_displayname} is no longer whitelisted.")
+        if subject_id in users.counters:
+            users.remove(subject_id, users.Role.COUNTER)
+            currentChat.message(channel, f"{subject_displayname} is no longer a counter.")
         else:
-            currentChat.message(channel, f"{subject_displayname} is already not whitelisted.")
+            currentChat.message(channel, f"{subject_displayname} is already not a counter.")
     elif command[0] == "!mmleave":
         l_channel = ""
         if len(command) == 1:
@@ -238,7 +238,7 @@ def process_line(line, currentChat, playerLookup):
         settings.redraw = True
         currentChat.message(channel, racer.display_name + " has quit.")
     elif command[0] in ["!add","!set"]:
-        if ((user_id not in users.updaters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blacklist):
+        if ((user_id not in users.counters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blocklist):
             currentChat.message(channel, f"{userCS}: You do not have permission to update score counts.")
             return
 
@@ -384,7 +384,7 @@ def process_line(line, currentChat, playerLookup):
 
         settings.redraw = True
         currentChat.message(channel, racer.display_name+"'s time has been updated.")
-    elif command[0] == "!blacklist":
+    elif command[0] == "!block":
         if len(command) != 2:
             return
         subject = command[1].lower()
@@ -395,14 +395,14 @@ def process_line(line, currentChat, playerLookup):
         info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
-        if subject_id in users.blacklist:
-            currentChat.message(channel, f"{subject_displayname} is already blacklisted.")
+        if subject_id in users.blocklist:
+            currentChat.message(channel, f"{subject_displayname} is already blocked.")
             return
-        users.add(subject, subject_id, users.Role.BLACKLIST)
-        if subject_id in users.updaters:
-            users.remove(subject_id, users.Role.UPDATER)
-        currentChat.message(channel, f"{subject_displayname} has been blacklisted.")
-    elif command[0] == "!unblacklist":
+        users.add(subject, subject_id, users.Role.BLOCKLIST)
+        if subject_id in users.counters:
+            users.remove(subject_id, users.Role.COUNTER)
+        currentChat.message(channel, f"{subject_displayname} has been blocked.")
+    elif command[0] == "!unblock":
         if len(command) != 2:
             return
         subject = command[1].lower()
@@ -413,11 +413,11 @@ def process_line(line, currentChat, playerLookup):
         info = info[0]
         subject_id = info['id']
         subject_displayname = info['display_name']
-        if subject_id not in users.blacklist:
-            currentChat.message(channel, f"{subject_displayname} is already not blacklisted.")
+        if subject_id not in users.blocklist:
+            currentChat.message(channel, f"{subject_displayname} is already not blocked.")
             return
-        users.remove(subject_id, users.Role.BLACKLIST)
-        currentChat.message(channel, f"{subject_displayname} is no longer blacklisted.")
+        users.remove(subject_id, users.Role.BLOCKLIST)
+        currentChat.message(channel, f"{subject_displayname} is no longer blocked.")
     elif command[0] == "!admin":
         if len(command) != 2:
             return
