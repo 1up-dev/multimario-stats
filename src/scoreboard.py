@@ -197,11 +197,25 @@ def draw(screen, playerLookup, page):
         color = (220,220,220)
         if player.place <=3:
             color = (239,195,0)
-        nameRender = getFont(24).render(str(player.display_name), 1, color)
         placeRender = getFont(40).render(str(player.place), 1, color)
+        place_width = placeRender.get_width()
 
-        screen.blit(nameRender, (65+player.corner[0], 15+player.corner[1]))
-        #topright justify the place text
+        # name + place width must be <= 237
+        target_name_width = 237 - place_width
+        nameRender = None
+        name_fontsize = 24
+        while True:
+            nameRender = getFont(name_fontsize).render(player.display_name, 1, color)
+            name_width = nameRender.get_width()
+            if name_width <= target_name_width:
+                break
+            name_fontsize -= 1
+
+        # Midleft justify the name
+        name_r = nameRender.get_rect(midleft=(64+player.corner[0], 31+player.corner[1]))
+        screen.blit(nameRender, name_r)
+
+        # Topright justify the place
         place_r = placeRender.get_rect(topright=(player.corner[0]+304,player.corner[1]+5))
         screen.blit(placeRender, place_r)
 

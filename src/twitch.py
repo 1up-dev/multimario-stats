@@ -91,7 +91,6 @@ def get_user_infos(users):
     j = 0
     while True:
         url = "https://api.twitch.tv/helix/users" + "?login=" + "&login=".join(users[j:j+100])
-        print(f"API request url:{url}")
         headers = {"Client-ID":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
         response = req("GET", url, headers)
         if response == None:
