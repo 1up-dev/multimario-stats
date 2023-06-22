@@ -15,6 +15,7 @@ class ChatRoom:
         self.msgPeriod = datetime.datetime.now()
         self.readbuffer = ""
         socket.setdefaulttimeout(480) # 8 minutes
+        self.last_connect_time = None
         self.reconnect()
     def send(self, msg):
         try:
@@ -77,6 +78,12 @@ class ChatRoom:
         t.daemon = True
         t.start()
     def reconnect(self):
+        if self.last_connect_time != None:
+            dur = (datetime.datetime.now() - self.last_connect_time).total_seconds()
+            if dur < 30:
+                print("Last connection attempt was less than 30 seconds ago. Waiting before connecting again to avoid rate limit.")
+                time.sleep(30 - dur)
+        self.last_connect_time = datetime.datetime.now()
         if settings.twitch_nick != "" and settings.twitch_nick not in self.channels:
             self.channels = [settings.twitch_nick] + self.channels
         self.currentSocket.close()
@@ -107,9 +114,10 @@ class ChatRoom:
         print(f"{direction}ing Twitch channels: {channels}")
         j = 0
         while True:
+            self.last_connect_time = datetime.datetime.now()
             channel_list = "#"+",#".join(channels[j:j+20])
             self.send(f"{direction} {channel_list}")
             j += 20
             if channels[j:j+20] == []:
                 break
-            time.sleep(10.1)
+            time.sleep(11)
