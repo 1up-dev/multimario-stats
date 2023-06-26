@@ -28,12 +28,6 @@ class ChatRoom:
             self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
                 print(datetime.datetime.now().isoformat().split(".")[0], "Socket recv: empty readbuffer")
-        except ConnectionAbortedError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: ConnectionAbortedError")
-            self.readbuffer = ""
-        except ConnectionResetError:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: ConnectionResetError")
-            self.readbuffer = ""
         except TimeoutError:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Socket recv: TimeoutError")
             self.readbuffer = ""
