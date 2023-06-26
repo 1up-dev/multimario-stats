@@ -122,7 +122,7 @@ class ChatRoom:
             print("[IRC] Invalid join/part arguments")
             return
         # Join Twitch channels in batches of 20 or less, to comply with rate limiting.
-        print(f"{direction}ing Twitch channels: {channels}")
+        print(f"{direction}ing Twitch channels.")
         j = 0
         while True:
             self.last_connect_time = datetime.datetime.now()
