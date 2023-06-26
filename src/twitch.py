@@ -70,16 +70,14 @@ def create_clip(broadcaster_id, username):
     params = {"broadcaster_id": broadcaster_id}
     response = req("POST", "https://api.twitch.tv/helix/clips", headers, params)
     if response == None:
-        print(f"Clip request failed.")
         return
     responseData = response['data']
     if len(responseData) == 0 or 'edit_url' not in responseData[0]:
         print(f"Clip request failed. {response}")
         return
     link = responseData[0]['edit_url']
-    print(f"Clip created of {username}: {link}")
     with open(settings.path(f"clip-links.txt"), 'a+') as f:
-        f.write(f"{username}: {link}\n")
+        f.write(f"{settings.now()} {username}: {link}\n")
 
 def create_clip_async(broadcaster_id, username):
     t = threading.Thread(target=create_clip, args=(broadcaster_id, username,))

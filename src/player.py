@@ -62,7 +62,8 @@ class Player:
         elif count == settings.max_score:
             self.finish("done")
             sort.sort(playerLookup)
-            twitch.create_clip_async(self.twitch_id, self.name)
+            if settings.mode == "602":
+                twitch.create_clip_async(self.twitch_id, self.name)
             return f"{self.display_name} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
 
     def calculateDuration(self):

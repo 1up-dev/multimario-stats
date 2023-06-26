@@ -13,6 +13,9 @@ def make_dir(dir_path):
 def path(file):
     return os.path.join(baseDir, file)
 
+def now():
+    return datetime.datetime.now().isoformat().split(".")[0]
+
 def dur_to_str(dur):
     # calculate readable duration string
     negative = False
