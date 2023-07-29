@@ -30,7 +30,7 @@ def init(playerLookup):
 
 def process_line(line, currentChat, playerLookup):
     if "PING :tmi.twitch.tv" in line:
-        currentChat.pong(line.replace('PING', 'PONG'))
+        currentChat.send(line.replace('PING', 'PONG'))
         return
     line = line.strip().split()
     if len(line) == 0:
@@ -122,7 +122,7 @@ def process_line(line, currentChat, playerLookup):
         try:
             target = int(command[1])
         except ValueError:
-            currentChat.message(channel, "Not a number.", message_id)
+            currentChat.message(channel, "{command[1]}: Not a number.", message_id)
             return
         racers_in_target = []
         extra_info = ""
