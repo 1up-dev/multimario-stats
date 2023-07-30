@@ -125,7 +125,6 @@ class ChatRoom:
             if channels[j:j+20] == []:
                 break
         # Insert the JOIN messages at the beginning of sendbuffer, so the joins are attempted first.
-        print(f"joins:{join_messages}")
         self.sendbuffer = join_messages + self.sendbuffer
 
     def reconnect(self):

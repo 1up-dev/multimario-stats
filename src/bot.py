@@ -120,23 +120,47 @@ def process_line(line, currentChat, playerLookup):
         if len(command) < 2:
             return
         try:
+            target_username = False
             target = int(command[1])
+            if target < 1 or target > len(playerLookup) * 10:
+                target_username = True
         except ValueError:
-            currentChat.message(channel, "{command[1]}: Not a number.", message_id)
+            target_username = True
+        
+        if target_username:
+            racer_name = command[1].lower()
+            if racer_name not in list(playerLookup.keys()):
+                currentChat.message(channel, f"Racer {racer_name} not found.", message_id)
+                return
+            racer = playerLookup[racer_name]
+            score, collectible, game = racer.collected()
+            status = f"{racer.display_name} has {str(score)} {collectible} in {game}. (Place #{racer.place}, Status: {racer.status}, Score: {racer.score})"
+            currentChat.message(channel, status)
             return
+        
+        effective_target = 1
+        for p in settings.sorted_racers:
+            racer = playerLookup[p]
+            if racer.place > target:
+                break
+            effective_target = racer.place
+        
         racers_in_target = []
         extra_info = ""
         for p in list(playerLookup.keys()):
             racer = playerLookup[p]
-            if racer.place == target:
+            if racer.place == effective_target:
                 racers_in_target.append(f"{racer.display_name} ({racer.status})")
                 if racer.score == settings.max_score:
                     extra_info = racer.duration_str
                     break
                 score, collectible, game = racer.collected()
                 extra_info = f"{str(score)} {collectible} in {game}"
+        disclaimer = ""
+        if effective_target != target:
+            disclaimer = " (Closest existing place)"
         if racers_in_target != []:
-            currentChat.message(channel, f"#{target}: {', '.join(racers_in_target)} ({extra_info})")
+            currentChat.message(channel, f"#{effective_target}{disclaimer}: {', '.join(racers_in_target)} ({extra_info})")
             return
         currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).", message_id)
 

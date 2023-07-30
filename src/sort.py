@@ -30,7 +30,8 @@ def sort(playerLookup):
                     sortedRacers.append(key)
                     break
     settings.stopTimer = all_racers_done
-    
+    settings.sorted_racers = sortedRacers
+
     # place & slot assignments
     slot = 0
     page = 0
