@@ -1,11 +1,13 @@
 # Bot commands
 ## Commands for Anyone
-#### !roles/!mmstatus [twitch_username]
-+ List the roles of `[twitch_username]`. (Both commands are identical)
+#### !roles [twitch_username]
++ List the roles of `[twitch_username]`.
 + If `[twitch_username]` is not specificed, list the roles of the user that sent the command.
-+ If the user is a racer, also show their status in the race.
 #### !place [number]
-+ Show who is in place #`[number]` in the race, what game they're up to, and how many collectibles they have in that game.
++ Show who is in place #`[number]` and their current status.
++ If the requested place number does not currently exist, the bot will display the info for the next highest existing place (This may happen if there are ties).
+#### !place [twitch_username]
++ If `[twitch_username]` is a racer, show their current status.
 #### !mmcommands
 + Post the link to this command list: https://bit.ly/44P3Y46
 
@@ -21,11 +23,13 @@
    
 ## Commands for Racers  
 #### !add [number]  
-+ Add `[number]` to the total amount of collectibles for the racer that sent the command.  
++ Add `[number]` to your total score.  
 + Positive and negative numbers are accepted.  
 + Addition is allowed. (`!add 70+120+120+32`)  
 #### !set [number]  
-+ Set the total number of collectibles for the racer that sent the command to `[number]`.  
++ Set your total score to `[number]`.  
+#### !place  
++ Check what place you are currently in and show your current score.  
 #### !quit  
 + Quit the race.  
 #### !rejoin/!unquit   

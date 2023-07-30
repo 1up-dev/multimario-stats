@@ -88,7 +88,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles","!mmstatus", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
+    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -102,7 +102,7 @@ def process_line(line, currentChat, playerLookup):
     # global commands
     if command[0] == "!mmcommands":
         currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46")
-    elif command[0] in ["!roles","!mmstatus"]:
+    elif command[0] == "!roles":
         if len(command) == 1:
             statusMsg = users.roles(user, user_id, userCS, playerLookup)
         else:
@@ -117,18 +117,25 @@ def process_line(line, currentChat, playerLookup):
             statusMsg = users.roles(subject, subject_id, subject_displayname, playerLookup)
         currentChat.message(channel, statusMsg)
     elif command[0] == "!place":
-        if len(command) < 2:
-            return
-        try:
-            target_username = False
-            target = int(command[1])
-            if target < 1 or target > len(playerLookup) * 10:
-                target_username = True
-        except ValueError:
+        racer_name = ""
+        if len(command) == 1:
+            if user.lower() not in playerLookup.keys():
+                currentChat.message(channel, f"Please specify a place number or racer username.", message_id)
+                return
+            racer_name = user.lower()
             target_username = True
-        
+        else:
+            try:
+                target_username = False
+                target = int(command[1])
+                if target < 1 or target > len(playerLookup) * 10:
+                    target_username = True
+            except ValueError:
+                target_username = True
+
         if target_username:
-            racer_name = command[1].lower()
+            if racer_name == "":
+                racer_name = command[1].lower()
             if racer_name not in list(playerLookup.keys()):
                 currentChat.message(channel, f"Racer {racer_name} not found.", message_id)
                 return
@@ -159,10 +166,7 @@ def process_line(line, currentChat, playerLookup):
         disclaimer = ""
         if effective_target != target:
             disclaimer = " (Closest existing place)"
-        if racers_in_target != []:
-            currentChat.message(channel, f"#{effective_target}{disclaimer}: {', '.join(racers_in_target)} ({extra_info})")
-            return
-        currentChat.message(channel, f"Place #{target} not found (There may be a tie causing this place number to be skipped).", message_id)
+        currentChat.message(channel, f"#{effective_target}{disclaimer}: {', '.join(racers_in_target)} ({extra_info})")
 
     # shared commands
     elif command[0] == "!addcounter":
@@ -292,7 +296,7 @@ def process_line(line, currentChat, playerLookup):
             return
         
         if command[0] == "!add" and number == 0:
-            currentChat.message(channel, "Use !mmstatus [username] to check a racer's current status. To check your own status, just type !mmstatus.")
+            currentChat.message(channel, "Use !place [username] to check a racer's current status. To check your own status, just type !place.")
             return
 
         response = ""

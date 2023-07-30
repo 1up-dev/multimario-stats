@@ -47,24 +47,18 @@ def remove(user_id, role: Role):
     push_all()
 
 def roles(user_name, user_id, display_name, playerLookup):
-    out = ""
+    user_roles = []
     if user_id in admins:
-        out += "Admin, "
-    if user_id in counters:
-        out += "Counter, "
-    if user_id in blocklist:
-        out += "Blocked, "
+        user_roles.append("Admin")
     if user_name.lower() in playerLookup.keys():
-        p = playerLookup[user_name.lower()]
-        score, collectible, game = p.collected()
-        if out != "":
-            out = f"Roles: {out}"
-        out = f"{p.display_name} has {str(score)} {collectible} in {game}. (Place #{p.place}, Status: {p.status}, Score: {p.score}) {out[0:-2]}"
-    else:
-        if out == "":
-            out =  "None, "
-        out = f"{display_name}: {out[0:-2]}"
-    return out
+        user_roles.append("Racer")
+    if user_id in counters:
+        user_roles.append("Counter")
+    if user_id in blocklist:
+        user_roles.append("Blocked")
+    if user_roles == []:
+        user_roles.append("None")
+    return f"{display_name}: {', '.join(user_roles)}"
 
 def update_usernames():
     global admins, counters, blocklist
