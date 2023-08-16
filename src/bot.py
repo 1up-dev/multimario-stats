@@ -66,6 +66,8 @@ def process_line(line, currentChat, playerLookup):
     whisper = False
     user = line[0].split('!')[0].lower()[1:]
     channel = line[2]
+    if line[1] == "WHISPER":
+        channel = "#0-whispers"
     command.append(line[3].lower()[1:])
     for index, word in enumerate(line):
         if index >= 4:

@@ -94,15 +94,19 @@ class ChatRoom:
     def message(self, channel, msg, reply_id=None):
         if len(msg) > 300:
             msg = msg[:300] + "... (Message cut due to length)"
-        if reply_id == None:
-            self.send(f"PRIVMSG {channel} :{msg}")
-        else:
-            self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
         
         # Log the outgoing message to the log file for readability
         path = f"irc/{channel[1:]}.log"
         with open(settings.path(path), 'a+') as f:
             f.write(f"{settings.now()} (Bot outgoing) {settings.twitch_nick}: {msg} \n")
+        
+        if channel == "#0-whispers":
+            return
+        
+        if reply_id == None:
+            self.send(f"PRIVMSG {channel} :{msg}")
+        else:
+            self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
 
     def part(self, channels):
         for channel in channels:
