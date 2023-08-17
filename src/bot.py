@@ -90,7 +90,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip"]:
+    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip", "!mmstresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -526,3 +526,6 @@ def process_line(line, currentChat, playerLookup):
             info = info[0]
             subject_id = info['id']
             twitch.create_clip_async(subject_id, subject)
+    elif command[0] == "!mmstresstest":
+        for i in range(1,21):
+            currentChat.message(channel, f"{i}")
