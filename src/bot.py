@@ -63,11 +63,13 @@ def process_line(line, currentChat, playerLookup):
     if len(line) < 4:
         return
     command = []
-    whisper = False
     user = line[0].split('!')[0].lower()[1:]
     channel = line[2]
     if line[1] == "WHISPER":
         channel = "#0-whispers"
+    if line[1] == "NOTICE" and line[3] == ":Login":
+        twitch.validate_token()
+        return
     command.append(line[3].lower()[1:])
     for index, word in enumerate(line):
         if index >= 4:
