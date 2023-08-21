@@ -71,5 +71,7 @@
 + Ask the bot to leave or join the chat of `[twitch_username]`.  
 #### !clearstats
 + Set the score of all racers to 0 and the status of all racers to "live".  
+#### !removeracer [twitch_username]  
++ Remove `[twitch_username]` from the stats stream manually without changing the Google sheet (Useful if there is a nearly-blank last page with only no-shows on it, and you want to remove those racers from the stream but not from the Google sheet). If `!fetchracers` is run after doing this, it will add the racer back onto the stream.
 #### !mmkill  
 + Close the stats program and bot. Warning: it will not turn back on automatically.  

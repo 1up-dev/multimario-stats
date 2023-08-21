@@ -92,7 +92,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!clip", "!mmstresstest"]:
+    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!clip", "!mmstresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -518,6 +518,18 @@ def process_line(line, currentChat, playerLookup):
             playerLookup[p].status = "live"
         currentChat.message(channel, f"Cleared all racer stats.")
         settings.redraw = True
+    elif command[0] == "!removeracer":
+        if len(command) < 2:
+            return
+        racer_to_remove = command[1].lower()
+        if racer_to_remove not in list(playerLookup.keys()):
+            currentChat.message(channel, f"Racer {racer_to_remove} not found.")
+            return
+        racer_display_name = playerLookup[racer_to_remove].display_name
+        playerLookup.pop(racer_to_remove)
+        currentChat.part([racer_to_remove])
+        currentChat.message(channel, f"Racer {racer_display_name} removed.")
+        settings.redraw = True
     elif command[0] == "!clip":
         if len(command) > 1:
             subject = command[1].lower()
@@ -529,5 +541,5 @@ def process_line(line, currentChat, playerLookup):
             subject_id = info['id']
             twitch.create_clip_async(subject_id, subject)
     elif command[0] == "!mmstresstest":
-        for i in range(1,21):
+        for i in range(1,26):
             currentChat.message(channel, f"{i}")
