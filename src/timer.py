@@ -1,5 +1,7 @@
 import math
 import datetime
+import threading
+import time
 import pygame
 import obs
 import settings
@@ -7,6 +9,10 @@ import settings
 stopped_time = None
 timelimit_event = datetime.datetime.now()
 clear_event = datetime.datetime.now()
+
+def stop_stream_delayed():
+    time.sleep(30)
+    obs.request("StopStream")
 
 def check_events(t, playerLookup):
     global timelimit_event, clear_event
@@ -18,7 +24,6 @@ def check_events(t, playerLookup):
                 p.finish("disqualified")
         timelimit_event = datetime.datetime.now()
         settings.redraw = True
-        obs.request("StopStream")
 
     seconds_since_event = (datetime.datetime.now() - clear_event).total_seconds()
     if t == "-0:30:00" and seconds_since_event > 5:
@@ -32,12 +37,15 @@ def check_events(t, playerLookup):
 
 def draw(screen, playerLookup):
     global stopped_time
-    if settings.stopTimer and stopped_time == None:
-        stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()
     if settings.stopTimer == False:
         dur = (datetime.datetime.now() - settings.startTime).total_seconds()
         stopped_time = None
     else:
+        if stopped_time == None:
+            stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()
+            t = threading.Thread(target=stop_stream_delayed, args=())
+            t.daemon = True
+            t.start()
         dur = stopped_time
     dur = math.floor(dur)
     time_str = settings.dur_to_str(dur)
