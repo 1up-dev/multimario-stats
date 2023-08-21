@@ -5,26 +5,28 @@ import obs
 import settings
 
 stopped_time = None
-time_limit_reached = False
-stats_cleared = False
+timelimit_event = datetime.datetime.now()
+clear_event = datetime.datetime.now()
 
 def check_events(t, playerLookup):
-    global time_limit_reached, stats_cleared
-    if t == settings.modeInfo['time-limit'] and time_limit_reached == False:
+    global timelimit_event, clear_event
+    seconds_since_event = (datetime.datetime.now() - timelimit_event).total_seconds()
+    if t == settings.modeInfo['time-limit'] and seconds_since_event > 5:
         for p in list(playerLookup.keys()):
             p = playerLookup[p]
             if p.status == "live":
                 p.finish("disqualified")
-        time_limit_reached = True
+        timelimit_event = datetime.datetime.now()
         settings.redraw = True
         obs.request("StopStream")
 
-    if t == "-0:15:00" and stats_cleared == False:
+    seconds_since_event = (datetime.datetime.now() - clear_event).total_seconds()
+    if t == "-0:30:00" and seconds_since_event > 5:
         for p in list(playerLookup.keys()):
             p = playerLookup[p]
             p.score = 0
             p.status = "live"
-        stats_cleared = True
+        clear_event = datetime.datetime.now()
         settings.redraw = True
         obs.request("StartStream")
 
