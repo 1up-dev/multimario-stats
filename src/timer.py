@@ -11,7 +11,7 @@ timelimit_event = datetime.datetime.now()
 clear_event = datetime.datetime.now()
 
 def stop_stream_delayed():
-    time.sleep(30)
+    time.sleep(10)
     obs.request("StopStream")
 
 def check_events(t, playerLookup):
@@ -33,7 +33,8 @@ def check_events(t, playerLookup):
             p.status = "live"
         clear_event = datetime.datetime.now()
         settings.redraw = True
-        obs.request("StartStream")
+        if settings.auto_stream_events:
+            obs.request("StartStream")
 
 def draw(screen, playerLookup):
     global stopped_time
@@ -43,9 +44,10 @@ def draw(screen, playerLookup):
     else:
         if stopped_time == None:
             stopped_time = (datetime.datetime.now() - settings.startTime).total_seconds()
-            t = threading.Thread(target=stop_stream_delayed, args=())
-            t.daemon = True
-            t.start()
+            if settings.auto_stream_events:
+                t = threading.Thread(target=stop_stream_delayed, args=())
+                t.daemon = True
+                t.start()
         dur = stopped_time
     dur = math.floor(dur)
     time_str = settings.dur_to_str(dur)

@@ -61,6 +61,8 @@
 + When specifying the date & time, it must be in this format: `2018-12-29T14:59:59` `(YYYY-MM-DDTHH:MM:SS)`  
 #### !togglestream  
 + Turn the Twitch stream on or off.  
+#### !autostream  
++ Enable or disable automatic stream events (Stream automatically turns on before the race begins, and turns off after all racers stop or the time limit is reached.)
 #### !addcounter/!removecounter [twitch_username]  
 + Add or remove `[twitch_username]` as a counter.  
 #### !block/!unblock [twitch_username]  

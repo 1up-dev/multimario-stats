@@ -86,6 +86,7 @@ twitch_pw = ""
 twitch_nick = ""
 chat_ref = None
 sorted_racers = []
+auto_stream_events = True
 make_dir('irc')
 make_dir('log')
 make_dir('profiles')

@@ -92,7 +92,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!clip", "!mmstresstest"]:
+    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -530,6 +530,13 @@ def process_line(line, currentChat, playerLookup):
         currentChat.part([racer_to_remove])
         currentChat.message(channel, f"Racer {racer_display_name} removed.")
         settings.redraw = True
+    elif command[0] == "!autostream":
+        if settings.auto_stream_events == True:
+            settings.auto_stream_events = False
+            currentChat.message(channel, f"Automatic stream events are now disabled.")
+        else:
+            settings.auto_stream_events = True
+            currentChat.message(channel, f"Automatic stream events are now enabled.")
     elif command[0] == "!clip":
         if len(command) > 1:
             subject = command[1].lower()
