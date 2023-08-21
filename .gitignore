@@ -7,5 +7,4 @@ venv/
 backup.json
 users.json
 settings.json
-clip-links.txt
 *test*

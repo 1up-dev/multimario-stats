@@ -76,7 +76,8 @@ def create_clip(broadcaster_id, username):
         print(f"Clip request failed. {response}")
         return
     link = responseData[0]['edit_url']
-    with open(settings.path(f"clip-links.txt"), 'a+') as f:
+    st = settings.startTime.isoformat().split("T")[0]
+    with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
         f.write(f"{settings.now()} {username}: {link}\n")
 
 def create_clip_async(broadcaster_id, username):

@@ -86,7 +86,7 @@ def process_line(line, currentChat, playerLookup):
     for word in line:
         full_line += "".join(c if ord(c)<128 else "." for c in word) + " "
     with open(settings.path(path), 'a+') as f:
-        f.write(datetime.datetime.now().isoformat().split(".")[0] + full_line[0:-1] + "\n")
+        f.write(settings.now() + full_line[0:-1] + "\n")
 
     if user_id == "":
         return
