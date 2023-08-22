@@ -69,6 +69,7 @@ def process_line(line, currentChat, playerLookup):
         channel = "#0-whispers"
     if line[1] == "NOTICE" and line[3] == ":Login":
         twitch.validate_token()
+        currentChat.reconnect()
         return
     command.append(line[3].lower()[1:])
     for index, word in enumerate(line):
