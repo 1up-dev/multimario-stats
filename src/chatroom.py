@@ -87,9 +87,9 @@ class ChatRoom:
         if self.readbuffer == "":
             self.reconnect()
             return []
-        tmp = self.readbuffer.split('\n')
-        self.readbuffer = tmp.pop()
-        return tmp
+        lines = self.readbuffer.split('\n')
+        self.readbuffer = lines.pop()
+        return lines
 
     def message(self, channel, msg, reply_id=None):
         if len(msg) > 300:

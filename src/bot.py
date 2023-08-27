@@ -22,8 +22,8 @@ def init(playerLookup):
         if settings.doQuit:
             break
         try:
-            readbuffer = chat.recv()
-            for line in readbuffer:
+            lines = chat.recv()
+            for line in lines:
                 process_line(line, chat, playerLookup)
         except Exception:
             print(f"{datetime.datetime.now().isoformat().split('.')[0]} Error in bot: {traceback.format_exc()}")
