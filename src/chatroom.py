@@ -10,8 +10,9 @@ class ChatRoom:
         self.HOST = "irc.chat.twitch.tv"
         self.PORT = 6667
         self.channels = channels
-        self.currentSocket = socket.socket()
+        self.connection = socket.socket()
         self.readbuffer = ""
+        self.authenticated = False
 
         # variables for outbound rate limit compliance 
         self.last_join_time = datetime.datetime.now() - datetime.timedelta(0,11)
@@ -28,6 +29,9 @@ class ChatRoom:
     def send_thread(self):
         while True:
             if len(self.sendbuffer) == 0:
+                time.sleep(0.5)
+                continue
+            if not self.authenticated:
                 time.sleep(0.5)
                 continue
 
@@ -57,7 +61,7 @@ class ChatRoom:
             self.msgCount += 1
 
             try:
-                self.currentSocket.send(bytes(f"{self.sendbuffer[0]}\r\n", "UTF-8"))
+                self.connection.send(bytes(f"{self.sendbuffer[0]}\r\n", "UTF-8"))
                 self.sendbuffer.pop(0)
             except OSError:
                 print(f"{settings.now()} Socket send: {traceback.format_exc()}")
@@ -66,8 +70,9 @@ class ChatRoom:
             time.sleep(1.1)
 
     def send_instant(self, msg):
+        self.msgCount += 1
         try:
-            self.currentSocket.send(bytes(f"{msg}\r\n", "UTF-8"))
+            self.connection.send(bytes(f"{msg}\r\n", "UTF-8"))
         except OSError:
             print(f"{settings.now()} Socket instant send: {traceback.format_exc()}")
 
@@ -76,7 +81,7 @@ class ChatRoom:
 
     def recv(self):
         try:
-            self.readbuffer = self.readbuffer + self.currentSocket.recv(4096).decode("UTF-8", errors = "ignore")
+            self.readbuffer = self.readbuffer + self.connection.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
                 print(settings.now(), "Socket recv: empty readbuffer")
         except OSError:
@@ -111,10 +116,11 @@ class ChatRoom:
     def part(self, channels):
         for channel in channels:
             self.channels.remove(channel)
-        channel_list = "#"+",#".join(channels)
-        self.send(f"PART {channel_list}")
+        channel_string = "#"+",#".join(channels)
+        self.send(f"PART {channel_string}")
 
     def join(self, channels=[]):
+        # Empty list: join all channels. Non-empty list: join specified channels and add them to the channels list
         self.channels += channels
         if channels == []:
             channels = self.channels
@@ -122,8 +128,8 @@ class ChatRoom:
         join_messages = []
         j = 0
         while True:
-            channel_list = "#"+",#".join(channels[j:j+20])
-            join_messages.append(f"JOIN {channel_list}")
+            channel_string = "#"+",#".join(channels[j:j+20])
+            join_messages.append(f"JOIN {channel_string}")
             j += 20
             if channels[j:j+20] == []:
                 break
@@ -131,27 +137,37 @@ class ChatRoom:
         self.sendbuffer = join_messages + self.sendbuffer
 
     def reconnect(self):
+        self.authenticated = False # Pause all message sending
         seconds_since_last_connect = (datetime.datetime.now() - self.last_connect_time).total_seconds()
         if seconds_since_last_connect < 30:
-            print("Last connection attempt was less than 30 seconds ago. Waiting before connecting again to avoid rate limit.")
-            time.sleep(30 - seconds_since_last_connect)
+            print(f"{settings.now()} [IRC] Last connection attempt was {seconds_since_last_connect}s ago. Waiting {2 * seconds_since_last_connect}s.")
+            time.sleep(2 * seconds_since_last_connect)
         self.last_connect_time = datetime.datetime.now()
-        print("Connecting to Twitch IRC.")
+        print(f"{settings.now()} [IRC] Connecting to Twitch IRC.")
 
-        if settings.twitch_nick != "" and settings.twitch_nick not in self.channels:
-            self.channels = [settings.twitch_nick] + self.channels
-        self.currentSocket.close()
-        self.currentSocket = socket.socket()
-        self.currentSocket.settimeout(480) # 8 minutes
+        # Remove all JOIN messages from the sendbuffer, because reconnect() will send a new JOIN for all channels.
+        new_sendbuffer = []
+        for msg in self.sendbuffer:
+            if msg[0:4] != "JOIN":
+                new_sendbuffer.append(msg)
+        self.sendbuffer = new_sendbuffer
+
+        
+        self.connection.close()
+        self.connection = socket.socket()
+        self.connection.settimeout(480) # 8 minutes
         self.readbuffer = ""
         try:
-            self.currentSocket.connect((self.HOST,self.PORT))
+            self.connection.connect((self.HOST,self.PORT))
         except Exception:
             time.sleep(10)
             return
         self.send_instant("CAP REQ :twitch.tv/tags twitch.tv/commands")
         self.send_instant(f"PASS oauth:{settings.twitch_token}")
         self.send_instant(f"NICK {settings.twitch_nick}")
-        self.msgCount += 3
+
+        # Queue JOIN messages for all channels. Add bot's own channel to the beginning of the channel list
+        if settings.twitch_nick != "" and settings.twitch_nick not in self.channels:
+            self.channels = [settings.twitch_nick] + self.channels
         self.join()
-        time.sleep(1)
+        # time.sleep(1)

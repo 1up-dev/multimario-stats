@@ -67,10 +67,15 @@ def process_line(line, currentChat, playerLookup):
     channel = line[2]
     if line[1] == "WHISPER":
         channel = "#0-whispers"
-    if line[1] == "NOTICE" and line[3] == ":Login":
-        print("[IRC] Login auth failed. Refreshing token.")
-        twitch.refresh_token()
-        currentChat.reconnect()
+    if line[1] == "NOTICE":
+        if line[3] == ":Login" or line[3] == ":Invalid":
+            # ":Login authentication failed" or ":Invalid NICK"
+            print(f"{settings.now()} [IRC] Login auth failed. Refreshing token.")
+            twitch.refresh_token()
+            currentChat.reconnect()
+            return
+    if line[1] == "001":
+        currentChat.authenticated = True
         return
     command.append(line[3].lower()[1:])
     for index, word in enumerate(line):

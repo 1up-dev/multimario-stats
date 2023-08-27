@@ -40,7 +40,7 @@ while True:
         if event.type == pygame.QUIT:
             settings.doQuit = True
     if settings.doQuit == True:
-        settings.chat_ref.currentSocket.close()
+        settings.chat_ref.connection.close()
         pygame.quit()
         break
 
