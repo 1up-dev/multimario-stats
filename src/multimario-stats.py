@@ -19,7 +19,7 @@ screen = pygame.display.set_mode([1600,900])
 pygame.display.set_caption("Multi-Mario Stats")
 scoreboard.draw(screen, {}, 0)
 
-# Validate Twitch API token
+# Validate Twitch API token. This also retrieves the bot username.
 twitch.validate_token()
 
 # load users and racers, construct player objects

@@ -119,7 +119,6 @@ class ChatRoom:
         if channels == []:
             channels = self.channels
         # Twitch JOIN rate limiting: batches of 20 channels or less
-        print(f"Joining Twitch channels.")
         join_messages = []
         j = 0
         while True:
@@ -137,6 +136,7 @@ class ChatRoom:
             print("Last connection attempt was less than 30 seconds ago. Waiting before connecting again to avoid rate limit.")
             time.sleep(30 - seconds_since_last_connect)
         self.last_connect_time = datetime.datetime.now()
+        print("Connecting to Twitch IRC.")
 
         if settings.twitch_nick != "" and settings.twitch_nick not in self.channels:
             self.channels = [settings.twitch_nick] + self.channels

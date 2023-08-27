@@ -68,7 +68,8 @@ def process_line(line, currentChat, playerLookup):
     if line[1] == "WHISPER":
         channel = "#0-whispers"
     if line[1] == "NOTICE" and line[3] == ":Login":
-        twitch.validate_token()
+        print("[IRC] Login auth failed. Refreshing token.")
+        twitch.refresh_token()
         currentChat.reconnect()
         return
     command.append(line[3].lower()[1:])
@@ -113,7 +114,7 @@ def process_line(line, currentChat, playerLookup):
         else:
             subject = command[1].lower()
             info = twitch.get_user_infos([subject])
-            if info == None or len(info) == 0:
+            if len(info) == 0:
                 currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
                 return
             info = info[0]
@@ -181,7 +182,7 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         info = twitch.get_user_infos([subject])
-        if info == None or len(info) == 0:
+        if len(info) == 0:
             currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
         info = info[0]
@@ -201,7 +202,7 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         info = twitch.get_user_infos([subject])
-        if info == None or len(info) == 0:
+        if len(info) == 0:
             currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
         info = info[0]
@@ -272,7 +273,7 @@ def process_line(line, currentChat, playerLookup):
         currentChat.message(channel, racer.display_name + " has quit.")
     elif command[0] in ["!add","!set"]:
         if ((user_id not in users.counters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blocklist):
-            currentChat.message(channel, f"{userCS}: You do not have permission to update score counts.")
+            currentChat.message(channel, f"You do not have permission to update score counts.", message_id)
             return
 
         if len(command) == 3:
@@ -285,7 +286,7 @@ def process_line(line, currentChat, playerLookup):
             return
 
         if racer not in playerLookup.keys():
-            currentChat.message(channel, f"Racer {racer} not found.")
+            currentChat.message(channel, f"Racer {racer} not found.", message_id)
             return
         p = playerLookup[racer]
         try:
@@ -297,11 +298,11 @@ def process_line(line, currentChat, playerLookup):
             else:
                 number = int(number)
         except ValueError:
-            currentChat.message(channel, f"Not a number.")
+            currentChat.message(channel, f"Not a number.", message_id)
             return
         
         if command[0] == "!add" and number == 0:
-            currentChat.message(channel, "Use !place [username] to check a racer's current status. To check your own status, just type !place.")
+            currentChat.message(channel, "Use !place [username] to check a racer's current status. To check your own status, just type !place.", message_id)
             return
 
         response = ""
@@ -309,10 +310,10 @@ def process_line(line, currentChat, playerLookup):
             number += p.score
 
         if p.status not in ["live","done"]:
-            currentChat.message(channel, f"{p.display_name} is not live, so their score cannot be updated.")
+            currentChat.message(channel, f"{p.display_name} is not live, so their score cannot be updated.", message_id)
             return
         if number < 0 or number > settings.max_score:
-            currentChat.message(channel, "The requested score is less than 0 or greater than the maximum possible score.")
+            currentChat.message(channel, "The requested score is less than 0 or greater than the maximum possible score.", message_id)
             return
         
         response = p.update(number, playerLookup)
@@ -422,7 +423,7 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         info = twitch.get_user_infos([subject])
-        if info == None or len(info) == 0:
+        if len(info) == 0:
             currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
         info = info[0]
@@ -440,7 +441,7 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         info = twitch.get_user_infos([subject])
-        if info == None or len(info) == 0:
+        if len(info) == 0:
             currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
         info = info[0]
@@ -456,7 +457,7 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         info = twitch.get_user_infos([subject])
-        if info == None or len(info) == 0:
+        if len(info) == 0:
             currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
             return
         info = info[0]
@@ -542,7 +543,7 @@ def process_line(line, currentChat, playerLookup):
         if len(command) > 1:
             subject = command[1].lower()
             info = twitch.get_user_infos([subject])
-            if info == None or len(info) == 0:
+            if len(info) == 0:
                 currentChat.message(channel, f"Twitch username {subject} not found.", message_id)
                 return
             info = info[0]
