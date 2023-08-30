@@ -1,7 +1,7 @@
 # multimario-stats
 This is the program that runs the scoreboard and Twitch chat bot for **[The 602 Race](https://docs.google.com/spreadsheets/d/1ludkWzuN0ZzMh9Bv1gq9oQxMypttiXkg6AEFvxy_gZk/)** and other Multi-Mario endurance races.  
-See **[this video archive](https://www.twitch.tv/videos/857024553)** from December 2020 for an example of it in use.  
-![Example](https://imgur.com/gap4Rol.png)
+See **[this video archive](https://www.twitch.tv/videos/1856764496)** for an example of it in use.  
+![Example](https://i.imgur.com/bHeYEUO.jpg)
 
 ## What is the 602 Race?  
 >The 602 Race is an endurance race to 100% completion of four 3D Super Mario games, with a total of 602 Stars to be collected.  
