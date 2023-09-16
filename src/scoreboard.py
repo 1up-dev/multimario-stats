@@ -32,7 +32,7 @@ def draw(screen, playerLookup, page):
         return
     
     screen.blit(pygame.transform.scale(background, (1600,900)), (0,0))
-    timer.draw(screen, playerLookup)
+    timer.draw(screen, playerLookup, update_display=False)
 
     #-----------scorecard drawing------------
     for key in list(playerLookup.keys()):

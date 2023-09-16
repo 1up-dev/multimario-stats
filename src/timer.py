@@ -36,7 +36,7 @@ def check_events(t, playerLookup):
         if settings.auto_stream_events:
             obs.request("StartStream")
 
-def draw(screen, playerLookup):
+def draw(screen, playerLookup, update_display=True):
     global stopped_time
     if settings.stopTimer == False:
         dur = (datetime.datetime.now() - settings.startTime).total_seconds()
@@ -62,5 +62,6 @@ def draw(screen, playerLookup):
     timer_r = timer.get_rect(center=(1277,84))#topright=, etc
     screen.blit(timer, timer_r)
 
-    pygame.display.update(r)
+    if update_display:
+        pygame.display.update(border)
     check_events(time_str, playerLookup)
