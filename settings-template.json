@@ -1,17 +1,16 @@
 {
-    "debug": true,
-    "debug-gsheet": "",
+    "debug": false,
+    "debug-gsheet": "https://sheets.googleapis.com/v4/spreadsheets/<id_here>/values/A6:A?key=",
     "mode":"602",
-    "start-time": "2021-01-16T09:17:42",
     "extra-chat-rooms": [
-        "602race",
-        "Odme_"
+        "twitch_channel_1",
+        "twitch_channel_2"
     ],
     "twitch-api-clientid": "",
     "twitch-api-secret": "",
+    "google-api-key": "",
     "twitch-api-token": "",
     "twitch-refresh-token": "",
-    "google-api-key": "",
     "modes":{
         "602":{
             "time-limit": "60:00:00",

@@ -45,7 +45,7 @@ while True:
         break
 
     if settings.redraw == True:
-        player.backup_all(playerLookup)
+        settings.save_state(playerLookup)
         sort.sort(playerLookup)
     
     # redraw every 10 seconds or if redraw is requested

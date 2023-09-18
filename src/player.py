@@ -79,40 +79,22 @@ class Player:
         self.calculateDuration()
     
     def backup(self):
-        p = {}
-        p['score'] = self.score
-        p['status'] = self.status
-        if self.finishTimeAbsolute == None:
-            p['finishtime'] = None
-        else:
-            p['finishtime'] = self.finishTimeAbsolute.isoformat()
+        racer_dict = {}
+        racer_dict['score'] = self.score
+        racer_dict['status'] = self.status
+        racer_dict['finishtime'] = None
+        if self.finishTimeAbsolute != None:
+            racer_dict['finishtime'] = self.finishTimeAbsolute.isoformat().split(".")[0]
         
-        delete_backup = False
-        with open(settings.path('backup.json'), 'r+') as f:
+        with open(settings.path('state.json'), 'r+') as f:
             try:
                 j = json.load(f)
-                j[self.name] = p
+                j['racers'][self.name] = racer_dict
                 f.seek(0)
                 json.dump(j, f, indent=4)
                 f.truncate()
             except json.decoder.JSONDecodeError:
-                print("Error: Backup failed to load. Clearing it")
-                delete_backup = True
-        if delete_backup:
-            with open(settings.path('backup.json'), 'w') as f:
-                json.dump({}, f, indent=4)
-
-def backup_all(players):
-    with open(settings.path('backup.json'), 'r+') as f:
-        j = json.load(f)
-        for p in players:
-            player = players[p]
-            j[player.name] = {}
-            j[player.name]['score'] = player.score
-            j[player.name]['status'] = player.status
-            j[player.name]['finishtime'] = None
-            if player.finishTimeAbsolute != None:
-                j[player.name]['finishtime'] = player.finishTimeAbsolute.isoformat().split(".")[0]
-        f.seek(0)
-        json.dump(j, f, indent=4)
-        f.truncate()
+                print("Error: State file failed to load. Clearing it")
+                f.seek(0)
+                json.dump({"start-time":settings.startTime.isoformat().split(".")[0], "racers":{}}, f, indent=4)
+                f.truncate()

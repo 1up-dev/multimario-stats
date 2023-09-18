@@ -87,13 +87,9 @@ def init_users():
     
     # player object instantiation
     playerLookup = {}
-    backupFile = settings.path("backup.json")
-    # create backup file if it doesn't exist
-    if not os.path.isfile(backupFile):
-        with open(backupFile, 'w+') as f:
-            json.dump({}, f, indent=4)
-    with open(backupFile, 'r') as f:
-        j = json.load(f)
+    state_file = settings.path("state.json")
+    with open(state_file, 'r') as f:
+        j = json.load(f)['racers']
     for racer in racers:
         state_data = {}
         if j != {} and racer.lower() in j.keys():

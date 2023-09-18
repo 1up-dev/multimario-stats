@@ -344,17 +344,11 @@ def process_line(line, currentChat, playerLookup):
             try:
                 newTime = datetime.datetime.fromisoformat(newTime)
             except ValueError:
-                currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29@09:00")
+                currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29T09:00")
         else:
-            currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29@09:00")
+            currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29T09:00")
         if type(newTime) == datetime.datetime:
             settings.startTime = newTime
-            with open(settings.path('settings.json'), 'r+') as f:
-                j = json.load(f)
-                j['start-time'] = settings.startTime.isoformat().split(".")[0]
-                f.seek(0)
-                json.dump(j, f, indent=4)
-                f.truncate()
             currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0])
             for racer in list(playerLookup.keys()):
                 playerLookup[racer].calculateDuration()
