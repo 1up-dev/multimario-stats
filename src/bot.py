@@ -237,7 +237,7 @@ def process_line(line, currentChat, playerLookup):
             currentChat.message(channel,f"Already not active in channel #{l_channel}.")
             return
         currentChat.message(channel,f"Leaving #{l_channel} now.")
-        currentChat.part([l_channel])
+        currentChat.part([l_channel], announce=True)
     elif command[0] == "!mmjoin":
         j_channel = ""
         if len(command) == 1:
@@ -253,10 +253,10 @@ def process_line(line, currentChat, playerLookup):
         if j_channel in currentChat.channels:
             currentChat.message(channel,f"Rejoining #{j_channel} now.")
             currentChat.part([j_channel])
-            currentChat.join([j_channel])
+            currentChat.join([j_channel], announce=True)
             return
         currentChat.message(channel,f"Joining #{j_channel} now.")
-        currentChat.join([j_channel])
+        currentChat.join([j_channel], announce=True)
 
     # racer commands
     elif command[0] in ["!rejoin", "!unquit"]:

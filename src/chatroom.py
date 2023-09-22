@@ -113,13 +113,16 @@ class ChatRoom:
         else:
             self.send(f"@reply-parent-msg-id={reply_id} PRIVMSG {channel} :{msg}")
 
-    def part(self, channels):
+    def part(self, channels, announce=False):
         for channel in channels:
             self.channels.remove(channel)
+            if announce:
+                self.message(f"#{channel}", f"Now leaving #{channel}.")
         channel_string = "#"+",#".join(channels)
         self.send(f"PART {channel_string}")
+        
 
-    def join(self, channels=[]):
+    def join(self, channels=[], announce=False):
         # Empty list: join all channels. Non-empty list: join specified channels and add them to the channels list
         self.channels += channels
         if channels == []:
@@ -135,6 +138,12 @@ class ChatRoom:
                 break
         # Insert the JOIN messages at the beginning of sendbuffer, so the joins are attempted first.
         self.sendbuffer = join_messages + self.sendbuffer
+
+        # Warning: if there are many channels to join, the JOIN messages may be slowed down to comply with rate limiting. Some of these announcement messages will then be dropped by Twitch IRC, since the bot won't have joined those channels yet.
+        # The code currently only calls for joins to be announced in situations where only one channel is being joined, so this case should not occur.
+        for channel in channels:
+            if announce:
+                self.message(f"#{channel}", f"Now joined #{channel}.")
 
     def reconnect(self):
         self.authenticated = False # Pause all message sending
