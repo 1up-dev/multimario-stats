@@ -51,6 +51,8 @@ def get_player_infos(logins, playerLookup):
         racer.profile = pygame.image.load(path)
         racer.twitch_id = info['id']
         racer.display_name = info['display_name']
+        if racer.display_name.lower() != racer.name:
+            racer.display_name = racer.name
         settings.redraw = True
 
 def get_player_infos_async(logins, playerLookup):
