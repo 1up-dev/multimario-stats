@@ -8,6 +8,7 @@ import player
 import chatroom
 import obs
 import twitch
+import sort
 
 def init(playerLookup):
     channels = []
@@ -109,6 +110,8 @@ def process_line(line, currentChat, playerLookup):
     st = settings.startTime.isoformat().split("T")[0]
     with open(settings.path(f"log/{st}-cmd.log"), 'a+') as f:
         f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
+
+    main_channel = f"#{settings.twitch_nick}"
 
     # global commands
     if command[0] == "!mmcommands":
@@ -266,6 +269,8 @@ def process_line(line, currentChat, playerLookup):
         if racer.score == settings.max_score:
             racer.status = "done"
         currentChat.message(channel, racer.display_name +" has rejoined the race.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, racer.display_name + " has rejoined the race.")
         settings.redraw = True
     elif command[0] == "!quit":
         if user not in playerLookup.keys():
@@ -276,24 +281,26 @@ def process_line(line, currentChat, playerLookup):
         racer.finish("quit")
         settings.redraw = True
         currentChat.message(channel, racer.display_name + " has quit.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, racer.display_name + " has quit.")
     elif command[0] in ["!add","!set"]:
         if ((user_id not in users.counters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blocklist):
             currentChat.message(channel, f"You do not have permission to update score counts.", message_id)
             return
 
         if len(command) == 3:
-            racer = command[1].lower()
+            racer_name = command[1].lower()
             number = command[2]
         elif len(command) == 2 and user in playerLookup.keys():
-            racer = user
+            racer_name = user
             number = command[1]
         else:
             return
 
-        if racer not in playerLookup.keys():
-            currentChat.message(channel, f"Racer {racer} not found.", message_id)
+        if racer_name not in playerLookup.keys():
+            currentChat.message(channel, f"Racer {racer_name} not found.", message_id)
             return
-        p = playerLookup[racer]
+        racer = playerLookup[racer_name]
         try:
             if '+' in number:
                 nums = number.split('+')
@@ -312,23 +319,39 @@ def process_line(line, currentChat, playerLookup):
 
         response = ""
         if command[0] == "!add":
-            number += p.score
+            number += racer.score
 
-        if p.status not in ["live","done"]:
-            currentChat.message(channel, f"{p.display_name} is not live, so their score cannot be updated.", message_id)
+        if racer.status not in ["live","done"]:
+            currentChat.message(channel, f"{racer.display_name} is not live, so their score cannot be updated.", message_id)
             return
         if number < 0 or number > settings.max_score:
             currentChat.message(channel, "The requested score is less than 0 or greater than the maximum possible score.", message_id)
             return
         
-        response = p.update(number, playerLookup)
-        currentChat.message(channel, response)
+        racer.score = number
+        if 0 <= number < settings.max_score:
+            if racer.status == "done":
+                racer.status = "live"
+            # sort() reassigns place numbers so the response will be accurate
+            sort.sort(playerLookup)
+            score, collectible, game = racer.collected()
+            currentChat.message(channel, f"{racer.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(racer.place)}, Score {racer.score})")
+        elif number == settings.max_score:
+            racer.finish("done")
+            # sort() reassigns place numbers so the response will be accurate
+            sort.sort(playerLookup)
+            if settings.mode == "602":
+                twitch.create_clip_async(racer.twitch_id, racer.name)
+            done_msg = f"{racer.display_name} has finished in place #{racer.place} with a time of {racer.duration_str}! GG!"
+            currentChat.message(channel, done_msg)
+            if channel != main_channel and not settings.debug:
+                currentChat.message(main_channel, done_msg)
 
         # Log score update in external file
         st = settings.startTime.isoformat().split("T")[0]
         log_file = settings.path(f"log/{st}-state.log")
         with open(log_file,'a+') as f:
-            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {p.name} {p.score} {user_id}\n")
+            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {racer.name} {racer.score} {user_id}\n")
         
         settings.redraw = True
 
@@ -361,7 +384,9 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("quit")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].display_name + " has been forcequit.")
+        currentChat.message(channel, f"{playerLookup[racer].display_name} has been forcequit.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, f"{playerLookup[racer].display_name} has been forcequit.")
     elif command[0] == "!noshow":
         if len(command) != 2:
             return
@@ -390,7 +415,9 @@ def process_line(line, currentChat, playerLookup):
         if playerLookup[racer].score == settings.max_score:
             playerLookup[racer].status = "done"
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].display_name + " has been revived.")
+        currentChat.message(channel, f"{playerLookup[racer].display_name} has been revived.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, f"{playerLookup[racer].display_name} has been revived.")
     elif command[0] == "!settime":
         if len(command) != 3:
             return

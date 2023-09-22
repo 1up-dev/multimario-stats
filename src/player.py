@@ -45,27 +45,6 @@ class Player:
             collectible += "s"
         return (score, collectible, game)
 
-    def update(self, count, playerLookup):
-        if self.status not in ["live","done"]:
-            return
-        if count < 0 or count > settings.max_score:
-            return
-        
-        self.score = count
-        if 0 <= count < settings.max_score:
-            if self.status == "done":
-                self.status = "live"
-            # sort() reassigns place numbers so the command output will be accurate
-            sort.sort(playerLookup)
-            score, collectible, game = self.collected()
-            return f"{self.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(self.place)}, Score {self.score})"
-        elif count == settings.max_score:
-            self.finish("done")
-            sort.sort(playerLookup)
-            if settings.mode == "602":
-                twitch.create_clip_async(self.twitch_id, self.name)
-            return f"{self.display_name} has finished in place #{self.place} with a time of {self.duration_str}! GG!"
-
     def calculateDuration(self):
         # calculate duration in seconds from finishTime - startTime
         if self.finishTimeAbsolute == None:
