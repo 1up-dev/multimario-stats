@@ -100,7 +100,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest"]:
+    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -114,7 +114,7 @@ def process_line(line, currentChat, playerLookup):
     main_channel = f"#{settings.twitch_nick}"
 
     # global commands
-    if command[0] == "!mmcommands":
+    if command[0] in ["!mmcommands", "!mmhelp"]:
         currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46")
     elif command[0] == "!roles":
         if len(command) == 1:

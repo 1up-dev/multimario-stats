@@ -8,7 +8,7 @@
 + If the requested place number does not currently exist, the bot will display the info for the next highest existing place (This may happen if there are ties).
 #### !place [twitch_username]
 + If `[twitch_username]` is a racer, show their current status.
-#### !mmcommands
+#### !mmhelp
 + Post the link to this command list: https://bit.ly/44P3Y46
 
 ## Commands for Counters  
