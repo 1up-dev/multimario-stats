@@ -19,6 +19,8 @@ def getRacers():
     for row in response["values"]:
         if row == [] or row[0] == "Theoretical WR":
             break
+        if row[0] == "":
+            continue
         if race_num <= 0:
             sheetRacers.append(row[0].strip())
             continue
