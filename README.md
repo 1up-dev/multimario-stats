@@ -13,6 +13,7 @@ See **[this video archive](https://www.twitch.tv/videos/1856764496)** for an exa
 - The bot gets its login info and makes API requests using a Twitch developer application. Register an application here: https://dev.twitch.tv/console. Add `http://localhost:3000` as an OAuth Redirect URL, then copy the `Client ID` and `Client Secret` into `settings.json`. After you start the program, it will open a browser window and prompt you to grant access using your desired account for the bot. The `token` and `refresh-token` fields will then be filled out automatically.
 - The Google API Key is used to get the list of racers from the race spreadsheet. You will need to create a new project that has access to the Google Sheets API. https://console.developers.google.com/apis/dashboard
 - For the OBS start- and stop-stream functionality to work, open your desired streaming profile on OBS, go to the Tools menu at the top of the window, and select `WebSocket Server Settings`. Check `Enable WebSocket server`, set `Server Port` to `4455`, and **un**check `Enable Authentication`.
-- Setting `"debug": true` in `settings.json` will have a few effects:
-    - The debug Google Sheets page (`debug-gsheet` in `settings.json`) will be used to get the list of racers instead of the official race sheet.
-    - Each racer will be given pseudorandom stats for testing.
+- Setting `"testing-gsheet"` in `settings.json` will enable testing mode:
+    - The provided testing Google Sheet will be used to get the list of racers instead of the official race sheet.
+    - Each racer will be given random stats.
+    - Racer status updates (done, quit, etc) will not be mirror-posted in the main channel, to avoid spam while testing.

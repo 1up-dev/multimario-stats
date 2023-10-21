@@ -1,6 +1,5 @@
 {
-    "debug": false,
-    "debug-gsheet": "https://sheets.googleapis.com/v4/spreadsheets/<id_here>/values/A6:A?key=",
+    "testing-gsheet": "",
     "mode":"602",
     "extra-chat-rooms": [
         "twitch_channel_1",

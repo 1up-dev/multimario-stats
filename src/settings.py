@@ -125,7 +125,7 @@ baseDir = os.path.join(os.path.dirname(__file__),'..')
 startTime = datetime.datetime.now()
 doQuit = False
 redraw = True
-debug = True
+debug = False
 mode = ""
 max_score = 0
 gsheet = ""
@@ -146,12 +146,13 @@ init_state()
 
 with open(path('settings.json'), 'r') as f:
     j = json.load(f)
-    debug = j['debug']
+    test_gsheet = j.get("testing-gsheet", "")
     mode = j['mode']
     modeInfo = j['modes'][mode]
     gsheet = modeInfo['gsheet']
-    if debug:
-        gsheet = j['debug-gsheet']
+    if test_gsheet != "":
+        debug = True
+        gsheet = test_gsheet
     for g in modeInfo['games']:
         max_score += g['count']
 
