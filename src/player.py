@@ -42,7 +42,10 @@ class Player:
                 break
             score -= g['count']
         if score != 1:
-            collectible += "s"
+            if collectible[-1] == 'y':
+                collectible = collectible[:-1] + "ies"
+            else:
+                collectible += "s"
         return (score, collectible, game)
 
     def calculateDuration(self):
