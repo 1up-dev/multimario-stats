@@ -103,7 +103,6 @@ def init_state():
             if "racers" not in j:
                 j["racers"] = {}
             startTime = datetime.datetime.fromisoformat(j['start-time'])
-            j = {"start-time":j['start-time'], "racers":j["racers"]}
             f.seek(0)
             json.dump(j, f, indent=4)
             f.truncate()
@@ -113,8 +112,10 @@ def init_state():
         # Start time is >1 week ago. Reset scores and delete profile pictures.
         # Keep old start time to avoid creating erroneous log files.
         with open(state_file, 'w+') as f:
+            j = json.load(f)
+            j["racers"] = {}
             f.seek(0)
-            json.dump({"start-time":startTime.isoformat().split(".")[0], "racers":{}}, f, indent=4)
+            json.dump(j, f, indent=4)
             f.truncate()
         profiles_dir = path('profiles')
         for filename in os.listdir(profiles_dir):
