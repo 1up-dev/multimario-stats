@@ -56,24 +56,3 @@ class Player:
         self.status = status
         self.finishTimeAbsolute = datetime.datetime.now()
         self.calculateDuration()
-    
-    def backup(self):
-        racer_dict = {}
-        racer_dict['score'] = self.score
-        racer_dict['status'] = self.status
-        racer_dict['finishtime'] = None
-        if self.finishTimeAbsolute != None:
-            racer_dict['finishtime'] = self.finishTimeAbsolute.isoformat().split(".")[0]
-        
-        with open(settings.path('state.json'), 'r+') as f:
-            try:
-                j = json.load(f)
-                j['racers'][self.name] = racer_dict
-                f.seek(0)
-                json.dump(j, f, indent=4)
-                f.truncate()
-            except json.decoder.JSONDecodeError:
-                print("Error: State file failed to load. Resetting it")
-                f.seek(0)
-                json.dump({"start-time":settings.startTime.isoformat().split(".")[0], "extra-channels": settings.extra_channels, "racers":{}}, f, indent=4)
-                f.truncate()
