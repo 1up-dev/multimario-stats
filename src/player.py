@@ -73,7 +73,7 @@ class Player:
                 json.dump(j, f, indent=4)
                 f.truncate()
             except json.decoder.JSONDecodeError:
-                print("Error: State file failed to load. Clearing it")
+                print("Error: State file failed to load. Resetting it")
                 f.seek(0)
-                json.dump({"start-time":settings.startTime.isoformat().split(".")[0], "racers":{}}, f, indent=4)
+                json.dump({"start-time":settings.startTime.isoformat().split(".")[0], "extra-channels": settings.extra_channels, "racers":{}}, f, indent=4)
                 f.truncate()

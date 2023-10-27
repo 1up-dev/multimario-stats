@@ -73,6 +73,7 @@ def save_state(player_lookup):
     with open(path('state.json'), 'r+') as f:
         j = json.load(f)
         j['start-time'] = startTime.isoformat().split(".")[0]
+        j["extra-channels"] = extra_channels
         racers = j['racers']
         for player_name in player_lookup.keys():
             player = player_lookup[player_name]
@@ -89,31 +90,36 @@ def save_state(player_lookup):
         f.truncate()
 
 def init_state():
-    global startTime
+    global startTime, extra_channels
     state_file = path("state.json")
 
     if not os.path.isfile(state_file):
         with open(state_file, 'w+') as f:
-            json.dump({"start-time":startTime.isoformat().split(".")[0], "racers":{}}, f, indent=4)
-    else:
-        with open(state_file, 'r+') as f:
-            j = json.load(f)
-            if "start-time" not in j:
-                j["start-time"] = startTime.isoformat().split(".")[0]
-            if "racers" not in j:
-                j["racers"] = {}
-            startTime = datetime.datetime.fromisoformat(j['start-time'])
-            f.seek(0)
-            json.dump(j, f, indent=4)
-            f.truncate()
+            json.dump({}, f, indent=4)
+
+    with open(state_file, 'r+') as f:
+        j = json.load(f)
+        if "start-time" not in j:
+            j["start-time"] = startTime.isoformat().split(".")[0]
+        if "extra-channels" not in j:
+            j["extra-channels"] = extra_channels
+        if "racers" not in j:
+            j["racers"] = {}
+        startTime = datetime.datetime.fromisoformat(j['start-time'])
+        extra_channels = j["extra-channels"]
+        f.seek(0)
+        json.dump(j, f, indent=4)
+        f.truncate()
     
     dur = (datetime.datetime.now() - startTime).total_seconds()
     if dur > 604800:
-        # Start time is >1 week ago. Reset scores and delete profile pictures.
+        # Start time is >1 week ago. Delete profile pictures, reset scores and extra channels.
         # Keep old start time to avoid creating erroneous log files.
         with open(state_file, 'r+') as f:
             j = json.load(f)
-            j["racers"] = {}
+            if not debug:
+                j["racers"] = {}
+                extra_channels = j["extra-channels"] = []
             f.seek(0)
             json.dump(j, f, indent=4)
             f.truncate()
@@ -130,6 +136,7 @@ debug = False
 mode = ""
 max_score = 0
 gsheet = ""
+extra_channels = []
 modeInfo = {}
 stopTimer = False
 playersLock = False
@@ -143,7 +150,6 @@ auto_stream_events = True
 make_dir('irc')
 make_dir('log')
 make_dir('profiles')
-init_state()
 
 with open(path('settings.json'), 'r') as f:
     j = json.load(f)
@@ -157,10 +163,10 @@ with open(path('settings.json'), 'r') as f:
     for g in modeInfo['games']:
         max_score += g['count']
 
-    extra_chats = j['extra-chat-rooms']
-
     twitch_clientid = j['twitch-api-clientid']
     twitch_secret = j['twitch-api-secret']
     twitch_token = j['twitch-api-token']
     twitch_refresh_token = j['twitch-refresh-token']
     google_api_key = j['google-api-key']
+
+init_state()

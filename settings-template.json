@@ -1,15 +1,11 @@
 {
     "testing-gsheet": "",
-    "mode":"602",
-    "extra-chat-rooms": [
-        "twitch_channel_1",
-        "twitch_channel_2"
-    ],
     "twitch-api-clientid": "",
     "twitch-api-secret": "",
     "google-api-key": "",
     "twitch-api-token": "",
     "twitch-refresh-token": "",
+    "mode":"602",
     "modes":{
         "602":{
             "time-limit": "60:00:00",

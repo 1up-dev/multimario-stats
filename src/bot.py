@@ -12,7 +12,7 @@ import sort
 
 def init(playerLookup):
     channels = []
-    for c in settings.extra_chats:
+    for c in settings.extra_channels:
         if c.lower() not in playerLookup.keys():
             channels.append(c.lower())
     for c in list(playerLookup.keys()):
@@ -100,7 +100,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest"]:
+    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest", "!extrachannels"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -231,6 +231,10 @@ def process_line(line, currentChat, playerLookup):
             if user_id not in users.admins:
                 return
             l_channel = command[1].lower()
+            if l_channel in settings.extra_channels:
+                settings.extra_channels.remove(l_channel)
+                # redraw will also save state, which will save this info
+                settings.redraw = True
         else:
             return
         if l_channel not in currentChat.channels:
@@ -248,6 +252,10 @@ def process_line(line, currentChat, playerLookup):
             if user_id not in users.admins:
                 return
             j_channel = command[1].lower()
+            if j_channel not in playerLookup.keys() and j_channel not in settings.extra_channels:
+                settings.extra_channels.append(j_channel)
+                # redraw will also save state, which will save this info
+                settings.redraw = True
         else:
             return
         if j_channel in currentChat.channels:
@@ -578,3 +586,5 @@ def process_line(line, currentChat, playerLookup):
     elif command[0] == "!mmstresstest":
         for i in range(1,26):
             currentChat.message(channel, f"{i}")
+    elif command[0] == "!extrachannels":
+        currentChat.message(channel, f"Current extra channel list: {', '.join(settings.extra_channels)}")

@@ -83,11 +83,11 @@ class ChatRoom:
         try:
             self.readbuffer = self.readbuffer + self.connection.recv(4096).decode("UTF-8", errors = "ignore")
             if self.readbuffer == "":
-                print(settings.now(), "Socket recv: empty readbuffer")
+                print(f"{settings.now()} Socket recv: empty readbuffer")
         except OSError:
             if settings.doQuit:
                 return []
-            print(f"{settings.now()[0]} Socket recv: {traceback.format_exc()}")
+            print(f"{settings.now()} Socket recv: {traceback.format_exc()}")
             self.readbuffer = ""
         if self.readbuffer == "":
             self.reconnect()
@@ -120,7 +120,6 @@ class ChatRoom:
                 self.message(f"#{channel}", f"Now leaving #{channel}.")
         channel_string = "#"+",#".join(channels)
         self.send(f"PART {channel_string}")
-        
 
     def join(self, channels=[], announce=False):
         # Empty list: join all channels. Non-empty list: join specified channels and add them to the channels list

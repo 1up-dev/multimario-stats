@@ -71,6 +71,8 @@
 + Add `[twitch_username]` as a new admin.  
 #### !mmleave/!mmjoin [twitch_username]  
 + Ask the bot to leave or join the chat of `[twitch_username]`.  
+#### !extrachannels
++ View the list of extra channels where the bot is currently active.  
 #### !clearstats
 + Set the score of all racers to 0 and the status of all racers to "live".  
 #### !removeracer [twitch_username]  
