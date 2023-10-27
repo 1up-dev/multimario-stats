@@ -110,10 +110,10 @@ def init_state():
     
     dur = (datetime.datetime.now() - startTime).total_seconds()
     if dur > 604800:
-        # start time is >1 week ago. Reset race state and delete profile pictures.
+        # Start time is >1 week ago. Reset scores and delete profile pictures.
+        # Keep old start time to avoid creating erroneous log files.
         with open(state_file, 'w+') as f:
             f.seek(0)
-            startTime = datetime.datetime.now()
             json.dump({"start-time":startTime.isoformat().split(".")[0], "racers":{}}, f, indent=4)
             f.truncate()
         profiles_dir = path('profiles')
