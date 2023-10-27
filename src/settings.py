@@ -111,7 +111,7 @@ def init_state():
     if dur > 604800:
         # Start time is >1 week ago. Reset scores and delete profile pictures.
         # Keep old start time to avoid creating erroneous log files.
-        with open(state_file, 'w+') as f:
+        with open(state_file, 'r+') as f:
             j = json.load(f)
             j["racers"] = {}
             f.seek(0)
