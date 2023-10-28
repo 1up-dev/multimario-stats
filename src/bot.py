@@ -37,6 +37,9 @@ def process_line(line, currentChat, playerLookup):
     if len(line) == 0:
         return
 
+    # Failsafe in case !fetchracers was interrupted
+    settings.playersLock = False
+
     # Twitch message tag processing
     ismod_orvip = False
     user_id = ""
@@ -542,6 +545,7 @@ def process_line(line, currentChat, playerLookup):
 
         if racers_added == [] and racers_removed == []:
             currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
+            settings.playersLock = False
             return
         
         # re-calculate the number of pages, redraw to remove old player cards
