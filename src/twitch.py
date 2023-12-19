@@ -48,7 +48,10 @@ def get_player_infos(logins, playerLookup):
         path = settings.path(f"profiles/{racer.name}.png")
         if not os.path.isfile(path):
             urllib.request.urlretrieve(info['profile_image_url'], path)
-        racer.profile = pygame.image.load(path)
+        try:
+            racer.profile = pygame.image.load(path)
+        except Exception:
+            pass
         racer.twitch_id = info['id']
         racer.display_name = info['display_name']
         if racer.display_name.lower() != racer.name:
