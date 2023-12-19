@@ -103,7 +103,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!clip", "!mmstresstest", "!extrachannels"]:
+    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!extrachannels", "!clip", "!mmstresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -579,6 +579,10 @@ def process_line(line, currentChat, playerLookup):
         else:
             settings.auto_stream_events = True
             currentChat.message(channel, f"Automatic stream events are now enabled.")
+    elif command[0] == "!extrachannels":
+        currentChat.message(channel, f"Current extra channel list: {', '.join(settings.extra_channels)}")
+    
+    # Undocumented testing commands
     elif command[0] == "!clip":
         if len(command) > 1:
             subject = command[1].lower()
@@ -592,5 +596,4 @@ def process_line(line, currentChat, playerLookup):
     elif command[0] == "!mmstresstest":
         for i in range(1,26):
             currentChat.message(channel, f"{i}")
-    elif command[0] == "!extrachannels":
-        currentChat.message(channel, f"Current extra channel list: {', '.join(settings.extra_channels)}")
+
