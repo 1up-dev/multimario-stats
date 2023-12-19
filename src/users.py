@@ -60,18 +60,6 @@ def roles(user_name, user_id, display_name, playerLookup):
         user_roles.append("None")
     return f"{display_name}: {', '.join(user_roles)}"
 
-def update_usernames():
-    global admins, counters, blocklist
-    # TODO: Pass all IDs into Twitch 'get users' API
-    # twitch.get_user_info()
-
-    with open(settings.path('users.json'),'w+') as f:
-        j = json.load(f)
-        j['admins'] = admins
-        j['counters'] = counters
-        j['blocklist'] = blocklist
-        json.dump(j, f, indent=4)
-
 def init_users():
     global admins, counters, blocklist
     with open(settings.path('users.json'),'r') as f:
