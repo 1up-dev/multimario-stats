@@ -15,6 +15,7 @@ See **[this video archive](https://www.twitch.tv/videos/1856764496)** for an exa
 - Any Twitch chat user can check the current status of any racer and check who is currently in a specific place.
 - Support for multiple categories: races with different games and score counts can be easily created using JSON.
 - Automatically starts/stops the livestream using OBS WebSocket server when the race is about to begin and after it finishes.
+- Automatically clip racer channels when they finish the race.
 - Nearly all functionality is accessible for Admin users using Twitch chat commands:
     - Set the start time of the race to a specific date and time to make the onscreen timer and final racer durations accurate.
     - Disqualify racers, give them a tag of "No-show", or force-quit them if they forgot to: this info is displayed on the scoreboard.
