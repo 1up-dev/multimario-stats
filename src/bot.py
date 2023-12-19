@@ -407,6 +407,8 @@ def process_line(line, currentChat, playerLookup):
         playerLookup[racer].finish("noshow")
         settings.redraw = True
         currentChat.message(channel, playerLookup[racer].display_name + " set to No-show.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, playerLookup[racer].display_name + " set to No-show.")
     elif command[0] == "!dq":
         if len(command) != 2:
             return
@@ -416,6 +418,8 @@ def process_line(line, currentChat, playerLookup):
         playerLookup[racer].finish("disqualified")
         settings.redraw = True
         currentChat.message(channel, playerLookup[racer].display_name + " has been disqualified.")
+        if channel != main_channel and not settings.debug:
+            currentChat.message(main_channel, playerLookup[racer].display_name + " has been disqualified.")
     elif command[0] == "!revive":
         if len(command) != 2:
             return
@@ -527,7 +531,7 @@ def process_line(line, currentChat, playerLookup):
                 racers_added.append(playerLookup[r.lower()].display_name)
                 channels_to_join.append(r.lower())
         if racers_added != []:
-            currentChat.message(channel, f"Adding new racer(s) found on the Google spreadsheet: {', '.join(racers_added)}")
+            currentChat.message(channel, f"Adding new racer(s) found on the Google sheet: {', '.join(racers_added)}")
             twitch.get_player_infos_async(channels_to_join, playerLookup)
             currentChat.join(channels_to_join)
         
@@ -540,13 +544,11 @@ def process_line(line, currentChat, playerLookup):
                 playerLookup.pop(r)
                 channels_to_part.append(r)
         if racers_removed != []:
-            currentChat.message(channel, f"Removing racers not found on the Google spreadsheet: {', '.join(racers_removed)}")
+            currentChat.message(channel, f"Removing racer(s) not found on the Google sheet: {', '.join(racers_removed)}")
             currentChat.part(channels_to_part)
 
         if racers_added == [] and racers_removed == []:
-            currentChat.message(channel, f"No changes were found between the bot's racer list and Google Sheets.")
-            settings.playersLock = False
-            return
+            currentChat.message(channel, f"No changes were found between the bot's racer list and the Google sheet.")
         
         # re-calculate the number of pages, redraw to remove old player cards
         settings.set_max_count(len(playerLookup))
