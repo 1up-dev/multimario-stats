@@ -37,10 +37,11 @@
 + To rejoin after finishing, just use `!set` or `!add` to your desired score.  
 #### !addcounter/!removecounter [twitch_username]  
 + Add or remove `[twitch_username]` as a counter.  
-#### !mmjoin  
-+ Ask the bot to join your channel if it is not already active there.   
-+ Must be sent by a racer in a chat where the bot is active (like twitch.tv/MultiMarioEvents).  
-+ Remember that if the bot is not responding, it may be delaying its responses to avoid getting globally muted by Twitch. Wait a couple minutes to be sure before attempting to !add/!set multiple times.  
+#### !mmjoin
++ Ask the bot to join your channel if it is not already active there.  
++ Must be sent by a racer in a chat where the bot is active (like twitch.tv/MultiMarioEvents).
++ ⚠️ This command has been unreliable in the past. Make sure follower-only and subscriber-only modes are both off, so the bot can respond. If it still isn't working, check with an admin or the host.
++ ⚠️ The bot may delay its responses to avoid getting globally muted by Twitch. When this happens, your command is processed instantly, but the bot won't respond instantly.
    
 ## Commands for channel owner  
 #### !mmleave  
@@ -71,7 +72,7 @@
 #### !admin [twitch_username]  
 + Add `[twitch_username]` as a new admin.  
 #### !mmleave/!mmjoin [twitch_username]  
-+ Ask the bot to leave or join the chat of `[twitch_username]`.  
++ Tell the bot to leave or join the chat of `[twitch_username]`.  
 #### !extrachannels
 + View the list of extra channels where the bot is currently active.  
 #### !clearstats
