@@ -40,15 +40,14 @@
 #### !mmjoin
 + Ask the bot to join your channel if it is not already active there.  
 + Must be sent by a racer in a chat where the bot is active (like twitch.tv/MultiMarioEvents).
-+ ⚠️ This command has been unreliable in the past. Make sure follower-only and subscriber-only modes are both off, so the bot can respond. If it still isn't working, check with an admin or the host.
-+ ⚠️ The bot may delay its responses to avoid getting globally muted by Twitch. When this happens, your command is processed instantly, but the bot won't respond instantly.
++ ❗ *This command has been unreliable in the past. Make sure follower-only and subscriber-only modes are both off, so the bot can respond. If it still isn't working, check with an admin or the host.*
++ ❗ *The bot may delay its responses to avoid getting globally muted by Twitch. When this happens, your command is processed instantly, but the bot won't respond instantly.*
    
 ## Commands for channel owner  
 #### !mmleave  
 + Ask the bot to leave your channel. Must be sent by the channel owner in their own chat.  
    
 ## Commands for Admins  
-*Note: ⚠️ indicates a destructive command that is not easily undone.*
 #### !forcequit/!noshow/!dq [twitch_username]  
 + Set the status of `[twitch_username]` to "Quit", "No-Show", or "Disqualified".  
 #### !revive [twitch_username]  
@@ -76,8 +75,10 @@
 #### !extrachannels
 + View the list of extra channels where the bot is currently active.  
 #### !clearstats
-+ ⚠️ Set the score of all racers to 0 and the status of all racers to "live".  
++ Set the score of all racers to 0 and the status of all racers to "live".
++ This will delete all the stats permanently, so be careful when using it.
 #### !removeracer [twitch_username]  
 + Remove `[twitch_username]` from the stats stream manually without changing the Google sheet (Useful if there is a nearly-blank last page with only no-shows on it, and you want to remove those racers from the stream but not from the Google sheet). If `!fetchracers` is run after doing this, it will add the racer back onto the stream.
-#### !mmkill  
-+ ⚠️ Close the stats program and bot permanently. If the program is unable to stop the stream, the stream will be stuck live with a blank screen until the host restarts the program or stops the stream.  
+#### !mmkill
++ Close the stats program and bot permanently.
++ ⚠️ **Warning**: If the program is unable to stop the stream, the stream will be stuck live with a blank screen until the host restarts the program or stops the stream.
