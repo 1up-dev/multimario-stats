@@ -103,7 +103,7 @@ def process_line(line, currentChat, playerLookup):
         return
     if len(command) < 1 or len(command[0]) < 1 or command[0][0] != '!':
         return
-    if command[0] not in ["!mmcommands", "!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!extrachannels", "!clip", "!mmstresstest"]:
+    if command[0] not in ["!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!extrachannels", "!clip", "!stresstest"]:
         return
     for i, word in enumerate(command):
         command[i] = "".join(c if ord(c)<128 else "" for c in word)
@@ -117,8 +117,8 @@ def process_line(line, currentChat, playerLookup):
     main_channel = f"#{settings.twitch_nick}"
 
     # global commands
-    if command[0] in ["!mmcommands", "!mmhelp"]:
-        currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46")
+    if command[0] in ["!mmhelp"]:
+        currentChat.message(channel, "Multimario stats bot command list: https://bit.ly/44P3Y46", message_id)
     elif command[0] == "!roles":
         if len(command) == 1:
             statusMsg = users.roles(user, user_id, userCS, playerLookup)
@@ -132,7 +132,7 @@ def process_line(line, currentChat, playerLookup):
             subject_id = info['id']
             subject_displayname = info['display_name']
             statusMsg = users.roles(subject, subject_id, subject_displayname, playerLookup)
-        currentChat.message(channel, statusMsg)
+        currentChat.message(channel, statusMsg, message_id)
     elif command[0] == "!place":
         racer_name = ""
         if len(command) == 1:
@@ -159,7 +159,7 @@ def process_line(line, currentChat, playerLookup):
             racer = playerLookup[racer_name]
             score, collectible, game = racer.collected()
             status = f"{racer.display_name} has {str(score)} {collectible} in {game}. (Place #{racer.place}, Status: {racer.status}, Score: {racer.score})"
-            currentChat.message(channel, status)
+            currentChat.message(channel, status, message_id)
             return
         
         effective_target = 1
@@ -183,7 +183,7 @@ def process_line(line, currentChat, playerLookup):
         disclaimer = ""
         if effective_target != target:
             disclaimer = " (Closest existing place)"
-        currentChat.message(channel, f"#{effective_target}{disclaimer}: {', '.join(racers_in_target)} ({extra_info})")
+        currentChat.message(channel, f"#{effective_target}{disclaimer}: {', '.join(racers_in_target)} ({extra_info})", message_id)
 
     # shared commands
     elif command[0] == "!addcounter":
@@ -200,12 +200,12 @@ def process_line(line, currentChat, playerLookup):
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.blocklist:
-            currentChat.message(channel, f"Sorry, {subject_displayname} is blocked.")
+            currentChat.message(channel, f"Sorry, {subject_displayname} is blocked.", message_id)
         elif subject_id not in users.counters:
             users.add(subject, subject_id, users.Role.COUNTER)
-            currentChat.message(channel, f"{subject_displayname} is now a counter.")
+            currentChat.message(channel, f"{subject_displayname} is now a counter.", message_id)
         else:
-            currentChat.message(channel, f"{subject_displayname} is already a counter.")
+            currentChat.message(channel, f"{subject_displayname} is already a counter.", message_id)
     elif command[0] == "!removecounter":
         if len(command) != 2:
             return
@@ -221,9 +221,9 @@ def process_line(line, currentChat, playerLookup):
         subject_displayname = info['display_name']
         if subject_id in users.counters:
             users.remove(subject_id, users.Role.COUNTER)
-            currentChat.message(channel, f"{subject_displayname} is no longer a counter.")
+            currentChat.message(channel, f"{subject_displayname} is no longer a counter.", message_id)
         else:
-            currentChat.message(channel, f"{subject_displayname} is already not a counter.")
+            currentChat.message(channel, f"{subject_displayname} is already not a counter.", message_id)
     elif command[0] == "!mmleave":
         l_channel = ""
         if len(command) == 1:
@@ -241,9 +241,9 @@ def process_line(line, currentChat, playerLookup):
         else:
             return
         if l_channel not in currentChat.channels:
-            currentChat.message(channel,f"Already not active in channel #{l_channel}.")
+            currentChat.message(channel,f"Already not active in channel #{l_channel}.", message_id)
             return
-        currentChat.message(channel,f"Leaving #{l_channel} now.")
+        currentChat.message(channel,f"Leaving #{l_channel} now.", message_id)
         currentChat.part([l_channel], announce=True)
     elif command[0] == "!mmjoin":
         j_channel = ""
@@ -262,12 +262,12 @@ def process_line(line, currentChat, playerLookup):
         else:
             return
         if j_channel in currentChat.channels:
-            currentChat.message(channel,f"Rejoining #{j_channel} now.")
+            currentChat.message(channel,f"Rejoining #{j_channel} now.", message_id)
             currentChat.part([j_channel])
-            # Tell the join message to *not* skip the queue, to ensure that it gets sent after the part message.
+            # Tell the join message to *not* skip the queue, to ensure that it gets sent *after* the part message.
             currentChat.join([j_channel], announce=True, skip_queue=False)
             return
-        currentChat.message(channel,f"Joining #{j_channel} now.")
+        currentChat.message(channel,f"Joining #{j_channel} now.", message_id)
         currentChat.join([j_channel], announce=True)
 
     # racer commands
@@ -280,7 +280,7 @@ def process_line(line, currentChat, playerLookup):
         racer.status = "live"
         if racer.score == settings.max_score:
             racer.status = "done"
-        currentChat.message(channel, racer.display_name +" has rejoined the race.")
+        currentChat.message(channel, racer.display_name +" has rejoined the race.", message_id)
         if channel != main_channel and not settings.debug:
             currentChat.message(main_channel, racer.display_name + " has rejoined the race.")
         settings.redraw = True
@@ -292,12 +292,12 @@ def process_line(line, currentChat, playerLookup):
             return
         racer.finish("quit")
         settings.redraw = True
-        currentChat.message(channel, racer.display_name + " has quit.")
+        currentChat.message(channel, racer.display_name + " has quit.", message_id)
         if channel != main_channel and not settings.debug:
             currentChat.message(main_channel, racer.display_name + " has quit.")
     elif command[0] in ["!add","!set"]:
         if ((user_id not in users.counters) and (not ismod_orvip) and (user not in playerLookup.keys())) or (user_id in users.blocklist):
-            currentChat.message(channel, f"You do not have permission to update score counts.", message_id)
+            currentChat.message(channel, f"You do not have permission to count.", message_id)
             return
 
         if len(command) == 3:
@@ -347,7 +347,7 @@ def process_line(line, currentChat, playerLookup):
             # sort() reassigns place numbers so the response will be accurate
             sort.sort(playerLookup)
             score, collectible, game = racer.collected()
-            currentChat.message(channel, f"{racer.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(racer.place)}, Score {racer.score})")
+            currentChat.message(channel, f"{racer.display_name} now has {str(score)} {collectible} in {game}. (Place #{str(racer.place)}, Score {racer.score})", message_id)
         elif number == settings.max_score:
             racer.finish("done")
             # sort() reassigns place numbers so the response will be accurate
@@ -374,20 +374,19 @@ def process_line(line, currentChat, playerLookup):
         newTime = -1
         if len(command)==1:
             newTime = datetime.datetime.now()
-        elif len(command)==2:
-            newTime = command[1]
-            try:
-                newTime = datetime.datetime.fromisoformat(newTime)
-            except ValueError:
-                currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29T09:00")
         else:
-            currentChat.message(channel, "Invalid date format. Must be of this format: 2018-12-29T09:00")
-        if type(newTime) == datetime.datetime:
-            settings.startTime = newTime
-            currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0])
-            for racer in list(playerLookup.keys()):
-                playerLookup[racer].calculateDuration()
-            settings.redraw = True
+            try:
+                newTime = datetime.datetime.fromisoformat(command[1])
+            except ValueError:
+                currentChat.message(channel, "Invalid date format. Must be in this format: 2018-12-29T09:00:00", message_id)
+                return
+        if type(newTime) != datetime.datetime:
+            return
+        settings.startTime = newTime
+        currentChat.message(channel, "The race start time has been set to " + settings.startTime.isoformat().split(".")[0], message_id)
+        for racer in list(playerLookup.keys()):
+            playerLookup[racer].calculateDuration()
+        settings.redraw = True
     elif command[0] == "!forcequit":
         if len(command) != 2:
             return
@@ -396,7 +395,7 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("quit")
         settings.redraw = True
-        currentChat.message(channel, f"{playerLookup[racer].display_name} has been forcequit.")
+        currentChat.message(channel, f"{playerLookup[racer].display_name} has been forcequit.", message_id)
         if channel != main_channel and not settings.debug:
             currentChat.message(main_channel, f"{playerLookup[racer].display_name} has been forcequit.")
     elif command[0] == "!noshow":
@@ -407,9 +406,9 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("noshow")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].display_name + " set to No-show.")
+        currentChat.message(channel, playerLookup[racer].display_name + " has been set to No-show.", message_id)
         if channel != main_channel and not settings.debug:
-            currentChat.message(main_channel, playerLookup[racer].display_name + " set to No-show.")
+            currentChat.message(main_channel, playerLookup[racer].display_name + " has been set to No-show.")
     elif command[0] == "!dq":
         if len(command) != 2:
             return
@@ -418,7 +417,7 @@ def process_line(line, currentChat, playerLookup):
             return
         playerLookup[racer].finish("disqualified")
         settings.redraw = True
-        currentChat.message(channel, playerLookup[racer].display_name + " has been disqualified.")
+        currentChat.message(channel, playerLookup[racer].display_name + " has been disqualified.", message_id)
         if channel != main_channel and not settings.debug:
             currentChat.message(main_channel, playerLookup[racer].display_name + " has been disqualified.")
     elif command[0] == "!revive":
@@ -431,7 +430,7 @@ def process_line(line, currentChat, playerLookup):
         if playerLookup[racer].score == settings.max_score:
             playerLookup[racer].status = "done"
         settings.redraw = True
-        currentChat.message(channel, f"{playerLookup[racer].display_name} has been revived.")
+        currentChat.message(channel, f"{playerLookup[racer].display_name} has been revived.", message_id)
         if channel != main_channel and not settings.debug:
             currentChat.message(main_channel, f"{playerLookup[racer].display_name} has been revived.")
     elif command[0] == "!settime":
@@ -439,27 +438,27 @@ def process_line(line, currentChat, playerLookup):
             return
         subject = command[1].lower()
         if subject not in playerLookup.keys():
-            currentChat.message(channel, f"Racer {subject} not found.")
+            currentChat.message(channel, f"Racer {subject} not found.", message_id)
             return
         racer = playerLookup[subject]
         newTime = command[2].split(":")
         if len(newTime) != 3:
-            currentChat.message(channel, "Invalid time string.")
+            currentChat.message(channel, "Invalid time string.", message_id)
             return
         try:
             duration = int(newTime[2]) + 60*int(newTime[1]) + 3600*int(newTime[0])
         except ValueError:
-            currentChat.message(channel, "Invalid time string.")
+            currentChat.message(channel, "Invalid time string.", message_id)
             return
         if int(newTime[1]) >= 60 or int(newTime[2]) >= 60:
-            currentChat.message(channel, "Invalid time string.")
+            currentChat.message(channel, "Invalid time string.", message_id)
             return
         
         racer.finishTimeAbsolute = settings.startTime + datetime.timedelta(seconds=duration)
         racer.calculateDuration()
 
         settings.redraw = True
-        currentChat.message(channel, racer.display_name+"'s time has been updated.")
+        currentChat.message(channel, racer.display_name+"'s time has been updated.", message_id)
     elif command[0] == "!block":
         if len(command) != 2:
             return
@@ -472,12 +471,12 @@ def process_line(line, currentChat, playerLookup):
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.blocklist:
-            currentChat.message(channel, f"{subject_displayname} is already blocked.")
+            currentChat.message(channel, f"{subject_displayname} is already blocked.", message_id)
             return
         users.add(subject, subject_id, users.Role.BLOCKLIST)
         if subject_id in users.counters:
             users.remove(subject_id, users.Role.COUNTER)
-        currentChat.message(channel, f"{subject_displayname} has been blocked.")
+        currentChat.message(channel, f"{subject_displayname} has been blocked.", message_id)
     elif command[0] == "!unblock":
         if len(command) != 2:
             return
@@ -490,10 +489,10 @@ def process_line(line, currentChat, playerLookup):
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id not in users.blocklist:
-            currentChat.message(channel, f"{subject_displayname} is already not blocked.")
+            currentChat.message(channel, f"{subject_displayname} is already not blocked.", message_id)
             return
         users.remove(subject_id, users.Role.BLOCKLIST)
-        currentChat.message(channel, f"{subject_displayname} is no longer blocked.")
+        currentChat.message(channel, f"{subject_displayname} is no longer blocked.", message_id)
     elif command[0] == "!admin":
         if len(command) != 2:
             return
@@ -506,17 +505,17 @@ def process_line(line, currentChat, playerLookup):
         subject_id = info['id']
         subject_displayname = info['display_name']
         if subject_id in users.admins:
-            currentChat.message(channel, f"{subject_displayname} is already an admin.")
+            currentChat.message(channel, f"{subject_displayname} is already an admin.", message_id)
             return
         users.add(subject, subject_id, users.Role.ADMIN)
-        currentChat.message(channel, f"{subject_displayname} is now an admin.")
+        currentChat.message(channel, f"{subject_displayname} is now an admin.", message_id)
     elif command[0] == "!mmkill":
         obs.request("StopStream")
-        currentChat.message(channel, "Permanently closing the bot now.")
+        currentChat.message(channel, "Permanently closing the bot now.", message_id)
         settings.doQuit = True
     elif command[0] == "!togglestream":
         obs.request("ToggleStream")
-        currentChat.message(channel, "Toggled stream.")
+        currentChat.message(channel, "Toggled stream.", message_id)
     elif command[0] == "!fetchracers":
         settings.playersLock = True
         newRacers = gsheets.getRacers()
@@ -532,7 +531,7 @@ def process_line(line, currentChat, playerLookup):
                 racers_added.append(playerLookup[r.lower()].display_name)
                 channels_to_join.append(r.lower())
         if racers_added != []:
-            currentChat.message(channel, f"Adding new racer(s) found on the Google sheet: {', '.join(racers_added)}")
+            currentChat.message(channel, f"Adding new racer(s) found on the Google sheet: {', '.join(racers_added)}", message_id)
             twitch.get_player_infos_async(channels_to_join, playerLookup)
             currentChat.join(channels_to_join)
         
@@ -545,11 +544,11 @@ def process_line(line, currentChat, playerLookup):
                 playerLookup.pop(r)
                 channels_to_part.append(r)
         if racers_removed != []:
-            currentChat.message(channel, f"Removing racer(s) not found on the Google sheet: {', '.join(racers_removed)}")
+            currentChat.message(channel, f"Removing racer(s) not found on the Google sheet: {', '.join(racers_removed)}", message_id)
             currentChat.part(channels_to_part)
 
         if racers_added == [] and racers_removed == []:
-            currentChat.message(channel, f"No changes were found between the bot's racer list and the Google sheet.")
+            currentChat.message(channel, f"No changes were found between the bot's racer list and the Google sheet.", message_id)
         
         # re-calculate the number of pages, redraw to remove old player cards
         settings.set_max_count(len(playerLookup))
@@ -559,29 +558,29 @@ def process_line(line, currentChat, playerLookup):
         for p in list(playerLookup.keys()):
             playerLookup[p].score = 0
             playerLookup[p].status = "live"
-        currentChat.message(channel, f"Cleared all racer stats.")
+        currentChat.message(channel, f"Cleared all racer stats.", message_id)
         settings.redraw = True
     elif command[0] == "!removeracer":
         if len(command) < 2:
             return
         racer_to_remove = command[1].lower()
         if racer_to_remove not in list(playerLookup.keys()):
-            currentChat.message(channel, f"Racer {racer_to_remove} not found.")
+            currentChat.message(channel, f"Racer {racer_to_remove} not found.", message_id)
             return
         racer_display_name = playerLookup[racer_to_remove].display_name
         playerLookup.pop(racer_to_remove)
         currentChat.part([racer_to_remove])
-        currentChat.message(channel, f"Racer {racer_display_name} removed.")
+        currentChat.message(channel, f"Racer {racer_display_name} removed.", message_id)
         settings.redraw = True
     elif command[0] == "!autostream":
         if settings.auto_stream_events == True:
             settings.auto_stream_events = False
-            currentChat.message(channel, f"Automatic stream events are now disabled.")
+            currentChat.message(channel, f"Automatic stream events are now disabled.", message_id)
         else:
             settings.auto_stream_events = True
-            currentChat.message(channel, f"Automatic stream events are now enabled.")
+            currentChat.message(channel, f"Automatic stream events are now enabled.", message_id)
     elif command[0] == "!extrachannels":
-        currentChat.message(channel, f"Current extra channel list: {', '.join(settings.extra_channels)}")
+        currentChat.message(channel, f"Current extra channel list: {', '.join(settings.extra_channels)}", message_id)
     
     # Undocumented testing commands
     elif command[0] == "!clip":
@@ -594,7 +593,7 @@ def process_line(line, currentChat, playerLookup):
             info = info[0]
             subject_id = info['id']
             twitch.create_clip_async(subject_id, subject)
-    elif command[0] == "!mmstresstest":
+    elif command[0] == "!stresstest":
         for i in range(1,26):
             currentChat.message(channel, f"{i}")
 
