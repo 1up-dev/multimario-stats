@@ -119,7 +119,7 @@ def process_line(line, currentChat, playerLookup):
     main_channel = f"#{settings.twitch_nick}"
 
     # global commands
-    if command[0] in ["!mmhelp"]:
+    if command[0] == "!mmhelp":
         currentChat.message(channel, "Bot commands: https://bit.ly/44P3Y46", message_id)
     elif command[0] == "!roles":
         if len(command) == 1:
