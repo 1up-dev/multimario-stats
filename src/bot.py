@@ -27,7 +27,7 @@ def init(playerLookup):
             for line in lines:
                 process_line(line, chat, playerLookup)
         except Exception:
-            print(f"{datetime.datetime.now().isoformat().split('.')[0]} Error in bot: {traceback.format_exc()}")
+            print(f"{settings.now()} Error in bot: {traceback.format_exc()}")
 
 def process_line(line, currentChat, playerLookup):
     if "PING :tmi.twitch.tv" in line:
@@ -105,14 +105,16 @@ def process_line(line, currentChat, playerLookup):
         return
     if command[0] not in ["!mmhelp", "!roles", "!place", "!addcounter", "!removecounter", "!mmleave", "!mmjoin", "!rejoin", "!unquit", "!quit", "!add", "!set", "!start", "!forcequit", "!noshow", "!dq", "!revive", "!settime", "!block", "!unblock", "!admin", "!mmkill", "!togglestream", "!fetchracers", "!clearstats", "!removeracer", "!autostream", "!extrachannels", "!clip", "!stresstest"]:
         return
+    
+    # Remove non-ASCII characters and hanging empty words from the command
     for i, word in enumerate(command):
-        command[i] = "".join(c if ord(c)<128 else "" for c in word)
+        command[i] = "".join(char if ord(char)<128 else "" for char in word)
         if command[i] == "":
             del(command[i])
     
     st = settings.startTime.isoformat().split("T")[0]
     with open(settings.path(f"log/{st}-cmd.log"), 'a+') as f:
-        f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} [{channel}] {user}: {' '.join(command)}\n")
+        f.write(f"{settings.now()} [{channel}] {user}: {' '.join(command)}\n")
 
     main_channel = f"#{settings.twitch_nick}"
 
@@ -363,7 +365,7 @@ def process_line(line, currentChat, playerLookup):
         st = settings.startTime.isoformat().split("T")[0]
         log_file = settings.path(f"log/{st}-state.log")
         with open(log_file,'a+') as f:
-            f.write(f"{datetime.datetime.now().isoformat().split('.')[0]} {racer.name} {racer.score} {user_id}\n")
+            f.write(f"{settings.now()} {racer.name} {racer.score} {user_id}\n")
         
         settings.redraw = True
 
@@ -510,6 +512,7 @@ def process_line(line, currentChat, playerLookup):
         users.add(subject, subject_id, users.Role.ADMIN)
         currentChat.message(channel, f"{subject_displayname} is now an admin.", message_id)
     elif command[0] == "!mmkill":
+        print(f"{settings.now()} !mmkill requested by {user}")
         obs.request("StopStream")
         currentChat.message(channel, "Permanently closing the bot now.", message_id)
         settings.doQuit = True
