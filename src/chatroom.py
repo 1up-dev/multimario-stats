@@ -121,7 +121,7 @@ class ChatRoom:
         channel_string = "#"+",#".join(channels)
         self.send(f"PART {channel_string}")
 
-    def join(self, channels=[], announce=False):
+    def join(self, channels=[], announce=False, skip_queue=True):
         # Empty list: join all channels. Non-empty list: join specified channels and add them to the channels list
         self.channels += channels
         if channels == []:
@@ -135,8 +135,12 @@ class ChatRoom:
             j += 20
             if channels[j:j+20] == []:
                 break
-        # Insert the JOIN messages at the beginning of sendbuffer, so the joins are attempted first.
-        self.sendbuffer = join_messages + self.sendbuffer
+
+        if skip_queue:
+            # Insert the JOIN messages at the beginning of sendbuffer, so the joins are attempted first.
+            self.sendbuffer = join_messages + self.sendbuffer
+        else:
+            self.sendbuffer = self.sendbuffer + join_messages
 
         # Warning: if there are many channels to join, the JOIN messages may be slowed down to comply with rate limiting. Some of these announcement messages will then be dropped by Twitch IRC, since the bot won't have joined those channels yet.
         # The code currently only calls for joins to be announced in situations where only one channel is being joined, so this case should not occur.

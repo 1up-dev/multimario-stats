@@ -264,7 +264,8 @@ def process_line(line, currentChat, playerLookup):
         if j_channel in currentChat.channels:
             currentChat.message(channel,f"Rejoining #{j_channel} now.")
             currentChat.part([j_channel])
-            currentChat.join([j_channel], announce=True)
+            # Tell the join message to *not* skip the queue, to ensure that it gets sent after the part message.
+            currentChat.join([j_channel], announce=True, skip_queue=False)
             return
         currentChat.message(channel,f"Joining #{j_channel} now.")
         currentChat.join([j_channel], announce=True)
