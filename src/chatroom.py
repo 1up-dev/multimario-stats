@@ -49,13 +49,13 @@ class ChatRoom:
                     continue
                 self.last_join_time = datetime.datetime.now()
 
-            # Twitch rate limiting: Using 32-sec and 19-msg thresholds just in case
+            # Twitch rate limiting: Using 31-sec and 19-msg thresholds just in case
             timer = (datetime.datetime.now() - self.msgPeriod).total_seconds()
-            if timer > 32:
+            if timer > 31:
                 self.msgPeriod = datetime.datetime.now()
                 self.msgCount = 0
             elif self.msgCount >= 19:
-                time.sleep(32-timer)
+                time.sleep(31-timer)
                 self.msgPeriod = datetime.datetime.now()
                 self.msgCount = 0
             self.msgCount += 1
