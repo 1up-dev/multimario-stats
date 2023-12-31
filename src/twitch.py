@@ -30,9 +30,9 @@ def req(method, url, headers={}, params={}, retry=False):
         return
     if response.status_code == 401:
         if retry:
-            print(f"{settings.now()} [API] 401 after retrying. Giving up.")
+            print(f"{settings.now()} [API] 401 after refreshing token. Giving up.")
             return
-        print(f"{settings.now()} [API] 401. Refreshing token. {response.json()}")
+        # print(f"{settings.now()} [API] 401. Refreshing token. {response.json()}")
         if refresh_token():
             headers["Authorization"] = f'Bearer {settings.twitch_token}'
             return req(method, url, headers, params, retry=True)
@@ -66,29 +66,34 @@ def get_player_infos_async(logins, playerLookup):
     t.start()
 
 def create_clip(broadcaster_id, username):
+    # Wait 20 seconds before clipping in order to capture more of the reaction in the clip
     time.sleep(20)
     headers = {"Client-Id":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
     params = {"broadcaster_id": broadcaster_id}
     response = req("POST", "https://api.twitch.tv/helix/clips", headers, params)
+    st = settings.startTime.isoformat().split("T")[0]
     if response == None:
+        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
+            f.write(f"{settings.now()} {username} Clip request failed.\n")
         return
     if response.status_code == 404:
         # Channel is offline.
+        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
+            f.write(f"{settings.now()} {username} Channel is offline.\n")
         return
     if response.status_code not in range(200,300):
-        print(f"{settings.now()} [API] Clip request failed: {response.status_code} {response.json()}")
+        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
+            f.write(f"{settings.now()} {username} Clip request failed: {response.status_code} {response.json()}\n")
         return
     response_json = response.json()
-    if response_json == None:
+    if response_json == None or len(response_json['data']) == 0 or 'edit_url' not in response_json['data'][0]:
+        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
+            f.write(f"{settings.now()} {username} API response has no clip link. {response.status_code} {response.json()}\n")
         return
-    data = response_json['data']
-    if len(data) == 0 or 'edit_url' not in data[0]:
-        print(f"{settings.now()} [API] Clip request failed: {response.status_code} {response_json}")
-        return
-    link = data[0]['edit_url']
-    st = settings.startTime.isoformat().split("T")[0]
+    
+    link = response_json['data'][0]['edit_url']
     with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-        f.write(f"{settings.now()} {username}: {link}\n")
+        f.write(f"{settings.now()} {username} {link}\n")
 
 def create_clip_async(broadcaster_id, username):
     t = threading.Thread(target=create_clip, args=(broadcaster_id, username,))
@@ -130,7 +135,7 @@ def validate_token(nested=False):
     if nested:
         # Avoid infinite loops on misbehaving API requests
         return False
-    print(f"{settings.now()} [API] Token is invalid. Refreshing. {response.status_code} {data}")
+    # print(f"{settings.now()} [API] Token is invalid. Refreshing. {response.status_code} {data}")
     refresh_token()
 
 def refresh_token():
@@ -138,21 +143,21 @@ def refresh_token():
     params = {"client_id": settings.twitch_clientid, "client_secret": settings.twitch_secret, "grant_type": "refresh_token", "refresh_token": settings.twitch_refresh_token}
     response = requests.post(url, params=params)
     data = response.json()
-    if response.status_code in range(200,300):
-        if data != None:
-            # Token refreshed.
-            settings.twitch_token = data['access_token']
-            settings.twitch_refresh_token = data['refresh_token']
-            settings.save_api_tokens_to_file()
+    if response.status_code not in range(200,300) or data == None:
+        print(f"{settings.now()} [API] Token refresh failed. Requesting authorization from user. {response.status_code} {data}")
+        return new_token()
+    # Token refreshed.
+    settings.twitch_token = data['access_token']
+    settings.twitch_refresh_token = data['refresh_token']
+    settings.save_api_tokens_to_file()
 
-            # Validate the new token in order to retrieve the bot's username
-            if not validate_token(nested=True):
-                print(f"{settings.now()} [API] Refreshed token is invalid. Giving up.")
-                return False
-            print(f"{settings.now()} [API] Token refreshed.")
-            return True
-    print(f"{settings.now()} [API] Token refresh failed. Requesting authorization from user. {response.status_code} {data}")
-    new_token()
+    # Validate the new token in order to retrieve the bot's username
+    if not validate_token(nested=True):
+        print(f"{settings.now()} [API] Refreshed token is invalid. Giving up.")
+        return False
+    # print(f"{settings.now()} [API] Token refreshed.")
+    return True
+    
 
 def new_token():
     # Request authorization from user
