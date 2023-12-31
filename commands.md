@@ -40,8 +40,8 @@
 #### !mmjoin
 + Ask the bot to join your channel if it is not already active there.  
 + Must be sent by a racer in a chat where the bot is active (like twitch.tv/MultiMarioEvents).
-+ ❗ *This command has been unreliable in the past. Make sure follower-only and subscriber-only modes are both off, so the bot can respond. If it still isn't working, check with an admin or the host.*
-+ ❗ *The bot may delay its responses to avoid getting globally muted by Twitch. When this happens, your command is processed instantly, but the bot won't respond instantly.*
++ ❗ If the bot is not responding in your chat, you may have to **disable Follower-only mode**. If a large race is currently happening, the bot **may be globally muted** by Twitch due to their spam detection. If that happens, the bot will *still be able to accept and process commands*, but it will *not be able to respond* in your chat for the next ~30 minutes unless you give it Mod or VIP.
++ ❗ If the bot still isn't working in your chat, let the host or an admin know.
    
 ## Commands for channel owner  
 #### !mmleave  
