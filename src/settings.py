@@ -142,21 +142,20 @@ stopTimer = False
 playersLock = False
 max_count = 0
 blank_profile = pygame.image.load(path("resources/empty.png"))
-twitch_pw = ""
 twitch_nick = ""
 chat_ref = None
 sorted_racers = []
 auto_stream_events = True
+
 make_dir('irc')
 make_dir('log')
 make_dir('profiles')
-
 with open(path('settings.json'), 'r') as f:
     j = json.load(f)
-    test_gsheet = j.get("testing-gsheet", "")
     mode = j['mode']
     modeInfo = j['modes'][mode]
     gsheet = modeInfo['gsheet']
+    test_gsheet = j.get("testing-gsheet", "")
     if test_gsheet != "":
         debug = True
         gsheet = test_gsheet
