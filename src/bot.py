@@ -535,7 +535,7 @@ def process_line(line, currentChat, playerLookup):
                 channels_to_join.append(r.lower())
         if racers_added != []:
             currentChat.message(channel, f"Adding new racer(s) found on the Google sheet: {', '.join(racers_added)}", message_id)
-            twitch.get_player_infos_async(channels_to_join, playerLookup)
+            player.get_player_infos_async(channels_to_join, playerLookup)
             currentChat.join(channels_to_join)
         
         # delete racers that have been removed from the sheet

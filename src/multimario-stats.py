@@ -22,16 +22,16 @@ scoreboard.draw(screen, {}, 0)
 # Validate Twitch API token. This also retrieves the bot username.
 twitch.validate_token()
 
-# load users and racers, construct player objects
-playerLookup = users.init_users()
+# load twitch user lists
+users.load_users()
+
+# load racers, construct player objects
+playerLookup = player.init_players()
 
 # start bot thread
 t = threading.Thread(target=bot.init, args=(playerLookup,))
 t.daemon = True
 t.start()
-
-# determine number of pages
-settings.set_max_count(len(playerLookup))
 
 # main display loop
 count = 0

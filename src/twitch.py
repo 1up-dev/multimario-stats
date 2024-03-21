@@ -1,13 +1,9 @@
 import requests
-import json
-import urllib
-import os
 import threading
 import time
 import http.server
 import socketserver
 import webbrowser
-import pygame
 import settings
 
 class HTTPHandler(http.server.BaseHTTPRequestHandler):
@@ -40,60 +36,37 @@ def req(method, url, headers={}, params={}, retry=False):
         return
     return response
 
-def get_player_infos(logins, playerLookup):
-    user_infos = get_user_infos(logins)
-    for info in user_infos:
-        login = info['login']
-        racer = playerLookup[login]
-        path = settings.path(f"profiles/{racer.name}.png")
-        if not os.path.isfile(path):
-            urllib.request.urlretrieve(info['profile_image_url'], path)
-        try:
-            racer.profile = pygame.image.load(path)
-        except pygame.error as e:
-            # remove corrupted profile image (possibly from closing the program while a download is in progress)
-            os.remove(path)
-            urllib.request.urlretrieve(info['profile_image_url'], path)
-        racer.twitch_id = info['id']
-        racer.display_name = info['display_name']
-        if racer.display_name.lower() != racer.name:
-            racer.display_name = racer.name
-        settings.redraw = True
-
-def get_player_infos_async(logins, playerLookup):
-    t = threading.Thread(target=get_player_infos, args=(logins, playerLookup,))
-    t.daemon = True
-    t.start()
-
 def create_clip(broadcaster_id, username):
-    # Wait 20 seconds before clipping in order to capture more of the reaction in the clip
-    time.sleep(20)
+    # Wait 15 seconds before clipping in order to capture more of the reaction in the clip
+    time.sleep(15)
     headers = {"Client-Id":settings.twitch_clientid, "Authorization":f'Bearer {settings.twitch_token}'}
     params = {"broadcaster_id": broadcaster_id}
     response = req("POST", "https://api.twitch.tv/helix/clips", headers, params)
-    st = settings.startTime.isoformat().split("T")[0]
+
+    error_message = ""
     if response == None:
-        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-            f.write(f"{settings.now()} {username} Clip request failed.\n")
-        return
-    if response.status_code == 404:
-        # Channel is offline.
-        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-            f.write(f"{settings.now()} {username} Channel is offline.\n")
-        return
-    if response.status_code not in range(200,300):
-        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-            f.write(f"{settings.now()} {username} Clip request failed: {response.status_code} {response.json()}\n")
-        return
-    response_json = response.json()
-    if response_json == None or len(response_json['data']) == 0 or 'edit_url' not in response_json['data'][0]:
-        with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-            f.write(f"{settings.now()} {username} API response has no clip link. {response.status_code} {response.json()}\n")
+        error_message = "API request failed (Empty response).\n"
+    elif response.status_code == 400:
+        error_message = "Broadcaster ID {broadcaster_id} not found.\n"
+    elif response.status_code == 403:
+        error_message = "Clip creation is restricted on this channel.\n"
+    elif response.status_code == 404:
+        error_message = "This channel is offline.\n"
+    elif response.status_code not in range(200,300):
+        error_message = "Clip request failed (unknown error): {response.status_code} {response.json()}\n"
+    elif response.json() == None or len(response.json()['data']) == 0 or 'edit_url' not in response.json()['data'][0]:
+        error_message = "Successful API response has no clip link. {response.status_code} {response.json()}\n"
+    
+    start_time = settings.startTime.isoformat().split("T")[0]
+    logfile = settings.path(f"log/{start_time}-clips.log")
+    if error_message != "":
+        with open(logfile, 'a+') as f:
+            f.write(f"{settings.now()} {username} {error_message}")
         return
     
-    link = response_json['data'][0]['edit_url']
-    with open(settings.path(f"log/{st}-clips.log"), 'a+') as f:
-        f.write(f"{settings.now()} {username} {link}\n")
+    clip_link = response.json()['data'][0]['edit_url']
+    with open(logfile, 'a+') as f:
+        f.write(f"{settings.now()} {username} {clip_link}\n")
 
 def create_clip_async(broadcaster_id, username):
     t = threading.Thread(target=create_clip, args=(broadcaster_id, username,))
@@ -157,7 +130,6 @@ def refresh_token():
         return False
     # print(f"{settings.now()} [API] Token refreshed.")
     return True
-    
 
 def new_token():
     # Request authorization from user
