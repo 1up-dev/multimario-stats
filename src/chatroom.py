@@ -142,8 +142,9 @@ class ChatRoom:
         else:
             self.sendbuffer = self.sendbuffer + join_messages
 
-        # Warning: if there are many channels to join, the JOIN messages may be slowed down to comply with rate limiting. Some of these announcement messages will then be dropped by Twitch IRC, since the bot won't have joined those channels yet.
-        # The code currently only calls for joins to be announced in situations where only one channel is being joined, so this case should not occur.
+        # Warning: if there are many channels to join, the JOIN messages may be slowed down to comply with rate limiting. Some of these announcement messages will then be sent before the bot has actually joined the channel.
+        # The code currently only calls for joins to be announced in situations where only one channel is being joined, so this case *should* not usually occur.
+        # TODO: Join announcements should instead only be sent once the bot receives a confirmation that it has joined the channel successfully (Twitch IRC message 366?).
         for channel in channels:
             if announce:
                 self.message(f"#{channel}", f"Now joined #{channel}.")
@@ -164,7 +165,6 @@ class ChatRoom:
                 new_sendbuffer.append(msg)
         self.sendbuffer = new_sendbuffer
 
-        
         self.connection.close()
         self.connection = socket.socket()
         self.connection.settimeout(480) # 8 minutes
